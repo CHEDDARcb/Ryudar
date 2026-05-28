@@ -405,8 +405,16 @@ void Ryudar::DrawMaterialGUI(BasicMeshGroup &meshGroup)
     ImGui::Text("Material");
     // ImGui::SliderFloat3("Material FresnelR0",
     //                     &material.fresnelR0.x, 0.0f, 1.0f);
-    ImGui::SliderFloat3("Material Diffuse", &material.diffuse.x, 0.0f, 3.0f);
-    ImGui::SliderFloat3("Material Specular", &material.specular.x, 0.0f, 3.0f);
+    float diffuse = (material.diffuse.x + material.diffuse.y + material.diffuse.z) / 3.0f;
+    if (ImGui::SliderFloat("Material Diffuse", &diffuse, 0.0f, 3.0f)) {
+        material.diffuse = Vector3(diffuse);
+    }
+
+    float specular = (material.specular.x + material.specular.y + material.specular.z) / 3.0f;
+    if (ImGui::SliderFloat("Material Specular", &specular, 0.0f, 3.0f)) {
+        material.specular = Vector3(specular);
+    }
+
     ImGui::SliderFloat("Material Shininess", &material.shininess, 0.01f, 20.0f);
     ImGui::NewLine();
 }

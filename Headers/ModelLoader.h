@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-//#include "ModelLoader.h"
+// #include "ModelLoader.h"
 
 // vcpkg install assimp:x64-windows
 // Preprocessor definitions에 NOMINMAX 추가
@@ -14,18 +14,18 @@
 #include "MeshData.h"
 #include "Vertex.h"
 
-namespace Ryudar {
+namespace Ryudar
+{
 class ModelLoader
 {
-  public:
-    void Load(std::string basePath, std::string fileName);
+public:
+	void Load(std::string basePath, std::string fileName);
 
-    void ProcessNode(aiNode *node, const aiScene *scene, 
-                     DirectX::SimpleMath::Matrix tr);
-    MeshData ProcessMesh(aiMesh *mesh, const aiScene *scene);
-  
-  public:
-    std::string basePath;
-    std::vector<MeshData> meshes;
+	void ProcessNode(aiNode *node, const aiScene *scene, DirectX::SimpleMath::Matrix tr);
+	MeshData ProcessMesh(aiMesh *mesh, const aiScene *scene);
+
+public:
+	std::string basePath;
+	std::vector<MeshData> meshes;
 };
-}
+} // namespace Ryudar

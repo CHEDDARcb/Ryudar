@@ -7,7 +7,8 @@
 
 #include "Mesh.h"
 
-namespace Ryudar{
+namespace Ryudar
+{
 
 using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
@@ -15,13 +16,13 @@ using DirectX::SimpleMath::Vector3;
 // 재질
 struct Material
 {
-    Vector3 ambient = Vector3(0.0f);    // 12
-    float shininess = 10.0;             // 4
-    Vector3 diffuse = Vector3(1.0f);    // 12
-    float dummy1;                       // 4
-    Vector3 specular = Vector3(0.5f);   // 12
-    float dummy2;                       //4
-    Vector3 fresnelR0 = Vector3(1.0f, 0.71f, 0.29f); // Gold
-    float dummy3;
+	Vector3 ambient = Vector3(0.0f);                 // 12
+	float shininess = 10.0;                          // 4
+	Vector3 diffuse = Vector3(1.0f);                 // 12
+	float dummy1;                                    // 4
+	Vector3 specular = Vector3(0.5f);                // 12
+	float dummy2;                                    // 4
+	Vector3 fresnelR0 = Vector3(1.0f, 0.71f, 0.29f); // Gold
+	float dummy3;
 }; // 48byte
-}
+} // namespace Ryudar

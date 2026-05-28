@@ -6,13 +6,15 @@
 
 using namespace std;
 
-int main(void) {
-    Ryudar::Ryudar ryudarApp;
+int main(void)
+{
+	Ryudar::Ryudar ryudarApp;
 
-    if (!ryudarApp.Initialize()) {
-        cout << "Initialization failed." << endl;
-        return -1;
-    }
+	if (!ryudarApp.Initialize())
+	{
+		cout << "Initialization failed." << endl;
+		return -1;
+	}
 
-    return ryudarApp.Run();
+	return ryudarApp.Run();
 }
