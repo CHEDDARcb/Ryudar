@@ -1,0 +1,18 @@
+#pragma once
+
+#include <directxtk/SimpleMath.h>
+#include <vector>
+
+namespace Ryudar {
+using DirectX::SimpleMath::Vector2;
+using DirectX::SimpleMath::Vector3;
+using DirectX::SimpleMath::Vector4;
+
+struct Vertex
+{
+    Vector3 position;
+    Vector3 normal;
+    Vector2 texcoord;
+};
+
+}
