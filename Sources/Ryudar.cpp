@@ -43,44 +43,35 @@ bool Ryudar::Initialize()
 	m_cubeMapping.Initialize(m_device, L"./Assets/Textures/Cubemaps/Stonewall_diffuseIBL.dds",
 	                         L"./Assets/Textures/Cubemaps/Stonewall_specularIBL.dds");
 
-	/*바닥만들기*/
-	// MeshData ground = GeometryGenerator::MakeSquare(2.0f);
-	// ground.textureFilename = "./Assets/Textures/blender_uv_grid_2k.png";
-	// m_meshGroupGround.Initialize(m_device, {ground});
-	// m_meshGroupGround.m_diffuseResView = m_cubeMapping.m_diffuseResView;
-	// m_meshGroupGround.m_specularResView = m_cubeMapping.m_specularResView;
-
 	/*물체만들기*/
 	// 구
 	MeshData sphere = GeometryGenerator::MakeSphere(1.3f, 100, 100);
 	sphere.textureFilename = "ojwD8.jpg";
 	m_meshGroupSphere.Initialize(m_device, {sphere});
-	m_meshGroupSphere.m_diffuseResView = m_cubeMapping.m_diffuseResView;
-	m_meshGroupSphere.m_specularResView = m_cubeMapping.m_specularResView;
+	m_meshGroupSphere.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
+	m_meshGroupSphere.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;
 
 	// 캐릭터
 	m_meshGroupCharacter.Initialize(m_device, "./Assets/Zelda/", "zeldaPosed001.fbx");
-	m_meshGroupCharacter.m_diffuseResView = m_cubeMapping.m_diffuseResView;
-	m_meshGroupCharacter.m_specularResView = m_cubeMapping.m_specularResView;
+	m_meshGroupCharacter.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
+	m_meshGroupCharacter.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;
 
 	BuildFilters();
 
 	return true;
 }
 
-static int changedMesh = 0;
-
 void Ryudar::Update(float dt)
 {
 	// 렌더링할 물체 선택
-	auto &visibleMeshGroup = m_visibleMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
+	auto &visibleMeshGroup = m_selectedMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
 
 	// 모델일 경우, 위치, 크기 조정
-	if (changedMesh == 1)
+	if (m_meshSelectionChanged)
 	{
 		m_modelTranslation = Vector3(0.0f, 0.3f, 3.0f);
-		m_modelScaling = m_visibleMeshIndex == 0 ? Vector3(1.0f) : Vector3(1.8f);
-		changedMesh = 0;
+		m_modelScaling = m_selectedMeshIndex == 0 ? Vector3(1.0f) : Vector3(1.8f);
+		m_meshSelectionChanged = false;
 	}
 
 	// 카메라의 이동
@@ -100,9 +91,6 @@ void Ryudar::Update(float dt)
 		m_camera.ResetCameraSet();
 	}
 
-	// std::cout << m_camera.GetEyePos().x << ", " << m_camera.GetEyePos().y << ", "
-	//           << m_camera.GetEyePos().z << std::endl;
-
 	Matrix viewRow = m_camera.GetViewRow();
 	Matrix projRow = m_camera.GetProjRow();
 	Vector3 eyeWorld = m_camera.GetEyePos();
@@ -118,37 +106,17 @@ void Ryudar::Update(float dt)
 	invTransposeRow.Translation(Vector3(0.0f)); // Translation을 0으로 만듬.
 	invTransposeRow = invTransposeRow.Invert().Transpose();
 
-	/*카메라 클래스로 빼냄*/
-	// View행렬
-	// auto viewRow = Matrix::CreateRotationY(m_viewRot.y) *
-	//                Matrix::CreateRotationX(m_viewRot.x) *
-	//                Matrix::CreateTranslation(0.0f, 0.0f, 2.0f);
-	//
-	// // Projection 행렬
-	// const float aspect = AppBase::GetAspectRatio();
-	// Matrix projRow =
-	//     m_usePerspectiveProjection
-	//         ? XMMatrixPerspectiveFovLH(
-	//             XMConvertToRadians(m_projFovAngleY), aspect, m_nearZ, m_farZ)
-	//         : XMMatrixOrthographicOffCenterLH(
-	//             -aspect, aspect, -1.0f, 1.0f, m_nearZ, m_farZ);
-	//
-	// //(0., 0, 0)의 카메라좌표계의 시점의 위치를 월드좌표계로 변경시켜주시기위해,
-	// // 기존의 월드좌표계->카메라좌표계로 변환시켜주는 행렬을,
-	// // 카메라 좌표계->월드 좌표계로 고쳐주기위해 행렬을 역행렬(역연산)시킴
-	// auto eyeWorld = Vector3::Transform(Vector3(0.0f), viewRow.Invert());
-
 	// MeshGroup의 ConstantBuffers 업데이트
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
 		// 다른 조명 끄기
-		if (i != m_lightType)
+		if (i != m_selectedLightType)
 		{
 			visibleMeshGroup.m_basicPixelConstantData.lights[i].strength *= 0.0f;
 		}
 		else
 		{
-			visibleMeshGroup.m_basicPixelConstantData.lights[i] = m_lightFromGUI;
+			visibleMeshGroup.m_basicPixelConstantData.lights[i] = m_editableLight;
 		}
 	}
 
@@ -163,47 +131,31 @@ void Ryudar::Update(float dt)
 	visibleMeshGroup.UpdateConstantBuffers(m_device, m_context);
 
 	// 큐브 매핑 Constant Buffer 업데이트
-	// m_cubeMapping.UpdateConstantBuffers(
-	//     m_device, m_context, (Matrix::CreateRotationY(m_viewRot.y)*
-	//                           Matrix::CreateRotationX(m_viewRot.x)).Transpose(),
-	//     projRow.Transpose());
 	m_cubeMapping.UpdateConstantBuffers(m_device, m_context, viewRow.Transpose(),
 	                                    projRow.Transpose());
 
-	if (m_dirtyflag)
+	if (m_postProcessConstantsDirty)
 	{
-		m_filters[1]->m_pixelConstData.threshold = m_threshold;
+		m_filters[1]->m_pixelConstData.threshold = m_bloomThreshold;
 		m_filters[1]->UpdateConstantBuffers(m_device, m_context);
-		m_filters.back()->m_pixelConstData.strength = m_strength;
+		m_filters.back()->m_pixelConstData.strength = m_bloomStrength;
 		m_filters.back()->UpdateConstantBuffers(m_device, m_context);
 
-		m_dirtyflag = 0;
+		m_postProcessConstantsDirty = 0;
 	}
 }
 
 void Ryudar::Render()
 {
-	// IA: Input-Assembler stage
-	// VS: Vertex Shader
-	// PS: Pixel Shader
-	// RS: Rasterizer stage
-	// OM: Output-Merger stage
-
-	// m_context->RSSetViewports(1, &m_screenViewport);
-	// Sleep(100);
-
 	SetViewport();
 
 	float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 	m_context->ClearRenderTargetView(m_renderTargetView.Get(), clearColor);
 	m_context->ClearDepthStencilView(m_depthStencilView.Get(),
 	                                 D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	// DepthBuffer를 사용하지 않는 경우
-	// m_context->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), NULL);
 	m_context->OMSetRenderTargets(1, m_renderTargetView.GetAddressOf(), m_depthStencilView.Get());
 	m_context->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 
-	// Rasterizer
 	if (m_drawAsWire)
 	{
 		m_context->RSSetState(m_wireRasterizerState.Get());
@@ -213,11 +165,10 @@ void Ryudar::Render()
 		m_context->RSSetState(m_solidRasterizerState.Get());
 	}
 
-	// m_meshGroupGround.Render(m_context);
 	/* 큐브매핑*/
 	m_cubeMapping.Render(m_context);
 	/*오브젝트*/
-	if (m_visibleMeshIndex == 0)
+	if (m_selectedMeshIndex == 0)
 	{
 		m_meshGroupSphere.Render(m_context);
 	}
@@ -230,7 +181,7 @@ void Ryudar::Render()
 	// 후처리 셰이더가 읽을 수 있는 single-sample texture로 resolve한다.
 	ComPtr<ID3D11Texture2D> backBuffer;
 	m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
-	m_context->ResolveSubresource(m_tempTexture.Get(), 0, backBuffer.Get(), 0,
+	m_context->ResolveSubresource(m_postProcessInputTexture.Get(), 0, backBuffer.Get(), 0,
 	                              DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// 후처리 필터
@@ -247,7 +198,7 @@ void Ryudar::OnResize()
 {
 	// 후처리 필터 다시 만들기
 	BuildFilters();
-	m_dirtyflag = 1;
+	m_postProcessConstantsDirty = 1;
 }
 
 // 블룸필터
@@ -260,31 +211,24 @@ void Ryudar::BuildFilters()
 {
 	m_filters.clear();
 
-	// 가장 기본필터 -> 자기 자신을 복사하는 필터
-	// -> GPU에서는 읽기 쓰기 동시에 안됨.
-	// 따로 복사용버퍼를 만들어 줘야함.
+	// 현재 프레임의 원본 이미지를 후처리 체인 안쪽 텍스처로 복사한다.
+	// 이후 필터들은 이전 필터의 SRV를 읽고 각자의 RTV에 중간 결과를 쓴다.
 	auto copyFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
 	                                           m_screenWidth, m_screenHeight);
-	// 필터의 기본적인 입력지정
-	// 렌더링된 결과(m_tempTextures = shaderResourceView)를
-	// m_tempTextures : GPU쓰기용
-	// m_shaderResourceView : GPU읽기용
-	// copyFilter에 넣어줌
-	copyFilter->SetShaderResources({this->m_shaderResourceView});
+	copyFilter->SetShaderResources({this->m_postProcessInputSRV});
 	m_filters.push_back(copyFilter);
 
-	// 해상도를 낮추는 다운 샘플링
-	// -> 블러할때 부드럽게 하기위해 횟수를 높이면 GPU과부화 걸림
-	// 다운필터에서 어두운부분을 도려내는 작업함.(threshold)
-	// 2단계씩 다운샘플링. 안티에일리어싱없앨수있음.
-	for (int down = 2; down <= m_down; down *= 2)
+	// Bloom에 사용할 밝은 영역을 추출하면서 단계적으로 해상도를 낮춘다.
+	// 첫 번째 down filter는 GUI threshold를 사용하고(Ryudar::Update()에서 조절),
+	// 이후 sampling 필터는 threshold 0으로 통과시킨다.
+	for (int down = 2; down <= m_downsampleCount; down *= 2)
 	{
 		auto downFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
 		                                           m_screenWidth / down, m_screenHeight / down);
 
 		if (down == 2)
 		{
-			downFilter->SetShaderResources({this->m_shaderResourceView});
+			downFilter->SetShaderResources({this->m_postProcessInputSRV});
 		}
 		else
 		{
@@ -295,20 +239,19 @@ void Ryudar::BuildFilters()
 		m_filters.push_back(downFilter);
 	}
 
-	// 다운 샘플링한 이미지를 블러처리.
-	// 다운 샘플링의 가장 낮은단계에서부터 블러처리
-	for (int down = m_down; down >= 1; down /= 2)
+	// 가장 낮은 해상도부터 blur와 upsample을 반복해 bloom 이미지를 만든다.
+	for (int down = m_downsampleCount; down >= 1; down /= 2)
 	{
-		for (int i = 0; i < m_repeat; i++)
+		for (int i = 0; i < m_blurRepeatCount; i++)
 		{
-			// x축 블러처리
+			// X축 blur 결과를 다음 필터의 입력으로 연결한다.
 			auto &prevResource = m_filters.back()->m_shaderResourceView;
 			m_filters.push_back(make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"BlurX",
 			                                             m_screenWidth / down,
 			                                             m_screenHeight / down));
 			m_filters.back()->SetShaderResources({prevResource});
 
-			// y축 블러처리
+			// Y축 blur 결과를 다음 필터의 입력으로 연결한다.
 			auto &prevResource2 = m_filters.back()->m_shaderResourceView;
 			m_filters.push_back(make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"BlurY",
 			                                             m_screenWidth / down,
@@ -328,29 +271,29 @@ void Ryudar::BuildFilters()
 		}
 	}
 
-	// 원본이미지와 블러처리한 이미지를 합치기
+	// 원본 이미지와 bloom 이미지를 합성해 최종 결과를 back buffer에 출력한다.
 	auto combineFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Combine",
 	                                              m_screenWidth, m_screenHeight);
 	combineFilter->SetShaderResources(
 	    {copyFilter->m_shaderResourceView, m_filters.back()->m_shaderResourceView});
 	combineFilter->SetRenderTargets({this->m_renderTargetView});
-	combineFilter->m_pixelConstData.strength = m_strength;
+	combineFilter->m_pixelConstData.strength = m_bloomStrength;
 	combineFilter->UpdateConstantBuffers(m_device, m_context);
 	m_filters.push_back(combineFilter);
 }
 
 void Ryudar::DrawMeshSelectorGUI()
 {
-	if (ImGui::RadioButton("Sphere", m_visibleMeshIndex == 0))
+	if (ImGui::RadioButton("Sphere", m_selectedMeshIndex == 0))
 	{
-		m_visibleMeshIndex = 0;
-		changedMesh = 1;
+		m_selectedMeshIndex = 0;
+		m_meshSelectionChanged = true;
 	}
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Character", m_visibleMeshIndex == 1))
+	if (ImGui::RadioButton("Character", m_selectedMeshIndex == 1))
 	{
-		m_visibleMeshIndex = 1;
-		changedMesh = 1;
+		m_selectedMeshIndex = 1;
+		m_meshSelectionChanged = true;
 	}
 }
 
@@ -371,7 +314,6 @@ void Ryudar::DrawRenderOptionsGUI(BasicMeshGroup &meshGroup)
 {
 	DrawShadingModeGUI(meshGroup);
 	ImGui::Checkbox("Use Texture", &meshGroup.m_basicPixelConstantData.useTexture);
-	// ImGui::Checkbox("Use Perspective Projection", &m_usePerspectiveProjection);
 	ImGui::Checkbox("Use Wireframe", &m_drawAsWire);
 	ImGui::Checkbox("Draw Normals", &meshGroup.m_drawNormals);
 	if (ImGui::SliderFloat("Normal scale", &meshGroup.m_normalVertexConstantData.scale, 0.0f, 1.0f))
@@ -387,8 +329,8 @@ void Ryudar::DrawPostProcessingGUI()
 	ImGui::Checkbox("Use PostProc", &m_usePostProcessing);
 	if (m_usePostProcessing)
 	{
-		m_dirtyflag += ImGui::SliderFloat("Bloom Threshold", &m_threshold, 0.0f, 1.0f);
-		m_dirtyflag += ImGui::SliderFloat("Bloom Strength", &m_strength, 0.0f, 3.0f);
+		m_postProcessConstantsDirty += ImGui::SliderFloat("Bloom Threshold", &m_bloomThreshold, 0.0f, 1.0f);
+		m_postProcessConstantsDirty += ImGui::SliderFloat("Bloom Strength", &m_bloomStrength, 0.0f, 3.0f);
 	}
 	ImGui::NewLine();
 }
@@ -399,15 +341,6 @@ void Ryudar::DrawModelGUI()
 	ImGui::SliderFloat3("m_modelTranslastion", &m_modelTranslation.x, -2.0f, 2.0f);
 	ImGui::SliderFloat3("m_modelRotaion(Rad)", &m_modelRotation.x, -3.13f, 3.14f);
 	ImGui::SliderFloat3("m_modelScaling", &m_modelScaling.x, 0.1f, 2.0f);
-
-	// ImGui::Text("View");
-	// ImGui::SliderFloat2("m_viewRot", &m_viewRot.x, -3.14f, 3.14f);
-	//
-	// ImGui::Text("Projection");
-	// ImGui::SliderFloat("m_nearZ", &m_nearZ, 0.01f, 10.0f);
-	// ImGui::SliderFloat("m_farZ", &m_farZ, 0.01f, 10.0f);
-	// ImGui::SliderFloat("m_projFovAngleY(Deg)", &m_projFovAngleY, 10.0f, 180.0f);
-	// ImGui::NewLine();
 }
 
 void Ryudar::DrawMaterialGUI(BasicMeshGroup &meshGroup)
@@ -415,8 +348,11 @@ void Ryudar::DrawMaterialGUI(BasicMeshGroup &meshGroup)
 	auto &material = meshGroup.m_basicPixelConstantData.material;
 
 	ImGui::Text("Material");
-	// ImGui::SliderFloat3("Material FresnelR0",
-	//                     &material.fresnelR0.x, 0.0f, 1.0f);
+	if (meshGroup.m_basicPixelConstantData.useIBL)
+	{
+		ImGui::SliderFloat3("Material FresnelR0", &material.fresnelR0.x, 0.0f, 1.0f);
+	}
+
 	float diffuse = (material.diffuse.x + material.diffuse.y + material.diffuse.z) / 3.0f;
 	if (ImGui::SliderFloat("Material Diffuse", &diffuse, 0.0f, 3.0f))
 	{
@@ -439,32 +375,32 @@ void Ryudar::DrawLightGUI(BasicMeshGroup &meshGroup)
 	ImGui::Checkbox("Use Image Based Light", &meshGroup.m_basicPixelConstantData.useIBL);
 	if (!meshGroup.m_basicPixelConstantData.useIBL)
 	{
-		if (ImGui::RadioButton("Directional Light", m_lightType == 0))
+		if (ImGui::RadioButton("Directional Light", m_selectedLightType == 0))
 		{
-			m_lightType = 0;
+			m_selectedLightType = 0;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Point Light", m_lightType == 1))
+		if (ImGui::RadioButton("Point Light", m_selectedLightType == 1))
 		{
-			m_lightType = 1;
+			m_selectedLightType = 1;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Spot Light", m_lightType == 2))
+		if (ImGui::RadioButton("Spot Light", m_selectedLightType == 2))
 		{
-			m_lightType = 2;
+			m_selectedLightType = 2;
 		}
 
 		// Point Light or Spot Light
-		if (m_lightType == 1 || m_lightType == 2)
+		if (m_selectedLightType == 1 || m_selectedLightType == 2)
 		{
-			ImGui::SliderFloat3("Light Position", &m_lightFromGUI.position.x, -5.0f, 5.0f);
-			ImGui::SliderFloat("Light fallOffStart", &m_lightFromGUI.fallOffStart, 0.0f, 5.0f);
-			ImGui::SliderFloat("Light fallOffEnd", &m_lightFromGUI.fallOffEnd, 0.0f, 10.0f);
+			ImGui::SliderFloat3("Light Position", &m_editableLight.position.x, -5.0f, 5.0f);
+			ImGui::SliderFloat("Light fallOffStart", &m_editableLight.fallOffStart, 0.0f, 5.0f);
+			ImGui::SliderFloat("Light fallOffEnd", &m_editableLight.fallOffEnd, 0.0f, 10.0f);
 
 			// Spot Light only
-			if (m_lightType == 2)
+			if (m_selectedLightType == 2)
 			{
-				ImGui::SliderFloat("Light spotPower", &m_lightFromGUI.spotPower, 1.0f, 512.0f);
+				ImGui::SliderFloat("Light spotPower", &m_editableLight.spotPower, 1.0f, 512.0f);
 			}
 		}
 
@@ -472,7 +408,8 @@ void Ryudar::DrawLightGUI(BasicMeshGroup &meshGroup)
 	}
 	else
 	{
-		ImGui::Checkbox("Use EnvironmentMapping", &meshGroup.m_basicPixelConstantData.useEvMapping);
+		ImGui::Checkbox("Use Environment Reflection",
+		                &meshGroup.m_basicPixelConstantData.useEnvironmentReflection);
 	}
 }
 
@@ -496,7 +433,7 @@ void Ryudar::UpdateGUI()
 
 	DrawMeshSelectorGUI();
 
-	auto &meshGroup = m_visibleMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
+	auto &meshGroup = m_selectedMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
 	DrawRenderOptionsGUI(meshGroup);
 	DrawPostProcessingGUI();
 	DrawModelGUI();

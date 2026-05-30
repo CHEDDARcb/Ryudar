@@ -152,7 +152,7 @@ void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 		// PS ConstantBuffer
 		// 물체 렌더링할 때 큐브맵도 같이 사용
 		ID3D11ShaderResourceView *resViews[3] = {mesh->textureResourceView.Get(),
-		                                         m_diffuseResView.Get(), m_specularResView.Get()};
+		                                         m_diffuseIBLSRV.Get(), m_specularIBLSRV.Get()};
 		context->PSSetShaderResources(0, 3, resViews);
 		context->PSSetConstantBuffers(0, 1, mesh->pixelConstantBuffer.GetAddressOf());
 
@@ -174,16 +174,5 @@ void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 
 		context->DrawIndexed(m_normalLines->m_indexCount, 0, 0);
 	}
-}
-
-void BasicMeshGroup::UpdateModelWorld(const Matrix &modelWorldRow)
-{
-	this->m_modelWorldRow = modelWorldRow;
-	this->m_invTransposeRow = modelWorldRow;
-	m_invTransposeRow.Translation(Vector3(0.0f));
-	m_invTransposeRow = m_invTransposeRow.Invert().Transpose();
-
-	m_basicVertexConstantData.modelWorld = modelWorldRow.Transpose();
-	m_basicVertexConstantData.invTranspose = m_invTransposeRow.Transpose();
 }
 } // namespace Ryudar

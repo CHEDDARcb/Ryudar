@@ -543,33 +543,35 @@ vector<MeshData> GeometryGenerator::ReadFromFile(std::string basePath, std::stri
 	vector<MeshData> &meshes = modelLoader.meshes;
 
 	// Normalize vertices
-	Vector3 vmin(1000, 1000, 1000);
-	Vector3 vmax(-1000, -1000, -1000);
+	Vector3 minBounds(1000, 1000, 1000);
+	Vector3 maxBounds(-1000, -1000, -1000);
 	for (auto &mesh : meshes)
 	{
 		for (auto &v : mesh.vertices)
 		{
-			vmin.x = XMMin(vmin.x, v.position.x);
-			vmin.y = XMMin(vmin.y, v.position.y);
-			vmin.z = XMMin(vmin.z, v.position.z);
-			vmax.x = XMMax(vmax.x, v.position.x);
-			vmax.y = XMMax(vmax.y, v.position.y);
-			vmax.z = XMMax(vmax.z, v.position.z);
+			minBounds.x = XMMin(minBounds.x, v.position.x);
+			minBounds.y = XMMin(minBounds.y, v.position.y);
+			minBounds.z = XMMin(minBounds.z, v.position.z);
+			maxBounds.x = XMMax(maxBounds.x, v.position.x);
+			maxBounds.y = XMMax(maxBounds.y, v.position.y);
+			maxBounds.z = XMMax(maxBounds.z, v.position.z);
 		}
 	}
 
-	float dx = vmax.x - vmin.x, dy = vmax.y - vmin.y, dz = vmax.z - vmin.z;
-	float dl = XMMax(XMMax(dx, dy), dz);
-	float cx = (vmax.x + vmin.x) * 0.5f, cy = (vmax.y + vmin.y) * 0.5f,
-	      cz = (vmax.z + vmin.z) * 0.5f;
+	float dx = maxBounds.x - minBounds.x, dy = maxBounds.y - minBounds.y,
+	      dz = maxBounds.z - minBounds.z;
+	float maxExtent = XMMax(XMMax(dx, dy), dz);
+	float cx = (maxBounds.x + minBounds.x) * 0.5f,
+	      cy = (maxBounds.y + minBounds.y) * 0.5f,
+	      cz = (maxBounds.z + minBounds.z) * 0.5f;
 
 	for (auto &mesh : meshes)
 	{
 		for (auto &v : mesh.vertices)
 		{
-			v.position.x = (v.position.x - cx) / dl;
-			v.position.y = (v.position.y - cy) / dl;
-			v.position.z = (v.position.z - cz) / dl;
+			v.position.x = (v.position.x - cx) / maxExtent;
+			v.position.y = (v.position.y - cy) / maxExtent;
+			v.position.z = (v.position.z - cz) / maxExtent;
 		}
 	}
 

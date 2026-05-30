@@ -63,7 +63,7 @@ public:
 		rastDesc.FrontCounterClockwise = false;
 		rastDesc.DepthClipEnable = false;
 
-		device->CreateRasterizerState(&rastDesc, m_rasterizerSate.GetAddressOf());
+		device->CreateRasterizerState(&rastDesc, m_rasterizerState.GetAddressOf());
 
 		// Set the viewport
 		ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
@@ -98,12 +98,14 @@ public:
 		device->CreateShaderResourceView(texture.Get(), nullptr,
 		                                 m_shaderResourceView.GetAddressOf());
 
-		m_pixelConstData.dx = 1.0f / width;
-		m_pixelConstData.dy = 1.0f / height;
+		m_pixelConstData.texelWidth = 1.0f / width;
+		m_pixelConstData.texelHeight = 1.0f / height;
 
 		D3D11Utils::CreateConstantBuffer(device, m_pixelConstData, m_mesh->pixelConstantBuffer);
 
-		// 기본 렌더타겟
+		// 기본 렌더타겟 설정.
+		// CombineFilter의 경우, 렌더타겟이 스왑체인의 back buffer이므로
+		// Ryudar::BuildFilters()에서 SetRenderTargets(this->m_renderTargetView)로 바꿔준다.
 		this->SetRenderTargets({m_renderTargetView});
 	}
 
@@ -122,7 +124,7 @@ public:
 		context->OMSetRenderTargets(UINT(m_renderTargets.size()), m_renderTargets.data(), nullptr);
 		// float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 		// context->ClearRenderTargetView(m_renderTargetView.Get(), clearColor);
-		context->RSSetState(m_rasterizerSate.Get());
+		context->RSSetState(m_rasterizerState.Get());
 		context->RSSetViewports(1, &m_viewport);
 
 		UINT stride = sizeof(Vertex);
@@ -166,10 +168,10 @@ public:
 
 	struct SamplingPixelConstantData
 	{
-		float dx;
-		float dy;
-		float threshold;
-		float strength;
+		float texelWidth = 0.f;
+		float texelHeight = 0.f;
+		float threshold = 0.f;
+		float strength = 0.f;
 		Vector4 options;
 	};
 
@@ -182,7 +184,7 @@ protected:
 	ComPtr<ID3D11PixelShader> m_pixelShader;
 	ComPtr<ID3D11InputLayout> m_inputLayout;
 	ComPtr<ID3D11SamplerState> m_samplerState;
-	ComPtr<ID3D11RasterizerState> m_rasterizerSate;
+	ComPtr<ID3D11RasterizerState> m_rasterizerState;
 
 	D3D11_VIEWPORT m_viewport;
 

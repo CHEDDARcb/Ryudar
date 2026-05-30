@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <directxtk/SimpleMath.h>
 
@@ -35,11 +35,11 @@ struct BasicPixelConstantData
 	uint32_t useBlinnPhong = false;   // 4
 	uint32_t usePhong = true;         // 4 `
 	bool useRimLight = false;         // 4
-	float dummy1[3];                  // 12 `
-	bool useEvMapping;                // 4
-	float dummy2[3];                  // 12 `
+	float padding0[3];                  // 12 `
+	bool useEnvironmentReflection;    // 4
+	float padding1[3];                  // 12 `
 	bool useIBL = false;              // 4
-	float dummy3[3];                  // 12 `
+	float padding2[3];                  // 12 `
 };
 
 static_assert((sizeof(BasicPixelConstantData) % 16) == 0,

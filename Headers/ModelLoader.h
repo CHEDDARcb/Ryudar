@@ -21,7 +21,8 @@ class ModelLoader
 public:
 	void Load(std::string basePath, std::string fileName);
 
-	void ProcessNode(aiNode *node, const aiScene *scene, DirectX::SimpleMath::Matrix tr);
+	void ProcessNode(aiNode *node, const aiScene *scene,
+	                 DirectX::SimpleMath::Matrix parentTransform);
 	MeshData ProcessMesh(aiMesh *mesh, const aiScene *scene);
 
 public:

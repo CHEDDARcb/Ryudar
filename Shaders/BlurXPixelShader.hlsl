@@ -5,8 +5,8 @@ static const float weights[5] = { 0.0545, 0.2442, 0.4026, 0.2442, 0.0545 };
 
 cbuffer SamplingPixelConstantData : register(b0)
 {
-    float dx;
-    float dy;
+    float texelWidth;
+    float texelHeight;
     float threshold;
     float strength;
     float4 options;
@@ -27,7 +27,7 @@ float4 main(SamplingPixelShaderInput input) : SV_TARGET
     for (i = 0; i < 5; i++)
     {
         color += weights[i] * g_texture0.Sample(g_sampler, input.texcoord
-                                                + float2(dx, 0.0) * float(i - 2)).rgb;
+                                                + float2(texelWidth, 0.0) * float(i - 2)).rgb;
     }
     
     return float4(color, 1.0);

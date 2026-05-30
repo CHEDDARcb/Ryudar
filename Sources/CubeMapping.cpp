@@ -7,8 +7,8 @@ void CubeMapping::Initialize(ComPtr<ID3D11Device> &device, const wchar_t *diffus
                              const wchar_t *specularFilename)
 {
 	// .dds 파일 읽어들여서 초기화
-	D3D11Utils::CreateCubemapTexture(device, diffuseFilename, m_diffuseResView);
-	D3D11Utils::CreateCubemapTexture(device, specularFilename, m_specularResView);
+	D3D11Utils::CreateCubemapTexture(device, diffuseFilename, m_diffuseIBLSRV);
+	D3D11Utils::CreateCubemapTexture(device, specularFilename, m_specularIBLSRV);
 
 	// 메쉬(버퍼) 생성
 	m_cubeMesh = std::make_shared<Mesh>();
@@ -86,7 +86,7 @@ void CubeMapping::Render(ComPtr<ID3D11DeviceContext> &context)
 
 	// Pixel Shader
 	// Diffuse, Specular 선택 가능
-	ID3D11ShaderResourceView *views[1] = {m_specularResView.Get()};
+	ID3D11ShaderResourceView *views[1] = {m_specularIBLSRV.Get()};
 	context->PSSetShaderResources(0, 1, views);
 	context->PSSetShader(m_pixelShader.Get(), 0, 0);
 	context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());

@@ -4,8 +4,8 @@ SamplerState g_sampler : register(s0);
 
 cbuffer SamplingPixelConstantData : register(b0)
 {
-    float dx;
-    float dy;
+    float texelWidth;
+    float texelHeight;
     float threshold;
     float strength;
     float4 options;

@@ -190,9 +190,9 @@ LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			m_context->PSSetShaderResources(0, 16, nullSRV);
 
 			m_renderTargetView.Reset();
-			m_shaderResourceView.Reset();
+			m_postProcessInputSRV.Reset();
 			m_depthStencilView.Reset();
-			m_tempTexture.Reset();
+			m_postProcessInputTexture.Reset();
 
 			HRESULT hr = m_swapChain->ResizeBuffers(0, UINT(m_screenWidth), UINT(m_screenHeight),
 			                                        DXGI_FORMAT_UNKNOWN, 0);
@@ -463,8 +463,8 @@ void AppBase::SetViewport()
 bool AppBase::CreateRenderTargetView()
 {
 	m_renderTargetView.Reset();
-	m_shaderResourceView.Reset();
-	m_tempTexture.Reset();
+	m_postProcessInputSRV.Reset();
+	m_postProcessInputTexture.Reset();
 
 	ComPtr<ID3D11Texture2D> backBuffer;
 
@@ -480,13 +480,14 @@ bool AppBase::CreateRenderTargetView()
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 		desc.MiscFlags = 0;
 
-		if (FAILED(m_device->CreateTexture2D(&desc, nullptr, m_tempTexture.GetAddressOf())))
+		if (FAILED(m_device->CreateTexture2D(&desc, nullptr,
+		                                      m_postProcessInputTexture.GetAddressOf())))
 		{
 			cout << "Create temp texture failed." << endl;
 		}
 
-		m_device->CreateShaderResourceView(m_tempTexture.Get(), nullptr,
-		                                   m_shaderResourceView.GetAddressOf());
+		m_device->CreateShaderResourceView(m_postProcessInputTexture.Get(), nullptr,
+		                                   m_postProcessInputSRV.GetAddressOf());
 	}
 	else
 	{

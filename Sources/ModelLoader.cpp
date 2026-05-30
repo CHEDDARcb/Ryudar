@@ -22,8 +22,8 @@ void ModelLoader::Load(std::string basePath, std::string filename)
 	}
 	else
 	{
-		Matrix tr; // Initial transformation
-		ProcessNode(pScene->mRootNode, pScene, tr);
+		Matrix parentTransform; // Initial transformation
+		ProcessNode(pScene->mRootNode, pScene, parentTransform);
 	}
 
 	// 노멀 벡터가 없는 경우를 대비하여 다시 계산
@@ -63,20 +63,20 @@ void ModelLoader::Load(std::string basePath, std::string filename)
 	}*/
 }
 
-void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix tr)
+void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix parentTransform)
 {
 
 	// std::cout << node->mName.C_Str() << " : " << node->mNumMeshes << " "
 	//           << node->mNumChildren << std::endl;
 
-	Matrix m;
+	Matrix nodeTransform;
 	ai_real *temp = &node->mTransformation.a1;
-	float *mTemp = &m._11;
+	float *matrixElements = &nodeTransform._11;
 	for (int t = 0; t < 16; t++)
 	{
-		mTemp[t] = float(temp[t]);
+		matrixElements[t] = float(temp[t]);
 	}
-	m = m.Transpose() * tr;
+	nodeTransform = nodeTransform.Transpose() * parentTransform;
 
 	for (UINT i = 0; i < node->mNumMeshes; i++)
 	{
@@ -86,7 +86,7 @@ void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix tr)
 
 		for (auto &v : newMesh.vertices)
 		{
-			v.position = DirectX::SimpleMath::Vector3::Transform(v.position, m);
+			v.position = DirectX::SimpleMath::Vector3::Transform(v.position, nodeTransform);
 		}
 
 		meshes.push_back(newMesh);
@@ -94,7 +94,7 @@ void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix tr)
 
 	for (UINT i = 0; i < node->mNumChildren; i++)
 	{
-		this->ProcessNode(node->mChildren[i], scene, m);
+		this->ProcessNode(node->mChildren[i], scene, nodeTransform);
 	}
 }
 

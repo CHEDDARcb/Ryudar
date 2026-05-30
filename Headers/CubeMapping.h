@@ -32,8 +32,8 @@ public:
 
 public:
 	// IBL을 위해 다른 메쉬들도 사용
-	ComPtr<ID3D11ShaderResourceView> m_diffuseResView;
-	ComPtr<ID3D11ShaderResourceView> m_specularResView;
+	ComPtr<ID3D11ShaderResourceView> m_diffuseIBLSRV;
+	ComPtr<ID3D11ShaderResourceView> m_specularIBLSRV;
 
 private:
 	std::shared_ptr<Mesh> m_cubeMesh;

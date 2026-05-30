@@ -26,11 +26,11 @@ struct Material
     float3 ambient;
     float shininess;
     float3 diffuse;
-    float dummy1;
+    float padding0;
     float3 specular;
-    float dummy2;
+    float padding1;
     float3 fresnelR0;
-    float dummy3;
+    float padding2;
 };
 
 // 조명

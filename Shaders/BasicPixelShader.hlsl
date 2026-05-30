@@ -18,11 +18,11 @@ cbuffer PixelConstantBuffer : register(b0)
     bool useBlinnPhong;
     bool usePhong;
     bool useRimLight;
-    float3 dummy1;
-    bool useEvMapping;
-    float3 dummy2;
+    float3 padding0;
+    bool useEnvironmentReflection;
+    float3 padding1;
     bool useIBL;
-    float3 dummy3;
+    float3 padding2;
 };
 
 // Schlick approximation: Eq. 9.17 in "Real-Time Rendering 4th Ed."
@@ -93,7 +93,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
     if (useIBL)
     {
         // 환경맵핑 사용.
-        if (useEvMapping)
+        if (useEnvironmentReflection)
         {
             return g_specularCube.Sample(g_sampler, reflect(-toEye, input.normalWorld));
         }
