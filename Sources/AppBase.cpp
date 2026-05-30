@@ -152,6 +152,7 @@ LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 		if (m_swapChain)
 		{
+			/*원래 코드
 			std::cout << (UINT)LOWORD(lParam) << " " << (UINT)HIWORD(lParam) << std::endl;
 			m_screenWidth = int(LOWORD(lParam));
 			m_screenHeight = int(HIWORD(lParam));
@@ -167,6 +168,50 @@ LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			D3D11Utils::CreateDepthBuffer(m_device, m_screenWidth, m_screenHeight, numQualityLevels,
 			                              m_depthStencilView);
 			SetViewport();
+
+			m_camera.SetAspectRatio(this->GetAspectRatio());
+			OnResize();
+			*/
+
+			m_screenWidth = int(LOWORD(lParam));
+			m_screenHeight = int(HIWORD(lParam));
+
+			if (m_screenWidth == 0 || m_screenHeight == 0)
+			{
+				break;
+			}
+
+			m_guiWidth = 0;
+
+			// ResizeBuffers 전에 back buffer와 관련된 바인딩을 해제한다.
+			m_context->OMSetRenderTargets(0, nullptr, nullptr);
+
+			ID3D11ShaderResourceView *nullSRV[16] = {};
+			m_context->PSSetShaderResources(0, 16, nullSRV);
+
+			m_renderTargetView.Reset();
+			m_shaderResourceView.Reset();
+			m_depthStencilView.Reset();
+			m_tempTexture.Reset();
+
+			HRESULT hr = m_swapChain->ResizeBuffers(0, UINT(m_screenWidth), UINT(m_screenHeight),
+			                                        DXGI_FORMAT_UNKNOWN, 0);
+
+			if (FAILED(hr))
+			{
+				std::cout << "ResizeBuffers() failed. " << std::hex << hr << std::endl;
+				break;
+			}
+
+			CreateRenderTargetView();
+
+			D3D11Utils::CreateDepthBuffer(m_device, m_screenWidth, m_screenHeight, numQualityLevels,
+			                              m_depthStencilView);
+
+			SetViewport();
+
+			m_camera.SetAspectRatio(GetAspectRatio());
+			OnResize();
 		}
 		break;
 	case WM_SYSCOMMAND:
@@ -391,12 +436,16 @@ bool AppBase::InitGUI()
 void AppBase::SetViewport()
 {
 	static int previousGuiWidth = -1;
-	// 윈도우 크기 변경을 막고 싶으면 m_guiWidth 기준 캐시를 사용할 수 있다.
-	// static int previousGuiWidth = m_guiWidth;
+	static int previousScreenWidth = -1;
+	static int previousScreenHeight = -1;
 
-	if (previousGuiWidth != m_guiWidth)
+	if (previousGuiWidth != m_guiWidth || previousScreenWidth != m_screenWidth ||
+	    previousScreenHeight != m_screenHeight)
 	{
 		previousGuiWidth = m_guiWidth;
+		previousScreenWidth = m_screenWidth;
+		previousScreenHeight = m_screenHeight;
+
 		ZeroMemory(&m_screenViewport, sizeof(D3D11_VIEWPORT));
 		m_screenViewport.TopLeftX = float(m_guiWidth);
 		m_screenViewport.TopLeftY = 0;
@@ -404,22 +453,25 @@ void AppBase::SetViewport()
 		m_screenViewport.Height = float(m_screenHeight);
 		m_screenViewport.MinDepth = 0.0f;
 		m_screenViewport.MaxDepth = 1.0f;
-
-		m_context->RSSetViewports(1, &m_screenViewport);
 	}
+
+	// ImageFilter 같은 후처리 패스가 viewport state를 바꿀 수 있으므로
+	// 메인 렌더링 시작 전 화면 viewport를 항상 다시 바인딩한다.
+	m_context->RSSetViewports(1, &m_screenViewport);
 }
 
 bool AppBase::CreateRenderTargetView()
 {
+	m_renderTargetView.Reset();
+	m_shaderResourceView.Reset();
+	m_tempTexture.Reset();
+
 	ComPtr<ID3D11Texture2D> backBuffer;
 
-	// Swap chain에서 back buffer를 가져와 render target과 shader resource를 만든다.
 	m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
 	if (backBuffer)
 	{
 		m_device->CreateRenderTargetView(backBuffer.Get(), NULL, m_renderTargetView.GetAddressOf());
-		m_device->CreateShaderResourceView(backBuffer.Get(), nullptr,
-		                                   m_shaderResourceView.GetAddressOf());
 
 		D3D11_TEXTURE2D_DESC desc;
 		backBuffer->GetDesc(&desc);
@@ -430,10 +482,9 @@ bool AppBase::CreateRenderTargetView()
 
 		if (FAILED(m_device->CreateTexture2D(&desc, nullptr, m_tempTexture.GetAddressOf())))
 		{
-			cout << "Failed()" << endl;
+			cout << "Create temp texture failed." << endl;
 		}
 
-		// MSAA back buffer는 직접 shader resource로 읽기 어려우므로 tempTexture를 사용한다.
 		m_device->CreateShaderResourceView(m_tempTexture.Get(), nullptr,
 		                                   m_shaderResourceView.GetAddressOf());
 	}
@@ -442,6 +493,7 @@ bool AppBase::CreateRenderTargetView()
 		cout << "CreateRenderTargetView() failed. " << endl;
 		return false;
 	}
+
 	return true;
 }
 

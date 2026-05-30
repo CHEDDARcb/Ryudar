@@ -29,6 +29,8 @@ public:
 	virtual void Update(float dt) override;
 	virtual void Render() override;
 
+	virtual void OnResize() override;
+
 	void BuildFilters();
 
 protected:

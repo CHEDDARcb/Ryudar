@@ -34,6 +34,12 @@ public:
 	virtual void Update(float dt) = 0;
 	virtual void Render() = 0;
 
+	// 윈도우 크기가 변경되어 AppBase가 swap chain, render target
+	// ,depth buffer, viewport 등을 다시만들어야 할 때 호출되는 훅 함수.
+	// 파생 클래스는 화면 크기에 의존하는 자체 리소스가 있다면 여기서 다시 생성하거나 갱신한다.
+	// 예: post-processing render target 재생성, camera aspect ratio 갱신.
+	virtual void OnResize() {}
+
 	virtual LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	// 마우스 조작을 위한 편의오버라이드

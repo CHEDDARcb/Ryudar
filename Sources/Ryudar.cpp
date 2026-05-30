@@ -226,7 +226,8 @@ void Ryudar::Render()
 		m_meshGroupCharacter.Render(m_context);
 	}
 
-	// 후처리 필터 시작하기 전에 Texture2DMS에 렌더링 된 결과를 Texture2D로 복사
+	// MSAA가 적용된 back buffer의 씬 렌더링 결과를
+	// 후처리 셰이더가 읽을 수 있는 single-sample texture로 resolve한다.
 	ComPtr<ID3D11Texture2D> backBuffer;
 	m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf()));
 	m_context->ResolveSubresource(m_tempTexture.Get(), 0, backBuffer.Get(), 0,
@@ -242,7 +243,15 @@ void Ryudar::Render()
 	}
 }
 
-// 블룸필터 첫단계: 전체필셀 돌면서
+void Ryudar::OnResize()
+{
+	// 후처리 필터 다시 만들기
+	BuildFilters();
+	m_dirtyflag = 1;
+}
+
+// 블룸필터
+// 첫단계: 전체필셀 돌면서
 // 픽셀의 평균값(RGB값의 평균->밝기)이 일정 값보다 작으면은
 // 0으로 처리.
 // 두번째 단계: 가우시안 블러처리.
@@ -257,7 +266,9 @@ void Ryudar::BuildFilters()
 	auto copyFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
 	                                           m_screenWidth, m_screenHeight);
 	// 필터의 기본적인 입력지정
-	// 렌더링된 결과(rederTargetView = shaderResourceView)를
+	// 렌더링된 결과(m_tempTextures = shaderResourceView)를
+	// m_tempTextures : GPU쓰기용
+	// m_shaderResourceView : GPU읽기용
 	// copyFilter에 넣어줌
 	copyFilter->SetShaderResources({this->m_shaderResourceView});
 	m_filters.push_back(copyFilter);
