@@ -1,4 +1,6 @@
 ﻿#pragma once
+// D3D11 버퍼, 셰이더, 텍스처 생성처럼 반복되는 초기화 코드를 모아둔 유틸리티.
+// 렌더링 클래스들이 공통 GPU 리소스를 일관된 방식으로 만들도록 돕는다.
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -28,22 +30,27 @@ using std::wstring;
 class D3D11Utils
 {
 public:
+	// 현재 back buffer 크기와 MSAA 설정에 맞는 depth/stencil view를 생성한다.
 	static bool CreateDepthBuffer(ComPtr<ID3D11Device> &device, int screenWidth, int screenHeight,
 	                              UINT &numQualityLevels,
 	                              ComPtr<ID3D11DepthStencilView> &depthStencilView);
 
+	// HLSL vertex shader를 컴파일하고, 해당 입력 구조에 맞는 input layout을 함께 생성한다.
 	static void
 	CreateVertexShaderAndInputLayout(ComPtr<ID3D11Device> &device, const wstring &filename,
 	                                 const vector<D3D11_INPUT_ELEMENT_DESC> &inputElements,
 	                                 ComPtr<ID3D11VertexShader> &m_vertexShader,
 	                                 ComPtr<ID3D11InputLayout> &m_inputLayout);
 
+	// HLSL pixel shader를 컴파일해 D3D11 pixel shader 객체를 생성한다.
 	static void CreatePixelShader(ComPtr<ID3D11Device> &device, const wstring &filename,
 	                              ComPtr<ID3D11PixelShader> &m_pixelShader);
 
+	// 인덱스 목록을 GPU index buffer로 업로드한다.
 	static void CreateIndexBuffer(ComPtr<ID3D11Device> &device, const vector<uint32_t> &indices,
 	                              ComPtr<ID3D11Buffer> &indexBuffer);
 
+	// 정점 목록을 변경 불가능한 GPU vertex buffer로 업로드한다.
 	template <typename T_VERTEX>
 	static void CreateVertexBuffer(ComPtr<ID3D11Device> &device, const vector<T_VERTEX> &vertices,
 	                               ComPtr<ID3D11Buffer> &vertexBuffer)
@@ -61,7 +68,7 @@ public:
 		bufferDesc.CPUAccessFlags = 0;                     // 0 if no CPU access is necessary.
 		bufferDesc.StructureByteStride = sizeof(T_VERTEX); // 데이터를 한번 읽어들을 때의 크기
 
-		D3D11_SUBRESOURCE_DATA vertexBufferData = {0}; // MS 예제에서 초기화하는 방식
+		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
 		vertexBufferData.pSysMem = vertices.data();
 		vertexBufferData.SysMemPitch = 0;
 		vertexBufferData.SysMemSlicePitch = 0;
@@ -74,16 +81,13 @@ public:
 		}
 	}
 
+	// CPU에서 자주 갱신할 constant buffer를 생성하고 초기 데이터를 채운다.
+	// T_CONSTANT의 크기는 D3D11 규칙상 16바이트 배수여야 한다.
 	template <typename T_CONSTANT>
 	static void CreateConstantBuffer(ComPtr<ID3D11Device> &device,
 	                                 const T_CONSTANT &constantBufferData,
 	                                 ComPtr<ID3D11Buffer> &constantBuffer)
 	{
-		// 주의:
-		// For a constant buffer (BindFlags of D3D11_BUFFER_DESC set to
-		// D3D11_BIND_CONSTANT_BUFFER), you must set the ByteWidth value of
-		// D3D11_BUFFER_DESC in multiples of 16, and less than or equal to
-		// D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT.
 
 		D3D11_BUFFER_DESC cbDesc;
 		cbDesc.ByteWidth = sizeof(constantBufferData);
@@ -93,7 +97,6 @@ public:
 		cbDesc.MiscFlags = 0;
 		cbDesc.StructureByteStride = 0;
 
-		// Fill int the Ssubresource data
 		D3D11_SUBRESOURCE_DATA initData;
 		initData.pSysMem = &constantBufferData;
 		initData.SysMemPitch = 0;
@@ -106,6 +109,8 @@ public:
 		}
 	}
 
+	// dynamic buffer를 Map/Unmap으로 갱신한다.
+	// 현재 프로젝트에서는 주로 constant buffer 업데이트에 사용한다.
 	template <typename T_DATA>
 	static void UpdateBuffer(ComPtr<ID3D11Device> &device, ComPtr<ID3D11DeviceContext> &context,
 	                         const T_DATA &bufferData, ComPtr<ID3D11Buffer> &buffer)
@@ -121,10 +126,12 @@ public:
 		context->Unmap(buffer.Get(), NULL);
 	}
 
+	// 이미지 파일을 읽어 2D texture와 shader resource view를 생성한다.
 	static void CreateTexture(ComPtr<ID3D11Device> &device, const std::string filename,
 	                          ComPtr<ID3D11Texture2D> &texture,
 	                          ComPtr<ID3D11ShaderResourceView> &textureResourceView);
 
+	// DDS cubemap 파일을 읽어 shader resource view를 생성한다.
 	static void CreateCubemapTexture(ComPtr<ID3D11Device> &device, const wchar_t *filename,
 	                                 ComPtr<ID3D11ShaderResourceView> &textureResourceView);
 };

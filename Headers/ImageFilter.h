@@ -1,4 +1,6 @@
 ﻿#pragma once
+// 후처리 한 패스를 표현하는 클래스.
+// 입력 SRV를 전체 화면 사각형에 샘플링해 자체 RTV/SRV 또는 back buffer로 출력한다.
 
 #include "D3D11Utils.h"
 #include "GeometryGenerator.h"
@@ -10,12 +12,14 @@ namespace Ryudar
 class ImageFilter
 {
 public:
+	// 지정한 셰이더와 출력 해상도로 후처리 패스 하나를 생성한다.
 	ImageFilter(ComPtr<ID3D11Device> &device, ComPtr<ID3D11DeviceContext> &context,
 	            const wstring vertexPrefix, const wstring pixelPrefix, int width, int height)
 	{
 		Initialize(device, context, vertexPrefix, pixelPrefix, width, height);
 	}
 
+	// 전체 화면 사각형, 셰이더, sampler, 출력 텍스처/RTV/SRV, constant buffer를 만든다.
 	void Initialize(ComPtr<ID3D11Device> &device, ComPtr<ID3D11DeviceContext> &context,
 	                const wstring vertexPrefix, const wstring pixelPrefix, int width, int height)
 	{
@@ -41,7 +45,7 @@ public:
 
 		D3D11Utils::CreatePixelShader(device, pixelPrefix + L"PixelShader.hlsl", m_pixelShader);
 
-		// Texture sampler
+		// 필터 입력 텍스처를 샘플링할 때 사용할 sampler.
 		D3D11_SAMPLER_DESC sampDesc;
 		ZeroMemory(&sampDesc, sizeof(sampDesc));
 		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -52,10 +56,9 @@ public:
 		sampDesc.MinLOD = 0;
 		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-		// Create the Sample State
 		device->CreateSamplerState(&sampDesc, m_samplerState.GetAddressOf());
 
-		// Create a rasterizer state
+		// 후처리 사각형은 화면 전체에 그리므로 culling 없이 렌더링한다.
 		D3D11_RASTERIZER_DESC rastDesc;
 		ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC)); // Need this
 		rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
@@ -65,7 +68,7 @@ public:
 
 		device->CreateRasterizerState(&rastDesc, m_rasterizerState.GetAddressOf());
 
-		// Set the viewport
+		// 이 필터가 출력하는 텍스처 크기에 맞춰 viewport를 고정한다.
 		ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
 		m_viewport.TopLeftX = 0;
 		m_viewport.TopLeftY = 0;
@@ -81,7 +84,7 @@ public:
 		txtDesc.Width = width;
 		txtDesc.Height = height;
 		txtDesc.MipLevels = txtDesc.ArraySize = 1;
-		txtDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; //  이미지 처리용도
+		txtDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT; // 이미지 처리용 중간 텍스처.
 		txtDesc.SampleDesc.Count = 1;
 		txtDesc.Usage = D3D11_USAGE_DEFAULT;
 		txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
@@ -93,11 +96,13 @@ public:
 		viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 		viewDesc.Texture2D.MipSlice = 0;
 
+		// 같은 texture를 RTV로는 쓰고, SRV로는 다음 필터가 읽는다.
 		device->CreateTexture2D(&txtDesc, NULL, texture.GetAddressOf());
 		device->CreateRenderTargetView(texture.Get(), &viewDesc, m_renderTargetView.GetAddressOf());
 		device->CreateShaderResourceView(texture.Get(), nullptr,
 		                                 m_shaderResourceView.GetAddressOf());
 
+		// blur shader가 주변 texel을 샘플링할 때 사용하는 1 texel 크기.
 		m_pixelConstData.texelWidth = 1.0f / width;
 		m_pixelConstData.texelHeight = 1.0f / height;
 
@@ -109,18 +114,20 @@ public:
 		this->SetRenderTargets({m_renderTargetView});
 	}
 
+	// threshold, strength, texel size 같은 픽셀 셰이더 상수를 GPU에 업로드한다.
 	void UpdateConstantBuffers(ComPtr<ID3D11Device> &device, ComPtr<ID3D11DeviceContext> &context)
 	{
 
 		D3D11Utils::UpdateBuffer(device, context, m_pixelConstData, m_mesh->pixelConstantBuffer);
 	}
 
+	// 설정된 SRV를 읽어 전체 화면 사각형에 샘플링하고, 설정된 RTV에 결과를 쓴다.
 	void Render(ComPtr<ID3D11DeviceContext> &context)
 	{
 		assert(m_shaderResources.size() > 0);
 		assert(m_renderTargets.size() > 0);
 
-		// 어디에 렌더링 할지를 지정
+		// 이 필터 결과를 어느 render target에 쓸지 지정한다.
 		context->OMSetRenderTargets(UINT(m_renderTargets.size()), m_renderTargets.data(), nullptr);
 		// float clearColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 		// context->ClearRenderTargetView(m_renderTargetView.Get(), clearColor);
@@ -142,6 +149,7 @@ public:
 		context->DrawIndexed(m_mesh->m_indexCount, 0, 0);
 	}
 
+	// 이 필터의 pixel shader가 읽을 입력 texture view들을 설정한다.
 	void SetShaderResources(const std::vector<ComPtr<ID3D11ShaderResourceView>> &resources)
 	{
 
@@ -152,6 +160,7 @@ public:
 		}
 	}
 
+	// 이 필터가 결과를 출력할 render target view들을 설정한다.
 	void SetRenderTargets(const std::vector<ComPtr<ID3D11RenderTargetView>> &targets)
 	{
 
@@ -163,21 +172,36 @@ public:
 	}
 
 public:
+	// 이 필터의 출력 텍스처를 다음 필터가 읽기 위한 view.
 	ComPtr<ID3D11ShaderResourceView> m_shaderResourceView;
+
+	// 이 필터가 자신의 출력 텍스처에 렌더링하기 위한 view.
+	// combine pass처럼 back buffer에 직접 출력하는 경우 SetRenderTargets()로 교체된다.
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView;
 
+	// Sampling/blur/combine 계열 pixel shader가 공유하는 constant buffer 데이터.
 	struct SamplingPixelConstantData
 	{
+		// 현재 필터 출력 텍스처 기준 1 texel의 가로/세로 크기.
 		float texelWidth = 0.f;
 		float texelHeight = 0.f;
+
+		// 밝은 영역 추출과 bloom 합성에 사용하는 파라미터.
 		float threshold = 0.f;
 		float strength = 0.f;
+
+		// 추후 필터 옵션 확장을 위한 여유 공간.
 		Vector4 options;
 	};
 
+	static_assert((sizeof(SamplingPixelConstantData) % 16) == 0,
+	              "Constant Buffer size must be 16-byte aligned");
+
+	// 필터 체인 소유자가 수정하는 픽셀 셰이더 상수.
 	SamplingPixelConstantData m_pixelConstData;
 
 protected:
+	// 전체 화면 패스용 메쉬와 파이프라인 상태.
 	shared_ptr<Mesh> m_mesh;
 
 	ComPtr<ID3D11VertexShader> m_vertexShader;
@@ -188,7 +212,7 @@ protected:
 
 	D3D11_VIEWPORT m_viewport;
 
-	// Do not delete pointers
+	// D3D11 바인딩 호출을 위해 캐싱하는 비소유 raw view.
 	std::vector<ID3D11ShaderResourceView *> m_shaderResources;
 	std::vector<ID3D11RenderTargetView *> m_renderTargets;
 };

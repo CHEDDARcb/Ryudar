@@ -1,4 +1,6 @@
 ﻿#pragma once
+// 1인칭 카메라의 위치, 방향, projection 설정을 관리한다.
+// 입력 변화에 따라 view/projection 행렬을 계산해 렌더링 코드에 제공한다.
 
 #include <directxtk/SimpleMath.h>
 
@@ -46,12 +48,14 @@ private:
 	// m_upDir : 위쪽 방향, 중력의 반대방향이 기본
 	// m_rightDir : 오른쪽 방향, eyeDir과 upDir로부터 계산
 
+	// 카메라 기준 벡터
 	Vector3 m_position = Vector3(0.0f, 0.4f, 0.0f); // 0.15f는 눈높이 정도
 	Vector3 m_viewDir = Vector3(0.0f, 0.0f, 1.0f);
 	Vector3 m_upDir = Vector3(0.0f, 1.0f, 0.0f); // 고정
 	// viewDir이 회전하면 rightDir도 같이 회전
 	Vector3 m_rightDir = Vector3(1.0f, 0.0f, 0.0f);
 
+	// 회전과 이동 설정
 	// roll, pitch, yaw
 	// https://en.wikipedia.org/wiki/Aircraft_principal_axes
 	float m_pitch = 0.0f; // x축
@@ -59,6 +63,7 @@ private:
 
 	float m_speed = 1.0f; // 움직이는 속도
 
+	// 프로젝션 설정
 	// 프로젝션 옵션도 카메라 클래스로 이동
 	float m_projFovAngleY = 70.0f;
 	float m_nearZ = 0.01f;

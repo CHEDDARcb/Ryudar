@@ -43,7 +43,7 @@ float3 SchlickFresnel(float3 fresnelR0, float3 normal, float3 toEye)
 
     float f0 = 1.0f - normalDotView; // 90도이면 f0 = 1, 0도이면 f0 = 0
 
-    // 1.0 보다 작은 값은 여러 번 곱하면 더 작은 값이 됩니다.
+    // 1.0 보다 작은 값은 여러 번 곱하면 더 작은 값이 된다..
     // 0도 -> f0 = 0 -> fresnelR0 반환
     // 90도 -> f0 = 1.0 -> float3(1.0) 반환
     // 0도에 가까운 가장자리는 Specular 색상, 90도에 가까운 안쪽은 고유
@@ -79,15 +79,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
     {
         color += ComputeSpotLight(light[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
     }
-
-    /*구 매핑
-    // posModel을 픽셀단위로 interporation해서,
-    // pos로부터 다시 텍스처 좌표계산
-    float2 uv;
-    uv.x = atan2(input.posModel.z, input.posModel.x) / (3.141592 * 2.0f) + 0.5f;
-    uv.y = acos(input.posModel.y / 1.5f) / 3.141592f;
-    return useTexture ? float4(color, 1.0) * g_texture0.Sample(g_sampler, uv) : float4(color, 1.0);
-    */
     
     // Image Based Light사용
     if (useIBL)
@@ -110,7 +101,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
                      material.shininess);
             specular.xyz *= material.specular;
             
-            // 참고: https://www.shadertoy.com/view/lscBW4
             float3 f = SchlickFresnel(material.fresnelR0, input.normalWorld, toEye);
             specular.xyz *= f;
             

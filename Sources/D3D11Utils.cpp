@@ -171,8 +171,6 @@ void D3D11Utils::CreateTexture(ComPtr<ID3D11Device> &device, const std::string f
 
 	unsigned char *img = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 
-	// assert(channels == 4);
-
 	// 4채널로 만들어서 복사
 	std::vector<uint8_t> image;
 	image.resize(width * height * 4);

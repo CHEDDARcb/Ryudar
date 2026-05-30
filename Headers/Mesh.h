@@ -1,12 +1,8 @@
-#pragma once
-
-#include <DirectXMath.h>
-#include <d3d11.h>
-#include <iostream>
-#include <vector>
+﻿#pragma once
+// GPU 렌더링에 필요한 정점/인덱스 버퍼, 상수 버퍼, 텍스처 view를 묶는 리소스 구조체.
+// 실제 렌더링 소유자는 BasicMeshGroup이나 ImageFilter가 담당한다.
 
 #include <d3d11.h>
-#include <vector>
 #include <windows.h>
 #include <wrl.h> // ComPtr
 
@@ -16,15 +12,17 @@ using Microsoft::WRL::ComPtr;
 
 struct Mesh
 {
+	// 지오메트리 버퍼
 	ComPtr<ID3D11Buffer> vertexBuffer;
 	ComPtr<ID3D11Buffer> indexBuffer;
+	UINT m_indexCount = 0;
 
+	// 소유한 mesh group/filter가 공유하는 셰이더 상수 버퍼.
 	ComPtr<ID3D11Buffer> vertexConstantBuffer;
 	ComPtr<ID3D11Buffer> pixelConstantBuffer;
 
+	// 선택적으로 사용하는 재질 텍스처.
 	ComPtr<ID3D11Texture2D> texture;
 	ComPtr<ID3D11ShaderResourceView> textureResourceView;
-
-	UINT m_indexCount = 0;
 };
 } // namespace Ryudar

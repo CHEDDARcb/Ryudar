@@ -1,4 +1,6 @@
 ﻿#pragma once
+// Direct Light, Point Light, Spot Light 계산에 공통으로 사용하는 조명 데이터 구조체.
+// HLSL Light 구조체와 constant buffer 레이아웃이 맞도록 구성한다.
 
 #include <d3d11.h>
 #include <d3dcompiler.h>

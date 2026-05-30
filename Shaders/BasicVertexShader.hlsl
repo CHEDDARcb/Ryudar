@@ -45,10 +45,8 @@ PixelShaderInput main(VertexShaderInput input)
     
     output.posWorld = pos.xyz; // 월드 위치 따로 저장
     
-    // Q. model, view, projection을 처음부터 곱한다음에
-    //    GPU에 보내주면 효율적이지 않음?
-    // A. 아님. 따로 보내주는 효율적임.
-    //    이유는 나중에....
+    // 조명 계산에는 world position이 필요하므로 model 변환 결과를 먼저 저장한다.
+    // 최종 clip-space position은 view, projection을 이어서 곱해 만든다.
     pos = mul(pos, view);
     pos = mul(pos, projection);
 
