@@ -152,27 +152,6 @@ LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE:
 		if (m_swapChain)
 		{
-			/*원래 코드
-			std::cout << (UINT)LOWORD(lParam) << " " << (UINT)HIWORD(lParam) << std::endl;
-			m_screenWidth = int(LOWORD(lParam));
-			m_screenHeight = int(HIWORD(lParam));
-			m_guiWidth = 0;
-
-			m_renderTargetView.Reset();
-			m_swapChain->ResizeBuffers(0,                    // 현재 버퍼 개수 유지
-			                           (UINT)LOWORD(lParam), // 변경된 너비
-			                           (UINT)HIWORD(lParam), // 변경된 높이
-			                           DXGI_FORMAT_UNKNOWN,  // 기존 포맷 유지
-			                           0);
-			CreateRenderTargetView();
-			D3D11Utils::CreateDepthBuffer(m_device, m_screenWidth, m_screenHeight, numQualityLevels,
-			                              m_depthStencilView);
-			SetViewport();
-
-			m_camera.SetAspectRatio(this->GetAspectRatio());
-			OnResize();
-			*/
-
 			m_screenWidth = int(LOWORD(lParam));
 			m_screenHeight = int(HIWORD(lParam));
 
@@ -293,24 +272,29 @@ bool AppBase::InitMainWindow()
 
 bool AppBase::InitDirect3D()
 {
-	// 하드웨어 드라이버 생성에 실패하는 환경에서는 WARP 드라이버로 바꿔 테스트할 수 있다.
-	// const D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE_WARP;
+	// 하드웨어 드라이버 생성에 실패하는 환경에서는 WARP 드라이버로 테스트 가능
 	const D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE_HARDWARE;
+	// const D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE_WARP;
 
 	UINT createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
 	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-	ComPtr<ID3D11Device> device;
-	ComPtr<ID3D11DeviceContext> context;
+	// 지원하고 싶은 feature level 목록
+	// 높은 버전부터 넣는 것이 일반적
+	const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_9_3};
 
-	const D3D_FEATURE_LEVEL featureLevels[2] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_9_3};
 	D3D_FEATURE_LEVEL featureLevel;
 
-	if (FAILED(D3D11CreateDevice(nullptr, driverType, 0, createDeviceFlags, featureLevels,
-	                             ARRAYSIZE(featureLevels), D3D11_SDK_VERSION, device.GetAddressOf(),
-	                             &featureLevel, context.GetAddressOf())))
+	// 1. Device / Context 생성
+	if (FAILED(D3D11CreateDevice(nullptr,           // 기본 어댑터 사용
+	                             driverType,        // 하드웨어 / WARP
+	                             0,                 // software rasterizer module handle
+	                             createDeviceFlags, // debug layer 등
+	                             featureLevels,     // 요청 feature level 목록
+	                             ARRAYSIZE(featureLevels), D3D11_SDK_VERSION,
+	                             m_device.GetAddressOf(), &featureLevel, m_context.GetAddressOf())))
 	{
 		cout << "D3D11CreateDevice() failed." << endl;
 		return false;
@@ -322,39 +306,68 @@ bool AppBase::InitDirect3D()
 		return false;
 	}
 
-	// 4x MSAA 지원 여부를 확인한다.
-	device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &numQualityLevels);
-	if (numQualityLevels <= 0)
+	// 2. 4x MSAA 지원 여부 확인
+	numQualityLevels = 0;
+	if (FAILED(m_device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4,
+	                                                   &numQualityLevels)))
 	{
-		cout << "MSAA not supported." << endl;
-	}
-
-	// numQualityLevels = 0; // MSAA를 강제로 끄고 싶을 때 사용.
-
-	if (FAILED(device.As(&m_device)))
-	{
-		cout << "device.As() failed." << endl;
-		return false;
-	}
-	if (FAILED(context.As(&m_context)))
-	{
-		cout << "context.As() failed" << endl;
+		cout << "CheckMultisampleQualityLevels() failed." << endl;
 		return false;
 	}
 
+	if (numQualityLevels == 0)
+	{
+		cout << "4x MSAA not supported. Fallback to no MSAA." << endl;
+	}
+
+	// 3. DXGI Factory 얻기
+	// Device -> DXGI Device -> Adapter -> Factory 순서로 얻는다.
+	ComPtr<IDXGIDevice> dxgiDevice;
+	ComPtr<IDXGIAdapter> dxgiAdapter;
+	ComPtr<IDXGIFactory> dxgiFactory;
+
+	if (FAILED(m_device.As(&dxgiDevice)))
+	{
+		cout << "m_device.As<IDXGIDevice>() failed." << endl;
+		return false;
+	}
+
+	if (FAILED(dxgiDevice->GetAdapter(dxgiAdapter.GetAddressOf())))
+	{
+		cout << "dxgiDevice->GetAdapter() failed." << endl;
+		return false;
+	}
+
+	if (FAILED(dxgiAdapter->GetParent(__uuidof(IDXGIFactory),
+	                                  reinterpret_cast<void **>(dxgiFactory.GetAddressOf()))))
+	{
+		cout << "dxgiAdapter->GetParent(IDXGIFactory) failed." << endl;
+		return false;
+	}
+
+	// 4. Swap Chain 생성
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
+
 	sd.BufferDesc.Width = m_screenWidth;
 	sd.BufferDesc.Height = m_screenHeight;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sd.BufferCount = 2;
+
+	// windowed 모드에서는 refresh rate가 큰 의미가 없는 경우가 많지만,
+	// 명시적으로 넣어도 무방
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
-	sd.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	// 백버퍼 2개 -> double buffering
+	sd.BufferCount = 2;
+
 	sd.OutputWindow = m_mainWindow;
 	sd.Windowed = TRUE;
+
 	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+
 	if (numQualityLevels > 0)
 	{
 		sd.SampleDesc.Count = 4;
@@ -366,43 +379,68 @@ bool AppBase::InitDirect3D()
 		sd.SampleDesc.Quality = 0;
 	}
 
-	// 여기서는 swap chain을 함께 생성하기 위해 device/context를 다시 받는다.
-	if (FAILED(D3D11CreateDeviceAndSwapChain(0, driverType, 0, createDeviceFlags, featureLevels, 1,
-	                                         D3D11_SDK_VERSION, &sd, m_swapChain.GetAddressOf(),
-	                                         m_device.GetAddressOf(), &featureLevel,
-	                                         m_context.GetAddressOf())))
+	if (FAILED(dxgiFactory->CreateSwapChain(m_device.Get(), &sd, m_swapChain.GetAddressOf())))
 	{
-		cout << "D3D11CreateDeviceAndSwapChain() failed." << endl;
+		cout << "CreateSwapChain() failed." << endl;
 		return false;
 	}
 
+	// Alt+Enter 기본 전체화면 전환 비활성화하고 싶다면 사용 가능
+	// dxgiFactory->MakeWindowAssociation(m_mainWindow, DXGI_MWA_NO_ALT_ENTER);
+
+	// 5. Render Target View 생성
 	CreateRenderTargetView();
+
+	// 6. Viewport 설정
 	SetViewport();
 
+	// 7. Rasterizer State 생성
 	D3D11_RASTERIZER_DESC rastDesc;
-	ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC));
-	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
-	rastDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+	ZeroMemory(&rastDesc, sizeof(rastDesc));
+
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+	rastDesc.CullMode = D3D11_CULL_NONE;
 	rastDesc.FrontCounterClockwise = false;
 	rastDesc.DepthClipEnable = true;
 
-	m_device->CreateRasterizerState(&rastDesc, m_solidRasterizerState.GetAddressOf());
+	if (FAILED(m_device->CreateRasterizerState(&rastDesc, m_solidRasterizerState.GetAddressOf())))
+	{
+		cout << "CreateRasterizerState(solid) failed." << endl;
+		return false;
+	}
 
-	rastDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
-	m_device->CreateRasterizerState(&rastDesc, m_wireRasterizerState.GetAddressOf());
+	rastDesc.FillMode = D3D11_FILL_WIREFRAME;
 
-	D3D11Utils::CreateDepthBuffer(m_device, m_screenWidth, m_screenHeight, numQualityLevels,
-	                              m_depthStencilView);
+	if (FAILED(m_device->CreateRasterizerState(&rastDesc, m_wireRasterizerState.GetAddressOf())))
+	{
+		cout << "CreateRasterizerState(wireframe) failed." << endl;
+		return false;
+	}
 
+	// 8. Depth Buffer / DSV 생성
+	if (!D3D11Utils::CreateDepthBuffer(m_device, m_screenWidth, m_screenHeight, numQualityLevels,
+	                                   m_depthStencilView))
+	{
+		cout << "CreateDepthBuffer() failed." << endl;
+		return false;
+	}
+
+	// 9. Depth-Stencil State 생성
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
 	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+	// stencil은 지금 사용하지 않으므로 기본 false 상태
+	depthStencilDesc.StencilEnable = false;
+
 	if (FAILED(m_device->CreateDepthStencilState(&depthStencilDesc,
 	                                             m_depthStencilState.GetAddressOf())))
 	{
-		cout << "CreateDepthStencilState() failed. " << endl;
+		cout << "CreateDepthStencilState() failed." << endl;
+		return false;
 	}
 
 	return true;
@@ -481,7 +519,7 @@ bool AppBase::CreateRenderTargetView()
 		desc.MiscFlags = 0;
 
 		if (FAILED(m_device->CreateTexture2D(&desc, nullptr,
-		                                      m_postProcessInputTexture.GetAddressOf())))
+		                                     m_postProcessInputTexture.GetAddressOf())))
 		{
 			cout << "Create temp texture failed." << endl;
 		}
