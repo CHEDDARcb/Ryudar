@@ -358,6 +358,7 @@ bool AppBase::InitDirect3D()
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 
+	// sd.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	// 백버퍼 2개 -> double buffering
 	sd.BufferCount = 2;

@@ -10,43 +10,15 @@ using namespace DirectX::SimpleMath;
 
 MeshData GeometryGenerator::MakeSquare(const float scale)
 {
-	vector<Vector3> positions;
-	vector<Vector3> colors;
-	vector<Vector3> normals;
-	vector<Vector2> texcoords; // 텍스춰 좌표
-
-	// 앞면
-	positions.push_back(Vector3(-1.0f, 1.0f, 0.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, 0.0f) * scale);
-	positions.push_back(Vector3(1.0f, -1.0f, 0.0f) * scale);
-	positions.push_back(Vector3(-1.0f, -1.0f, 0.0f) * scale);
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-
-	// TODO: 텍스춰 좌표 추가
-	// Texture Coordinates (Direct3D 9)
-	// https://learn.microsoft.com/en-us/windows/win32/direct3d9/texture-coordinates
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
 	MeshData meshData;
-	for (size_t i = 0; i < positions.size(); i++)
-	{
-		Vertex v;
-		v.position = positions[i];
-		v.normal = normals[i];
-		v.texcoord = texcoords[i];
+	const Vector3 normal(0.0f, 0.0f, -1.0f);
 
-		meshData.vertices.push_back(v);
-	}
+	meshData.vertices = {
+	    {Vector3(-1.0f, 1.0f, 0.0f) * scale, normal, Vector2(0.0f, 0.0f)},
+	    {Vector3(1.0f, 1.0f, 0.0f) * scale, normal, Vector2(1.0f, 0.0f)},
+	    {Vector3(1.0f, -1.0f, 0.0f) * scale, normal, Vector2(1.0f, 1.0f)},
+	    {Vector3(-1.0f, -1.0f, 0.0f) * scale, normal, Vector2(0.0f, 1.0f)},
+	};
 	meshData.indices = {
 	    0, 1, 2, 0, 2, 3, // 앞면
 	};
@@ -56,129 +28,36 @@ MeshData GeometryGenerator::MakeSquare(const float scale)
 
 MeshData GeometryGenerator::MakeBox(const float scale)
 {
+	MeshData meshData;
+	meshData.vertices.reserve(24);
 
-	vector<Vector3> positions;
-	vector<Vector3> colors;
-	vector<Vector3> normals;
-	vector<Vector2> texcoords;
+	auto AddFace = [&](const Vector3 &p0, const Vector3 &p1, const Vector3 &p2, const Vector3 &p3,
+	                   const Vector3 &normal)
+	{
+		meshData.vertices.push_back({p0 * scale, normal, Vector2(0.0f, 0.0f)});
+		meshData.vertices.push_back({p1 * scale, normal, Vector2(1.0f, 0.0f)});
+		meshData.vertices.push_back({p2 * scale, normal, Vector2(1.0f, 1.0f)});
+		meshData.vertices.push_back({p3 * scale, normal, Vector2(0.0f, 1.0f)});
+	};
 
 	// 윗면
-	positions.push_back(Vector3(-1.0f, 1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, 1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, -1.0f) * scale);
-	colors.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	colors.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	colors.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	colors.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
+	AddFace(Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f),
+	        Vector3(1.0f, 1.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f));
 	// 아랫면
-	positions.push_back(Vector3(-1.0f, -1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(1.0f, -1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(1.0f, -1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, -1.0f, 1.0f) * scale);
-	colors.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	colors.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	colors.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	colors.push_back(Vector3(0.0f, 1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, -1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, -1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, -1.0f, 0.0f));
-	normals.push_back(Vector3(0.0f, -1.0f, 0.0f));
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
+	AddFace(Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, 1.0f),
+	        Vector3(-1.0f, -1.0f, 1.0f), Vector3(0.0f, -1.0f, 0.0f));
 	// 앞면
-	positions.push_back(Vector3(-1.0f, -1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, 1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(1.0f, -1.0f, -1.0f) * scale);
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, -1.0f));
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
+	AddFace(Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
+	        Vector3(1.0f, -1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f));
 	// 뒷면
-	positions.push_back(Vector3(-1.0f, -1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(1.0f, -1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, 1.0f, 1.0f) * scale);
-	colors.push_back(Vector3(0.0f, 1.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 1.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 1.0f, 1.0f));
-	colors.push_back(Vector3(0.0f, 1.0f, 1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	normals.push_back(Vector3(0.0f, 0.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
+	AddFace(Vector3(-1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f),
+	        Vector3(-1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f));
 	// 왼쪽
-	positions.push_back(Vector3(-1.0f, -1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, 1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, 1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(-1.0f, -1.0f, -1.0f) * scale);
-	colors.push_back(Vector3(1.0f, 1.0f, 0.0f));
-	colors.push_back(Vector3(1.0f, 1.0f, 0.0f));
-	colors.push_back(Vector3(1.0f, 1.0f, 0.0f));
-	colors.push_back(Vector3(1.0f, 1.0f, 0.0f));
-	normals.push_back(Vector3(-1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(-1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(-1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(-1.0f, 0.0f, 0.0f));
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
+	AddFace(Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, 1.0f, -1.0f),
+	        Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 0.0f, 0.0f));
 	// 오른쪽
-	positions.push_back(Vector3(1.0f, -1.0f, 1.0f) * scale);
-	positions.push_back(Vector3(1.0f, -1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, -1.0f) * scale);
-	positions.push_back(Vector3(1.0f, 1.0f, 1.0f) * scale);
-	colors.push_back(Vector3(1.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(1.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(1.0f, 0.0f, 1.0f));
-	colors.push_back(Vector3(1.0f, 0.0f, 1.0f));
-	normals.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	normals.push_back(Vector3(1.0f, 0.0f, 0.0f));
-	texcoords.push_back(Vector2(0.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 0.0f));
-	texcoords.push_back(Vector2(1.0f, 1.0f));
-	texcoords.push_back(Vector2(0.0f, 1.0f));
-
-	MeshData meshData;
-	for (size_t i = 0; i < positions.size(); i++)
-	{
-		Vertex v;
-		v.position = positions[i];
-		v.normal = normals[i];
-		v.texcoord = texcoords[i];
-		meshData.vertices.push_back(v);
-	}
+	AddFace(Vector3(1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
+	        Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 0.0f, 0.0f));
 
 	meshData.indices = {
 	    0,  1,  2,  0,  2,  3,  // 윗면
@@ -205,6 +84,8 @@ MeshData GeometryGenerator::MakeGrid(const float width, const float height, cons
 	const float dy = height / numStacks;
 
 	MeshData meshData;
+	meshData.vertices.reserve((numSlices + 1) * (numStacks + 1));
+	meshData.indices.reserve(numSlices * numStacks * 6);
 
 	vector<Vertex> &vertices = meshData.vertices;
 	vector<uint32_t> &indices = meshData.indices;
@@ -257,6 +138,8 @@ MeshData GeometryGenerator::MakeCylinder(const float bottomRadius, const float t
 	const float dTheta = -XM_2PI / float(sliceCount);
 
 	MeshData meshData;
+	meshData.vertices.reserve((sliceCount + 1) * 2);
+	meshData.indices.reserve(sliceCount * 6);
 
 	vector<Vertex> &vertices = meshData.vertices;
 	// 옆면의 바닥 버텍스들 (인덱스 0 이상 sliceCount 미만)
@@ -316,6 +199,8 @@ MeshData GeometryGenerator::MakeSphere(const float radius, const int numSlices, 
 	const float dPhi = -XM_PI / float(numStacks);
 
 	MeshData meshData;
+	meshData.vertices.reserve((numSlices + 1) * (numStacks + 1));
+	meshData.indices.reserve(numSlices * numStacks * 6);
 
 	vector<Vertex> &vertices = meshData.vertices;
 	for (int j = 0; j <= numStacks; j++)
@@ -439,7 +324,7 @@ MeshData GeometryGenerator::MakeTetrahedron()
 	return meshData;
 }
 
-MeshData GeometryGenerator::SubdivideToSphere(const float radius, MeshData meshData)
+MeshData GeometryGenerator::SubdivideToSphere(const float radius, const MeshData &meshData)
 {
 	auto ProjectVertex = [&](Vertex &v)
 	{
@@ -561,8 +446,7 @@ vector<MeshData> GeometryGenerator::ReadFromFile(std::string basePath, std::stri
 	float dx = maxBounds.x - minBounds.x, dy = maxBounds.y - minBounds.y,
 	      dz = maxBounds.z - minBounds.z;
 	float maxExtent = XMMax(XMMax(dx, dy), dz);
-	float cx = (maxBounds.x + minBounds.x) * 0.5f,
-	      cy = (maxBounds.y + minBounds.y) * 0.5f,
+	float cx = (maxBounds.x + minBounds.x) * 0.5f, cy = (maxBounds.y + minBounds.y) * 0.5f,
 	      cz = (maxBounds.z + minBounds.z) * 0.5f;
 
 	for (auto &mesh : meshes)

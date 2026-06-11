@@ -42,6 +42,6 @@ public:
 	static MeshData MakeIcosahedron();
 
 	// 삼각형을 세분화한 뒤 각 정점을 구 표면으로 투영한다.
-	static MeshData SubdivideToSphere(const float radius, MeshData meshData);
+	static MeshData SubdivideToSphere(const float radius, const MeshData &meshData);
 };
 } // namespace Ryudar
