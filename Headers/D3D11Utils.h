@@ -127,7 +127,7 @@ public:
 	}
 
 	// 이미지 파일을 읽어 2D texture와 shader resource view를 생성한다.
-	static void CreateTexture(ComPtr<ID3D11Device> &device, const std::string filename,
+	static void CreateTexture(ComPtr<ID3D11Device> &device, const std::string &filename,
 	                          ComPtr<ID3D11Texture2D> &texture,
 	                          ComPtr<ID3D11ShaderResourceView> &textureResourceView);
 

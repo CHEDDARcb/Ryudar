@@ -163,25 +163,13 @@ void D3D11Utils::CreateIndexBuffer(ComPtr<ID3D11Device> &device,
 	device->CreateBuffer(&bufferDesc, &indexBufferData, indexBuffer.GetAddressOf());
 }
 
-void D3D11Utils::CreateTexture(ComPtr<ID3D11Device> &device, const std::string filename,
+void D3D11Utils::CreateTexture(ComPtr<ID3D11Device> &device, const std::string &filename,
                                ComPtr<ID3D11Texture2D> &texture,
                                ComPtr<ID3D11ShaderResourceView> &textureResourceView)
 {
 	int width, height, channels;
 
-	unsigned char *img = stbi_load(filename.c_str(), &width, &height, &channels, 0);
-
-	// 4채널로 만들어서 복사
-	std::vector<uint8_t> image;
-	image.resize(width * height * 4);
-	for (size_t i = 0; i < width * height; i++)
-	{
-		for (size_t c = 0; c < 3; c++)
-		{
-			image[4 * i + c] = img[i * channels + c];
-		}
-		image[4 * i + 3] = 255;
-	}
+	unsigned char *img = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
 	// Create texture.
 	D3D11_TEXTURE2D_DESC txtDesc = {};
@@ -194,13 +182,15 @@ void D3D11Utils::CreateTexture(ComPtr<ID3D11Device> &device, const std::string f
 	txtDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	// Fill in the subresource data.
-	D3D11_SUBRESOURCE_DATA initData;
-	initData.pSysMem = image.data();
+	D3D11_SUBRESOURCE_DATA initData{};
+	initData.pSysMem = img;
 	initData.SysMemPitch = txtDesc.Width * sizeof(uint8_t) * 4;
 	// initData.SysMemSlicePitch = 0;
 
 	device->CreateTexture2D(&txtDesc, &initData, texture.GetAddressOf());
 	device->CreateShaderResourceView(texture.Get(), nullptr, textureResourceView.GetAddressOf());
+
+	stbi_image_free(img);
 }
 
 void D3D11Utils::CreateCubemapTexture(ComPtr<ID3D11Device> &device, const wchar_t *filename,

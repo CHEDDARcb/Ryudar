@@ -425,7 +425,8 @@ vector<MeshData> GeometryGenerator::ReadFromFile(std::string basePath, std::stri
 
 	ModelLoader modelLoader;
 	modelLoader.Load(basePath, filename);
-	vector<MeshData> &meshes = modelLoader.meshes;
+	// vector<MeshData> &meshes = modelLoader.m_meshes;
+	vector<MeshData> meshes = std::move(modelLoader.m_meshes);
 
 	// Normalize vertices
 	Vector3 minBounds(1000, 1000, 1000);

@@ -9,16 +9,16 @@ using namespace DirectX::SimpleMath;
 
 void ModelLoader::Load(std::string basePath, std::string filename)
 {
-	this->basePath = basePath;
+	this->m_basePath = basePath;
 
 	Assimp::Importer importer;
 
 	const aiScene *pScene = importer.ReadFile(
-	    this->basePath + filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+	    this->m_basePath + filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
 
 	if (!pScene)
 	{
-		std::cout << "Failed to read file: " << this->basePath + filename << std::endl;
+		std::cout << "Failed to read file: " << this->m_basePath + filename << std::endl;
 	}
 	else
 	{
@@ -89,7 +89,7 @@ void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix parentT
 			v.position = DirectX::SimpleMath::Vector3::Transform(v.position, nodeTransform);
 		}
 
-		meshes.push_back(newMesh);
+		m_meshes.push_back(std::move(newMesh));
 	}
 
 	for (UINT i = 0; i < node->mNumChildren; i++)
@@ -100,9 +100,13 @@ void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix parentT
 
 MeshData ModelLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 {
+	MeshData newMesh;
+	newMesh.vertices.reserve(mesh->mNumVertices);
+	newMesh.indices.reserve(mesh->mNumFaces * 3);
+
 	// Data to fill
-	std::vector<Vertex> vertices;
-	std::vector<uint32_t> indices;
+	std::vector<Vertex> &vertices = newMesh.vertices;
+	std::vector<uint32_t> &indices = newMesh.indices;
 
 	// Walk through each of the mesh's vertices
 	for (UINT i = 0; i < mesh->mNumVertices; i++)
@@ -134,10 +138,6 @@ MeshData ModelLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 			indices.push_back(face.mIndices[j]);
 	}
 
-	MeshData newMesh;
-	newMesh.vertices = vertices;
-	newMesh.indices = indices;
-
 	// http://assimp.sourceforge.net/lib_html/materials.html
 	if (mesh->mMaterialIndex >= 0)
 	{
@@ -149,7 +149,7 @@ MeshData ModelLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &filepath);
 
 			std::string fullPath =
-			    this->basePath +
+			    this->m_basePath +
 			    std::string(std::filesystem::path(filepath.C_Str()).filename().string());
 
 			newMesh.textureFilename = fullPath;

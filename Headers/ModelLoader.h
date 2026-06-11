@@ -20,13 +20,13 @@ public:
 	void Load(std::string basePath, std::string fileName);
 
 public:
-	std::vector<MeshData> meshes;
+	std::vector<MeshData> m_meshes;
 
 private:
 	void ProcessNode(aiNode *node, const aiScene *scene,
 	                 DirectX::SimpleMath::Matrix parentTransform);
 	MeshData ProcessMesh(aiMesh *mesh, const aiScene *scene);
 
-	std::string basePath;
+	std::string m_basePath;
 };
 } // namespace Ryudar
