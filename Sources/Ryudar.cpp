@@ -136,8 +136,8 @@ void Ryudar::Update(float dt)
 
 	if (m_postProcessConstantsDirty)
 	{
-		m_filters[1]->m_pixelConstData.threshold = m_bloomThreshold;
-		m_filters[1]->UpdateConstantBuffers(m_device, m_context);
+		m_filters[0]->m_pixelConstData.threshold = m_bloomThreshold;
+		m_filters[0]->UpdateConstantBuffers(m_device, m_context);
 		m_filters.back()->m_pixelConstData.strength = m_bloomStrength;
 		m_filters.back()->UpdateConstantBuffers(m_device, m_context);
 
@@ -211,13 +211,6 @@ void Ryudar::BuildFilters()
 {
 	m_filters.clear();
 
-	// 현재 프레임의 원본 이미지를 후처리 체인 안쪽 텍스처로 복사한다.
-	// 이후 필터들은 이전 필터의 SRV를 읽고 각자의 RTV에 중간 결과를 쓴다.
-	auto copyFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
-	                                           m_screenWidth, m_screenHeight);
-	copyFilter->SetShaderResources({this->m_postProcessInputSRV});
-	m_filters.push_back(copyFilter);
-
 	// Bloom에 사용할 밝은 영역을 추출하면서 단계적으로 해상도를 낮춘다.
 	// 첫 번째 down filter는 GUI threshold를 사용하고(Ryudar::Update()에서 조절),
 	// 이후 sampling 필터는 threshold 0으로 통과시킨다.
@@ -240,8 +233,9 @@ void Ryudar::BuildFilters()
 	}
 
 	// 가장 낮은 해상도부터 blur와 upsample을 반복해 bloom 이미지를 만든다.
-	for (int down = m_downsampleCount; down >= 1; down /= 2)
+	for (int down = m_downsampleCount; down >= 2; down /= 2)
 	{
+		// m_blurRepeatCount = 1;
 		for (int i = 0; i < m_blurRepeatCount; i++)
 		{
 			// X축 blur 결과를 다음 필터의 입력으로 연결한다.
@@ -257,25 +251,22 @@ void Ryudar::BuildFilters()
 			                                             m_screenWidth / down,
 			                                             m_screenHeight / down));
 			m_filters.back()->SetShaderResources({prevResource2});
-
-			if (down > 1)
-			{
-				auto upFilter =
-				    make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
-				                             m_screenWidth / down * 2, m_screenHeight / down * 2);
-				upFilter->SetShaderResources({m_filters.back()->m_shaderResourceView});
-				upFilter->m_pixelConstData.threshold = 0.0f;
-				upFilter->UpdateConstantBuffers(m_device, m_context);
-				m_filters.push_back(upFilter);
-			}
 		}
+
+		auto upFilter =
+		    make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
+		                             m_screenWidth / down * 2, m_screenHeight / down * 2);
+		upFilter->SetShaderResources({m_filters.back()->m_shaderResourceView});
+		upFilter->m_pixelConstData.threshold = 0.0f;
+		upFilter->UpdateConstantBuffers(m_device, m_context);
+		m_filters.push_back(upFilter);
 	}
 
 	// 원본 이미지와 bloom 이미지를 합성해 최종 결과를 back buffer에 출력한다.
 	auto combineFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Combine",
 	                                              m_screenWidth, m_screenHeight);
 	combineFilter->SetShaderResources(
-	    {copyFilter->m_shaderResourceView, m_filters.back()->m_shaderResourceView});
+	    {m_postProcessInputSRV, m_filters.back()->m_shaderResourceView});
 	combineFilter->SetRenderTargets({this->m_renderTargetView});
 	combineFilter->m_pixelConstData.strength = m_bloomStrength;
 	combineFilter->UpdateConstantBuffers(m_device, m_context);
@@ -329,8 +320,10 @@ void Ryudar::DrawPostProcessingGUI()
 	ImGui::Checkbox("Use PostProc", &m_usePostProcessing);
 	if (m_usePostProcessing)
 	{
-		m_postProcessConstantsDirty += ImGui::SliderFloat("Bloom Threshold", &m_bloomThreshold, 0.0f, 1.0f);
-		m_postProcessConstantsDirty += ImGui::SliderFloat("Bloom Strength", &m_bloomStrength, 0.0f, 3.0f);
+		m_postProcessConstantsDirty +=
+		    ImGui::SliderFloat("Bloom Threshold", &m_bloomThreshold, 0.0f, 1.0f);
+		m_postProcessConstantsDirty +=
+		    ImGui::SliderFloat("Bloom Strength", &m_bloomStrength, 0.0f, 3.0f);
 	}
 	ImGui::NewLine();
 }

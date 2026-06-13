@@ -35,12 +35,29 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<
 	m_basicVertexConstantData.modelWorld = Matrix();
 	m_basicVertexConstantData.view = Matrix();
 	m_basicVertexConstantData.projection = Matrix();
-
 	D3D11Utils::CreateConstantBuffer(device, m_basicVertexConstantData, m_vertexConstantBuffer);
 	D3D11Utils::CreateConstantBuffer(device, m_basicPixelConstantData, m_pixelConstantBuffer);
 
+	// Vertex Shader, Pixel Shader, Input Layout 만들기
+	vector<D3D11_INPUT_ELEMENT_DESC> basicInputElements = {
+	    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	    {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 3 + 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
+	};
+
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"BasicVertexShader.hlsl",
+	                                             basicInputElements, m_basicVertexShader,
+	                                             m_basicInputLayout);
+
+	D3D11Utils::CreatePixelShader(device, L"BasicPixelShader.hlsl", m_basicPixelShader);
+
+	// MeshData 목록으로 Mesh 목록 만들기
+	std::size_t totalVertexCount = 0;
+	m_meshes.reserve(m_meshes.size() + meshes.size());
 	for (const auto &meshData : meshes)
 	{
+		totalVertexCount += meshData.vertices.size();
+
 		auto newMesh = std::make_shared<Mesh>();
 		D3D11Utils::CreateVertexBuffer(device, meshData.vertices, newMesh->vertexBuffer);
 		newMesh->m_indexCount = UINT(meshData.indices.size());
@@ -62,23 +79,14 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<
 		this->m_meshes.push_back(newMesh);
 	}
 
-	vector<D3D11_INPUT_ELEMENT_DESC> basicInputElements = {
-	    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	    {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 3 + 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	};
-
-	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"BasicVertexShader.hlsl",
-	                                             basicInputElements, m_basicVertexShader,
-	                                             m_basicInputLayout);
-
-	D3D11Utils::CreatePixelShader(device, L"BasicPixelShader.hlsl", m_basicPixelShader);
-
 	// 노멀 벡터 그리기
 	m_normalLines = std::make_shared<Mesh>();
 
 	std::vector<Vertex> normalVertices;
 	std::vector<uint32_t> normalIndices;
+	// 각 정점마다 노멀 벡터의 시작점과 끝점이 필요하므로 2배
+	normalVertices.reserve(totalVertexCount * 2);
+	normalIndices.reserve(totalVertexCount * 2);
 
 	// 여러 메쉬의 normal 들을 하나로 합치기
 	size_t offset = 0;
