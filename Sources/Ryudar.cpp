@@ -331,7 +331,7 @@ void Ryudar::DrawPostProcessingGUI()
 void Ryudar::DrawModelGUI()
 {
 	ImGui::Text("Model");
-	ImGui::SliderFloat3("m_modelTranslastion", &m_modelTranslation.x, -2.0f, 2.0f);
+	ImGui::SliderFloat3("m_modelTranslastion", &m_modelTranslation.x, -3.0f, 3.0f);
 	ImGui::SliderFloat3("m_modelRotaion(Rad)", &m_modelRotation.x, -3.13f, 3.14f);
 	ImGui::SliderFloat3("m_modelScaling", &m_modelScaling.x, 0.1f, 2.0f);
 }

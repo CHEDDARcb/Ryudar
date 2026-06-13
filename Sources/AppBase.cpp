@@ -458,6 +458,7 @@ bool AppBase::InitGUI()
 	// ImGui::StyleColorsDark();
 	ImGui::StyleColorsClassic();
 	// ImGui::StyleColorsLight();
+	ImGui::GetIO().FontGlobalScale = 2.f;
 
 	if (!ImGui_ImplDX11_Init(m_device.Get(), m_context.Get()))
 	{
