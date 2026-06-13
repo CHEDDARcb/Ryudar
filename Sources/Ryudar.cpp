@@ -46,7 +46,7 @@ bool Ryudar::Initialize()
 	/*물체만들기*/
 	// 구
 	MeshData sphere = GeometryGenerator::MakeSphere(1.3f, 100, 100);
-	sphere.textureFilename = "ojwD8.jpg";
+	sphere.textureFilename = "./Assets/Textures/ojwD8.jpg";
 	m_meshGroupSphere.Initialize(m_device, {sphere});
 	m_meshGroupSphere.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
 	m_meshGroupSphere.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;

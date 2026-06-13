@@ -238,9 +238,9 @@
     <None Include="stanford_dragon.stl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="crate2_diffuse.png" />
-    <Image Include="ojwD8.jpg" />
-    <Image Include="wall.jpg" />
+    <Image Include="Assets\Textures\crate2_diffuse.png" />
+    <Image Include="Assets\Textures\ojwD8.jpg" />
+    <Image Include="Assets\Textures\wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

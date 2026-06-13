@@ -141,13 +141,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="crate2_diffuse.png">
+    <Image Include="Assets\Textures\crate2_diffuse.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="wall.jpg">
+    <Image Include="Assets\Textures\wall.jpg">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="ojwD8.jpg">
+    <Image Include="Assets\Textures\ojwD8.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
