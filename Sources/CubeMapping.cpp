@@ -70,7 +70,7 @@ void CubeMapping::Render(ComPtr<ID3D11DeviceContext> &context)
 	context->VSSetConstantBuffers(0, 1, m_cubeMesh->vertexConstantBuffer.GetAddressOf());
 
 	// 화면 배경으로는 specular cubemap을 샘플링한다.
-	// diffuse/specular IBL SRV는 BasicMeshGroup에서도 별도로 사용한다.
+	// diffuse/specular IBL SRV는 ClassicLit::MeshGroup에서도 별도로 사용한다.
 	ID3D11ShaderResourceView *views[1] = {m_specularIBLSRV.Get()};
 	context->PSSetShaderResources(0, 1, views);
 	context->PSSetShader(m_pixelShader.Get(), 0, 0);

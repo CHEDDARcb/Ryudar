@@ -5,7 +5,7 @@
 Material 속성은 소유자가 명확해야 한다.
 
 이전 구조에서는 `diffuse`, `specular`는 `Ryudar` 멤버 변수로 관리했고,
-`shininess`는 `meshGroup.m_basicPixelConstantData.material`을 직접 수정했다.
+`shininess`는 `meshGroup.m_pixelConstantData.material`을 직접 수정했다.
 
 즉 상태 소유권이 다음처럼 섞여 있었다.
 
@@ -13,7 +13,7 @@ Material 속성은 소유자가 명확해야 한다.
 |---|---|---|
 | Diffuse | `Ryudar` | 구체와 캐릭터가 같은 값 공유 |
 | Specular | `Ryudar` | 구체와 캐릭터가 같은 값 공유 |
-| Shininess | `BasicMeshGroup`의 material | 구체와 캐릭터가 서로 다른 값 가능 |
+| Shininess | `ClassicLit::MeshGroup`의 material | 구체와 캐릭터가 서로 다른 값 가능 |
 
 `diffuse`, `specular`, `shininess`는 모두 물체 표면의 성질이다. 그런데 어떤 값은 전역처럼 공유되고, 어떤 값은 오브젝트별로 따로 관리되면 코드 의도가 흐려진다.
 
@@ -44,7 +44,7 @@ Character Material
 이 프로젝트에서는 material 값의 자연스러운 소유 위치가 다음이다.
 
 ```cpp
-meshGroup.m_basicPixelConstantData.material
+meshGroup.m_pixelConstantData.material
 ```
 
 GUI는 이 실제 material 값을 수정하고, constant buffer 업데이트 과정에서 이 값이 GPU로 전달된다.
@@ -58,10 +58,10 @@ GUI는 이 실제 material 값을 수정하고, constant buffer 업데이트 과
 
 ## 현재 적용한 개선
 
-현재는 GUI가 선택된 `BasicMeshGroup`의 material을 직접 수정한다.
+현재는 GUI가 선택된 `ClassicLit::MeshGroup`의 material을 직접 수정한다.
 
 ```cpp
-auto &material = meshGroup.m_basicPixelConstantData.material;
+auto &material = meshGroup.m_pixelConstantData.material;
 
 float diffuse = (material.diffuse.x + material.diffuse.y + material.diffuse.z) / 3.0f;
 if (ImGui::SliderFloat("Material Diffuse", &diffuse, 0.0f, 3.0f)) {
@@ -81,7 +81,7 @@ ImGui::SliderFloat("Material Shininess", &material.shininess, 0.01f, 20.0f);
 이 방식은 다음 장점이 있다.
 
 - 기존처럼 밝기/세기를 한 번에 조절할 수 있다.
-- material 소유권은 `BasicMeshGroup`에 유지된다.
+- material 소유권은 `ClassicLit::MeshGroup`에 유지된다.
 - 구체와 캐릭터가 서로 다른 material 값을 가질 수 있다.
 - HLSL 구조체는 수정하지 않아도 된다.
 

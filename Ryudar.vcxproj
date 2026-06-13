@@ -137,7 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Sources\AppBase.cpp" />
-    <ClCompile Include="Sources\BasicMeshGroup.cpp" />
+    <ClCompile Include="Sources\ClassicLitMeshGroup.cpp" />
     <ClCompile Include="Sources\Camera.cpp" />
     <ClCompile Include="Sources\CubeMapping.cpp" />
     <ClCompile Include="Sources\D3D11Utils.cpp" />
@@ -148,8 +148,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\AppBase.h" />
-    <ClInclude Include="Headers\BasicConstantData.h" />
-    <ClInclude Include="Headers\BasicMeshGroup.h" />
+    <ClInclude Include="Headers\ClassicLitConstantData.h" />
+    <ClInclude Include="Headers\ClassicLitMeshGroup.h" />
+    <ClInclude Include="Headers\ClassicLitRenderSettings.h" />
     <ClInclude Include="Headers\Camera.h" />
     <ClInclude Include="Headers\CubeMapping.h" />
     <ClInclude Include="Headers\D3D11Utils.h" />
@@ -206,13 +207,13 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
-    <FxCompile Include="Shaders\BasicPixelShader.hlsl">
+    <FxCompile Include="Shaders\ClassicLitPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Shaders\BasicVertexShader.hlsl">
+    <FxCompile Include="Shaders\ClassicLitVertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>

@@ -7,7 +7,7 @@ namespace Ryudar
 
 using namespace DirectX::SimpleMath;
 
-void ModelLoader::Load(std::string basePath, std::string filename)
+void ModelLoader::Load(const std::string &basePath, const std::string &filename)
 {
 	this->m_basePath = basePath;
 

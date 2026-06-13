@@ -5,24 +5,34 @@ TextureCube g_diffuseCube : register(t1);
 TextureCube g_specularCube : register(t2);
 SamplerState g_sampler : register(s0);
 
-cbuffer PixelConstantBuffer : register(b0)
+cbuffer LightingConstantBuffer : register(b0)
 {
+    Light lights[MAX_LIGHTS];
+
     float3 eyeWorld;
-    bool useTexture;
+    float padding;
+};
+
+cbuffer ShadingConstantBuffer : register(b1)
+{
     Material material;
-    Light light[MAX_LIGHTS];
+
     float3 rimColor;
     float rimPower;
+
     float rimStrength;
-    bool useSmoothstep;
-    bool useBlinnPhong;
-    bool usePhong;
-    bool useRimLight;
-    float3 padding0;
-    bool useEnvironmentReflection;
-    float3 padding1;
-    bool useIBL;
-    float3 padding2;
+    uint useRimLight;
+    uint useSmoothstep;
+    float rimPadding;
+
+    uint useTexture;
+    uint useBlinnPhong;
+    uint usePhong;
+    float shadingPadding;
+
+    uint useIBL;
+    uint useEnvironmentReflection;
+    float2 environmentPadding;
 };
 
 // Schlick approximation: Eq. 9.17 in "Real-Time Rendering 4th Ed."
@@ -65,19 +75,19 @@ float4 main(PixelShaderInput input) : SV_TARGET
     [unroll] // warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
     for (i = 0; i < NUM_DIR_LIGHTS; ++i)
     {
-        color += ComputeDirectionalLight(light[i], material, input.normalWorld, toEye, useBlinnPhong, usePhong);
+        color += ComputeDirectionalLight(lights[i], material, input.normalWorld, toEye, useBlinnPhong, usePhong);
     }
     
     [unroll]
     for (i = NUM_DIR_LIGHTS; i < NUM_DIR_LIGHTS + NUM_POINT_LIGHTS; ++i)
     {
-        color += ComputePointLight(light[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
+        color += ComputePointLight(lights[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
     }
     
     [unroll]
     for (i = NUM_DIR_LIGHTS + NUM_POINT_LIGHTS; i < NUM_DIR_LIGHTS + NUM_POINT_LIGHTS + NUM_SPOT_LIGHTS; ++i)
     {
-        color += ComputeSpotLight(light[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
+        color += ComputeSpotLight(lights[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
     }
     
     // Image Based Light사용

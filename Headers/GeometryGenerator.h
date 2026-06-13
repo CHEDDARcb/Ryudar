@@ -16,7 +16,7 @@ class GeometryGenerator
 {
 public:
 	// Assimp로 외부 모델 파일을 읽고, 모델 전체를 원점 기준 단위 크기로 정규화한다.
-	static vector<MeshData> ReadFromFile(std::string basePath, std::string fileName);
+	static vector<MeshData> ReadFromFile(const std::string &basePath, const std::string &fileName);
 
 	// x-y 평면에 놓인 화면/후처리용 사각형 메쉬를 만든다.
 	static MeshData MakeSquare(const float scale = 1.0f);

@@ -7,7 +7,7 @@
 
 ## 한 줄 요약
 
-현재 프로젝트는 `AppBase -> Ryudar` 구조로 Win32/D3D11 앱 기반과 데모 씬 로직이 분리되어 있고, `BasicMeshGroup`, `CubeMapping`, `ImageFilter`, `Camera` 등 주요 기능 단위도 어느 정도 나뉘어 있습니다.  
+현재 프로젝트는 `AppBase -> Ryudar` 구조로 Win32/D3D11 앱 기반과 데모 씬 로직이 분리되어 있고, `ClassicLit::MeshGroup`, `CubeMapping`, `ImageFilter`, `Camera` 등 주요 기능 단위도 어느 정도 나뉘어 있습니다.
 다만 포트폴리오 관점에서는 **상태 소유권**, **public 멤버 노출**, **네이밍/오타**, **후처리 필터 구성**, **리사이즈 대응** 쪽을 조금만 정리해도 훨씬 안정적인 코드처럼 보입니다.
 
 ---
@@ -19,7 +19,7 @@
 | P0 | Blur Y 패스가 `BlurX` 셰이더를 사용함 | `Sources/Ryudar.cpp:298` | 블룸 설명은 X/Y 블러인데 실제 코드는 Y 패스도 X 블러입니다. 결과 품질/의도 불일치로 보일 수 있습니다. | 두 번째 블러 필터 생성 시 `L"BlurY"` 사용 |
 | P0 | 윈도우 리사이즈 후 필터/카메라 aspect 갱신 누락 | `Sources/AppBase.cpp:155`, `Sources/Ryudar.cpp:254` | 렌더타겟 크기는 바뀌지만 `ImageFilter` 해상도와 카메라 aspect가 이전 값에 머물 수 있습니다. | `OnResize()` 가상 함수 추가 또는 `WM_SIZE`에서 카메라 aspect 갱신, 필터 재빌드 |
 | P1 | `static int changedMesh` 전역 상태 | `Sources/Ryudar.cpp:70` | 씬 상태가 클래스 밖에 있어 소유권이 흐려집니다. 포폴 코드에서 전역 상태는 눈에 잘 띕니다. | `Ryudar` 멤버 `bool m_meshSelectionChanged`로 이동 |
-| P1 | `AppBase`, `BasicMeshGroup`의 public 멤버 과다 노출 | `Headers/AppBase.h:52`, `Headers/BasicMeshGroup.h:25` | 외부에서 내부 렌더링 리소스를 마음대로 바꿀 수 있어 캡슐화가 약해 보입니다. | 단기적으로는 주석 정리, 중기적으로 getter/setter 또는 설정 함수로 축소 |
+| P1 | `AppBase`, `ClassicLit::MeshGroup`의 public 멤버 과다 노출 | `Headers/AppBase.h:52`, `Headers/ClassicLitMeshGroup.h:25` | 외부에서 내부 렌더링 리소스를 마음대로 바꿀 수 있어 캡슐화가 약해 보입니다. | 단기적으로는 주석 정리, 중기적으로 getter/setter 또는 설정 함수로 축소 |
 | P1 | GUI 라벨/변수명 오타 | `Sources/Ryudar.cpp:387`, `Sources/Ryudar.cpp:388`, `Headers/imageFilter.h:185` | 작은 오타가 포폴 완성도를 크게 낮춰 보이게 합니다. | `Translastion -> Translation`, `Rotaion -> Rotation`, `m_rasterizerSate -> m_rasterizerState` |
 | P1 | 헤더 파일 대소문자 불일치 | `Headers/Ryudar.h:11`, `Headers/imageFilter.h` | Windows에서는 빌드될 수 있지만, Git/CI/다른 환경에서 깨질 수 있습니다. | 파일명을 `ImageFilter.h`로 통일하거나 include를 실제 파일명과 일치 |
 | P2 | `Ryudar` 클래스가 씬, GUI, 후처리, 모델 선택을 모두 담당 | `Headers/Ryudar.h`, `Sources/Ryudar.cpp` | 기능은 잘 보이지만 클래스 책임이 많아 보입니다. | 시간이 있으면 `SceneSettings`, `PostProcessSettings`, `Draw*GUI()` 묶음 유지 |
@@ -105,23 +105,23 @@ bool m_meshSelectionChanged = false;
 
 #### Material 소유권
 
-현재 `BasicMeshGroup`이 `m_basicPixelConstantData.material`을 가지고 있고, GUI가 선택된 `BasicMeshGroup`의 material을 직접 수정합니다. 이 방향은 괜찮습니다.  
+현재 `ClassicLit::MeshGroup`이 `m_pixelConstantData.material`을 가지고 있고, GUI가 선택된 `ClassicLit::MeshGroup`의 material을 직접 수정합니다. 이 방향은 괜찮습니다.
 오히려 material 값을 `Ryudar` 전역 멤버로 다시 빼는 것보다, **각 MeshGroup이 자기 material을 가진다**는 점이 설명하기 좋습니다.
 
 개선 방향:
 
 | 현재 | 개선 |
 |---|---|
-| `BasicPixelConstantData` 안의 GPU 전송용 material을 GUI가 직접 수정 | `EditableMaterial` 같은 CPU 편집용 구조체를 두고 GPU용 `Material`로 변환 |
+| `ClassicLit::PixelConstantData` 안의 GPU 전송용 material을 GUI가 직접 수정 | `EditableMaterial` 같은 CPU 편집용 구조체를 두고 GPU용 `Material`로 변환 |
 | diffuse/specular를 평균 slider 하나로 조절 | 색상은 ColorEdit, 강도는 Slider로 분리 |
 
 이건 시간이 있을 때 하면 좋고, 지금은 "material은 MeshGroup 단위로 소유"만 유지해도 충분합니다.
 
 ---
 
-### 3. `BasicMeshGroup` 책임
+### 3. `ClassicLit::MeshGroup` 책임
 
-`BasicMeshGroup`은 현재 아래 역할을 같이 합니다.
+`ClassicLit::MeshGroup`은 현재 아래 역할을 같이 합니다.
 
 | 역할 | 현재 위치 |
 |---|---|
@@ -138,14 +138,14 @@ bool m_meshSelectionChanged = false;
 
 | 항목 | 방향 |
 |---|---|
-| `m_basicPixelConstantData` public | 당장 유지하되 주석으로 "GUI 편집을 위해 임시 공개" 같은 의도 명시 |
+| `m_pixelConstantData` public | 당장 유지하되 주석으로 "GUI 편집을 위해 임시 공개" 같은 의도 명시 |
 | texture/cubemap SRV public | `SetIBLResources(diffuse, specular)` 함수로 감싸기 |
 | normal debug 관련 public | `SetDrawNormals(bool)`, `SetNormalScale(float)` 함수로 감싸기 |
 
 중기 개선:
 
 ```text
-BasicMeshGroup
+ClassicLit::MeshGroup
   SetMaterial()
   SetLights()
   SetIBLResources()
@@ -227,7 +227,7 @@ Ryudar::OnResize()
 | `m_modelTranslastion` | `Model Translation` 또는 `m_modelTranslation` | `Sources/Ryudar.cpp:387` |
 | `m_modelRotaion(Rad)` | `Model Rotation (Rad)` | `Sources/Ryudar.cpp:388` |
 | `m_rasterizerSate` | `m_rasterizerState` | `Headers/imageFilter.h:185` |
-| `useEvMapping` | `useEnvMapping` | `Headers/BasicConstantData.h:39`, `Shaders/BasicPixelShader.hlsl:22` |
+| `useEvMapping` | `useEnvMapping` | `Headers/ClassicLitConstantData.h:39`, `Shaders/ClassicLitPixelShader.hlsl:22` |
 | `CrteateBuffer()` | `CreateBuffer()` | `Headers/D3D11Utils.h:73` |
 | `dirtyflag` | `dirtyFlag` 또는 `postProcessDirty` | `Headers/Ryudar.h:66` |
 | `m_down` | `m_downsampleFactor` | `Headers/Ryudar.h:67` |
@@ -286,7 +286,7 @@ Ryudar.vcxproj의 ClInclude 경로도 같이 수정
 
 > 제출 전 정리 과정에서는 전역 상태를 클래스 멤버로 옮기고, 리사이즈 시 GPU 리소스 갱신 흐름을 보강하고, GUI와 셰이더 이름의 오타를 정리해서 유지보수성을 높였습니다.
 
-> Material 값은 전역 상태가 아니라 렌더링 대상인 `BasicMeshGroup`이 소유하게 두는 것이 자연스럽다고 판단했습니다. 이후 확장한다면 CPU 편집용 material과 GPU constant buffer용 material을 분리할 계획입니다.
+> Material 값은 전역 상태가 아니라 렌더링 대상인 `ClassicLit::MeshGroup`이 소유하게 두는 것이 자연스럽다고 판단했습니다. 이후 확장한다면 CPU 편집용 material과 GPU constant buffer용 material을 분리할 계획입니다.
 
 ---
 
@@ -295,10 +295,9 @@ Ryudar.vcxproj의 ClInclude 경로도 같이 수정
 | 개선 | 효과 |
 |---|---|
 | `AppBase::OnResize()` 가상 함수 추가 | 리소스 라이프사이클 구조가 명확해짐 |
-| `BasicMeshGroup` public 데이터 축소 | 캡슐화 개선 |
+| `ClassicLit::MeshGroup` public 데이터 축소 | 캡슐화 개선 |
 | `ImageFilter`를 `.h/.cpp`로 분리 | 헤더 의존성과 빌드 단위 정리 |
 | `D3D11Utils` 함수들이 `HRESULT`/`bool` 반환 | 실패 처리 안정성 개선 |
 | `enum class MeshSelection`, `enum class LightType` 추가 | magic number 제거 |
 | `PostProcessSettings` 구조체 추가 | 블룸 관련 변수 묶음 정리 |
 | README 작성 | 포폴 완성도 상승 |
-

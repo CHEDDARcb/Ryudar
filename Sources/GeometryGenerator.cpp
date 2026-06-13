@@ -418,7 +418,8 @@ MeshData GeometryGenerator::SubdivideToSphere(const float radius, const MeshData
 	return newMesh;
 }
 
-vector<MeshData> GeometryGenerator::ReadFromFile(std::string basePath, std::string filename)
+vector<MeshData> GeometryGenerator::ReadFromFile(const std::string &basePath,
+                                                 const std::string &filename)
 {
 
 	using namespace DirectX;

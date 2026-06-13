@@ -1,6 +1,6 @@
 ﻿#pragma once
 // GPU 렌더링에 필요한 정점/인덱스 버퍼, 상수 버퍼, 텍스처 view를 묶는 리소스 구조체.
-// 실제 렌더링 소유자는 BasicMeshGroup이나 ImageFilter가 담당한다.
+// 실제 렌더링 소유자는 ClassicLit::MeshGroup이나 ImageFilter가 담당한다.
 
 #include <d3d11.h>
 #include <windows.h>

@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "AppBase.h"
-#include "BasicMeshGroup.h"
+#include "ClassicLitMeshGroup.h"
 #include "CubeMapping.h"
 #include "GeometryGenerator.h"
 #include "ImageFilter.h"
@@ -49,10 +49,10 @@ protected:
 	void DrawMeshSelectorGUI();
 
 	// Phong/Blinn-Phong 등 셰이딩 방식을 선택하는 GUI.
-	void DrawShadingModeGUI(BasicMeshGroup &meshGroup);
+	void DrawShadingModeGUI(ClassicLit::MeshGroup &meshGroup);
 
 	// 텍스처, 와이어프레임, 노멀 시각화 같은 렌더링 옵션 GUI.
-	void DrawRenderOptionsGUI(BasicMeshGroup &meshGroup);
+	void DrawRenderOptionsGUI(ClassicLit::MeshGroup &meshGroup);
 
 	// 블룸 사용 여부와 threshold/strength를 조절하는 후처리 GUI.
 	void DrawPostProcessingGUI();
@@ -61,17 +61,17 @@ protected:
 	void DrawModelGUI();
 
 	// 선택된 메쉬의 재질 값을 조절하는 GUI.
-	void DrawMaterialGUI(BasicMeshGroup &meshGroup);
+	void DrawMaterialGUI(ClassicLit::MeshGroup &meshGroup);
 
 	// 기본 조명과 IBL/환경 반사 옵션을 조절하는 GUI.
-	void DrawLightGUI(BasicMeshGroup &meshGroup);
+	void DrawLightGUI(ClassicLit::MeshGroup &meshGroup);
 
 	// 림 라이트 색상과 강도를 조절하는 GUI.
-	void DrawRimLightGUI(BasicMeshGroup &meshGroup);
+	void DrawRimLightGUI(ClassicLit::MeshGroup &meshGroup);
 
 	// 씬 리소스
-	BasicMeshGroup m_meshGroupSphere;
-	BasicMeshGroup m_meshGroupCharacter;
+	ClassicLit::MeshGroup m_meshGroupSphere;
+	ClassicLit::MeshGroup m_meshGroupCharacter;
 	CubeMapping m_cubeMapping;
 
 	// GUI에서 조절하는 모델 변환값

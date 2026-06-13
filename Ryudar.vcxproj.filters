@@ -36,7 +36,7 @@
     <ClCompile Include="Sources\D3D11Utils.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\BasicMeshGroup.cpp">
+    <ClCompile Include="Sources\ClassicLitMeshGroup.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Sources\CubeMapping.cpp">
@@ -77,13 +77,16 @@
     <ClInclude Include="Headers\D3D11Utils.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\BasicConstantData.h">
+    <ClInclude Include="Headers\ClassicLitConstantData.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Light.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\BasicMeshGroup.h">
+    <ClInclude Include="Headers\ClassicLitMeshGroup.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\ClassicLitRenderSettings.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\imageFilter.h">
@@ -94,10 +97,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\BasicPixelShader.hlsl">
+    <FxCompile Include="Shaders\ClassicLitPixelShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\BasicVertexShader.hlsl">
+    <FxCompile Include="Shaders\ClassicLitVertexShader.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\NormalPixelShader.hlsl">

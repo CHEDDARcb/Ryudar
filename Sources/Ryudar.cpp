@@ -112,21 +112,21 @@ void Ryudar::Update(float dt)
 		// 다른 조명 끄기
 		if (i != m_selectedLightType)
 		{
-			visibleMeshGroup.m_basicPixelConstantData.lights[i].strength *= 0.0f;
+			visibleMeshGroup.m_lightingConstantData.lights[i].strength *= 0.0f;
 		}
 		else
 		{
-			visibleMeshGroup.m_basicPixelConstantData.lights[i] = m_editableLight;
+			visibleMeshGroup.m_lightingConstantData.lights[i] = m_editableLight;
 		}
 	}
 
 	// Row Major(DirectX)에서 Column major(HLSL)변환
-	visibleMeshGroup.m_basicVertexConstantData.modelWorld = modelRow.Transpose();
-	visibleMeshGroup.m_basicVertexConstantData.invTranspose = invTransposeRow.Transpose();
-	visibleMeshGroup.m_basicVertexConstantData.view = viewRow.Transpose();
-	visibleMeshGroup.m_basicVertexConstantData.projection = projRow.Transpose();
+	visibleMeshGroup.m_vertexConstantData.modelWorld = modelRow.Transpose();
+	visibleMeshGroup.m_vertexConstantData.invTranspose = invTransposeRow.Transpose();
+	visibleMeshGroup.m_vertexConstantData.view = viewRow.Transpose();
+	visibleMeshGroup.m_vertexConstantData.projection = projRow.Transpose();
 
-	visibleMeshGroup.m_basicPixelConstantData.eyeWorld = eyeWorld;
+	visibleMeshGroup.m_lightingConstantData.eyeWorld = eyeWorld;
 
 	visibleMeshGroup.UpdateConstantBuffers(m_device, m_context);
 
@@ -288,23 +288,23 @@ void Ryudar::DrawMeshSelectorGUI()
 	}
 }
 
-void Ryudar::DrawShadingModeGUI(BasicMeshGroup &meshGroup)
+void Ryudar::DrawShadingModeGUI(ClassicLit::MeshGroup &meshGroup)
 {
-	auto &pixelData = meshGroup.m_basicPixelConstantData;
+	auto &shading = meshGroup.m_renderSettings.shading;
 	const char *items[] = {"Blinn-Phong Shading", "Phong Shading"};
-	int currentItem = pixelData.useBlinnPhong ? 0 : 1;
+	int currentItem = shading.useBlinnPhong ? 0 : 1;
 
 	if (ImGui::Combo("Shading Option", &currentItem, items, IM_ARRAYSIZE(items)))
 	{
-		pixelData.useBlinnPhong = currentItem == 0;
-		pixelData.usePhong = currentItem == 1;
+		shading.useBlinnPhong = currentItem == 0;
+		shading.usePhong = currentItem == 1;
 	}
 }
 
-void Ryudar::DrawRenderOptionsGUI(BasicMeshGroup &meshGroup)
+void Ryudar::DrawRenderOptionsGUI(ClassicLit::MeshGroup &meshGroup)
 {
 	DrawShadingModeGUI(meshGroup);
-	ImGui::Checkbox("Use Texture", &meshGroup.m_basicPixelConstantData.useTexture);
+	ImGui::Checkbox("Use Texture", &meshGroup.m_renderSettings.shading.useTexture);
 	ImGui::Checkbox("Use Wireframe", &m_drawAsWire);
 	ImGui::Checkbox("Draw Normals", &meshGroup.m_drawNormals);
 	if (ImGui::SliderFloat("Normal scale", &meshGroup.m_normalVertexConstantData.scale, 0.0f, 1.0f))
@@ -336,12 +336,12 @@ void Ryudar::DrawModelGUI()
 	ImGui::SliderFloat3("m_modelScaling", &m_modelScaling.x, 0.1f, 2.0f);
 }
 
-void Ryudar::DrawMaterialGUI(BasicMeshGroup &meshGroup)
+void Ryudar::DrawMaterialGUI(ClassicLit::MeshGroup &meshGroup)
 {
-	auto &material = meshGroup.m_basicPixelConstantData.material;
+	auto &material = meshGroup.m_renderSettings.material;
 
 	ImGui::Text("Material");
-	if (meshGroup.m_basicPixelConstantData.useIBL)
+	if (meshGroup.m_renderSettings.environment.useIBL)
 	{
 		ImGui::SliderFloat3("Material FresnelR0", &material.fresnelR0.x, 0.0f, 1.0f);
 	}
@@ -362,11 +362,13 @@ void Ryudar::DrawMaterialGUI(BasicMeshGroup &meshGroup)
 	ImGui::NewLine();
 }
 
-void Ryudar::DrawLightGUI(BasicMeshGroup &meshGroup)
+void Ryudar::DrawLightGUI(ClassicLit::MeshGroup &meshGroup)
 {
+	auto &environment = meshGroup.m_renderSettings.environment;
+
 	ImGui::Text("Light");
-	ImGui::Checkbox("Use Image Based Light", &meshGroup.m_basicPixelConstantData.useIBL);
-	if (!meshGroup.m_basicPixelConstantData.useIBL)
+	ImGui::Checkbox("Use Image Based Light", &environment.useIBL);
+	if (!environment.useIBL)
 	{
 		if (ImGui::RadioButton("Directional Light", m_selectedLightType == 0))
 		{
@@ -401,22 +403,21 @@ void Ryudar::DrawLightGUI(BasicMeshGroup &meshGroup)
 	}
 	else
 	{
-		ImGui::Checkbox("Use Environment Reflection",
-		                &meshGroup.m_basicPixelConstantData.useEnvironmentReflection);
+		ImGui::Checkbox("Use Environment Reflection", &environment.useEnvironmentReflection);
 	}
 }
 
-void Ryudar::DrawRimLightGUI(BasicMeshGroup &meshGroup)
+void Ryudar::DrawRimLightGUI(ClassicLit::MeshGroup &meshGroup)
 {
-	ImGui::Checkbox("Use Rim Light", &meshGroup.m_basicPixelConstantData.useRimLight);
-	if (meshGroup.m_basicPixelConstantData.useRimLight)
+	auto &rimLight = meshGroup.m_renderSettings.rimLight;
+
+	ImGui::Checkbox("Use Rim Light", &rimLight.useRimLight);
+	if (rimLight.useRimLight)
 	{
-		ImGui::SliderFloat("Rim Strength", &meshGroup.m_basicPixelConstantData.rimStrength, 0.0f,
-		                   10.0f);
-		ImGui::Checkbox("Use Smoothstep", &meshGroup.m_basicPixelConstantData.useSmoothstep);
-		ImGui::SliderFloat3("Rim Color", &meshGroup.m_basicPixelConstantData.rimColor.x, 0.0f,
-		                    1.0f);
-		ImGui::SliderFloat("Rim Power", &meshGroup.m_basicPixelConstantData.rimPower, 0.01f, 10.0f);
+		ImGui::SliderFloat("Rim Strength", &rimLight.rimStrength, 0.0f, 10.0f);
+		ImGui::Checkbox("Use Smoothstep", &rimLight.useSmoothstep);
+		ImGui::SliderFloat3("Rim Color", &rimLight.rimColor.x, 0.0f, 1.0f);
+		ImGui::SliderFloat("Rim Power", &rimLight.rimPower, 0.01f, 10.0f);
 	}
 }
 

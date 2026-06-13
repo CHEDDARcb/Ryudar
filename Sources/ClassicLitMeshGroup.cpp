@@ -1,13 +1,13 @@
 ﻿
-#include "BasicMeshGroup.h"
+#include "ClassicLitMeshGroup.h"
 #include "GeometryGenerator.h"
 
-namespace Ryudar
+namespace Ryudar::ClassicLit
 {
 
 // 모델읽어오기
-void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::string &basePath,
-                                const std::string &filename)
+void MeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::string &basePath,
+                           const std::string &filename)
 {
 
 	auto meshes = GeometryGenerator::ReadFromFile(basePath, filename);
@@ -16,7 +16,7 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::string 
 }
 
 // Constant Buffer, Vertex, Index Buffer 생성
-void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<MeshData> &meshes)
+void MeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<MeshData> &meshes)
 {
 
 	// Sampler 만들기
@@ -32,24 +32,25 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<
 	device->CreateSamplerState(&sampDesc, m_samplerState.GetAddressOf());
 
 	// ConstantBuffer 만들기
-	m_basicVertexConstantData.modelWorld = Matrix();
-	m_basicVertexConstantData.view = Matrix();
-	m_basicVertexConstantData.projection = Matrix();
-	D3D11Utils::CreateConstantBuffer(device, m_basicVertexConstantData, m_vertexConstantBuffer);
-	D3D11Utils::CreateConstantBuffer(device, m_basicPixelConstantData, m_pixelConstantBuffer);
+	m_vertexConstantData.modelWorld = Matrix();
+	m_vertexConstantData.view = Matrix();
+	m_vertexConstantData.projection = Matrix();
+	D3D11Utils::CreateConstantBuffer(device, m_vertexConstantData, m_vertexConstantBuffer);
+	D3D11Utils::CreateConstantBuffer(device, m_lightingConstantData, m_lightingConstantBuffer);
+	D3D11Utils::CreateConstantBuffer(device, m_shadingConstantData, m_shadingConstantBuffer);
 
 	// Vertex Shader, Pixel Shader, Input Layout 만들기
-	vector<D3D11_INPUT_ELEMENT_DESC> basicInputElements = {
+	vector<D3D11_INPUT_ELEMENT_DESC> classicLitInputElements = {
 	    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	    {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 4 * 3 + 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
-	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"BasicVertexShader.hlsl",
-	                                             basicInputElements, m_basicVertexShader,
-	                                             m_basicInputLayout);
+	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"ClassicLitVertexShader.hlsl",
+	                                             classicLitInputElements, m_vertexShader,
+	                                             m_inputLayout);
 
-	D3D11Utils::CreatePixelShader(device, L"BasicPixelShader.hlsl", m_basicPixelShader);
+	D3D11Utils::CreatePixelShader(device, L"ClassicLitPixelShader.hlsl", m_pixelShader);
 
 	// MeshData 목록으로 Mesh 목록 만들기
 	std::size_t totalVertexCount = 0;
@@ -74,7 +75,6 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<
 		}
 
 		newMesh->vertexConstantBuffer = m_vertexConstantBuffer;
-		newMesh->pixelConstantBuffer = m_pixelConstantBuffer;
 
 		this->m_meshes.push_back(newMesh);
 	}
@@ -114,19 +114,23 @@ void BasicMeshGroup::Initialize(ComPtr<ID3D11Device> &device, const std::vector<
 	D3D11Utils::CreateIndexBuffer(device, normalIndices, m_normalLines->indexBuffer);
 
 	D3D11Utils::CreateVertexShaderAndInputLayout(device, L"NormalVertexShader.hlsl",
-	                                             basicInputElements, m_normalVertexShader,
-	                                             m_basicInputLayout);
+	                                             classicLitInputElements, m_normalVertexShader,
+	                                             m_inputLayout);
 	D3D11Utils::CreatePixelShader(device, L"NormalPixelShader.hlsl", m_normalPixelShader);
 
 	D3D11Utils::CreateConstantBuffer(device, m_normalVertexConstantData,
 	                                 m_normalVertexConstantBuffer);
 }
 
-void BasicMeshGroup::UpdateConstantBuffers(ComPtr<ID3D11Device> &device,
-                                           ComPtr<ID3D11DeviceContext> &context)
+void MeshGroup::UpdateConstantBuffers(ComPtr<ID3D11Device> &device,
+                                      ComPtr<ID3D11DeviceContext> &context)
 {
-	D3D11Utils::UpdateBuffer(device, context, m_basicVertexConstantData, m_vertexConstantBuffer);
-	D3D11Utils::UpdateBuffer(device, context, m_basicPixelConstantData, m_pixelConstantBuffer);
+	ApplyRenderSettings();
+
+	D3D11Utils::UpdateBuffer(device, context, m_vertexConstantData, m_vertexConstantBuffer);
+	D3D11Utils::UpdateBuffer(device, context, m_lightingConstantData, m_lightingConstantBuffer);
+	D3D11Utils::UpdateBuffer(device, context, m_shadingConstantData, m_shadingConstantBuffer);
+
 	// 노멀 벡터 그리기
 	if (m_drawNormals && m_drawNormalsDirtyFlag)
 	{
@@ -136,12 +140,12 @@ void BasicMeshGroup::UpdateConstantBuffers(ComPtr<ID3D11Device> &device,
 	}
 }
 
-void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
+void MeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 {
 	// VS, PS 쉐이더 설정
-	context->VSSetShader(m_basicVertexShader.Get(), 0, 0);
+	context->VSSetShader(m_vertexShader.Get(), 0, 0);
 	context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
-	context->PSSetShader(m_basicPixelShader.Get(), 0, 0);
+	context->PSSetShader(m_pixelShader.Get(), 0, 0);
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
@@ -149,7 +153,7 @@ void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 	for (const auto &mesh : m_meshes)
 	{
 		// Input Assembler
-		context->IASetInputLayout(m_basicInputLayout.Get());
+		context->IASetInputLayout(m_inputLayout.Get());
 		context->IASetVertexBuffers(0, 1, mesh->vertexBuffer.GetAddressOf(), &stride, &offset);
 		context->IASetIndexBuffer(mesh->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -162,7 +166,10 @@ void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 		ID3D11ShaderResourceView *resViews[3] = {mesh->textureResourceView.Get(),
 		                                         m_diffuseIBLSRV.Get(), m_specularIBLSRV.Get()};
 		context->PSSetShaderResources(0, 3, resViews);
-		context->PSSetConstantBuffers(0, 1, mesh->pixelConstantBuffer.GetAddressOf());
+
+		ID3D11Buffer *pixelConstantBuffers[2] = {m_lightingConstantBuffer.Get(),
+		                                         m_shadingConstantBuffer.Get()};
+		context->PSSetConstantBuffers(0, 2, pixelConstantBuffers);
 
 		context->DrawIndexed(mesh->m_indexCount, 0, 0);
 	}
@@ -170,7 +177,7 @@ void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 	// 노멀 벡터 그리기
 	if (m_drawNormals)
 	{
-		context->IASetInputLayout(m_basicInputLayout.Get());
+		context->IASetInputLayout(m_inputLayout.Get());
 		context->IASetVertexBuffers(0, 1, m_normalLines->vertexBuffer.GetAddressOf(), &stride,
 		                            &offset);
 		context->IASetIndexBuffer(m_normalLines->indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -183,4 +190,23 @@ void BasicMeshGroup::Render(ComPtr<ID3D11DeviceContext> &context)
 		context->DrawIndexed(m_normalLines->m_indexCount, 0, 0);
 	}
 }
-} // namespace Ryudar
+
+void MeshGroup::ApplyRenderSettings()
+{
+	m_shadingConstantData.material = m_renderSettings.material;
+
+	m_shadingConstantData.shadingOptions.useTexture = m_renderSettings.shading.useTexture;
+	m_shadingConstantData.shadingOptions.useBlinnPhong = m_renderSettings.shading.useBlinnPhong;
+	m_shadingConstantData.shadingOptions.usePhong = m_renderSettings.shading.usePhong;
+
+	m_shadingConstantData.environment.useIBL = m_renderSettings.environment.useIBL;
+	m_shadingConstantData.environment.useEnvironmentReflection =
+	    m_renderSettings.environment.useEnvironmentReflection;
+
+	m_shadingConstantData.rimLight.enabled = m_renderSettings.rimLight.useRimLight;
+	m_shadingConstantData.rimLight.useSmoothstep = m_renderSettings.rimLight.useSmoothstep;
+	m_shadingConstantData.rimLight.rimColor = m_renderSettings.rimLight.rimColor;
+	m_shadingConstantData.rimLight.power = m_renderSettings.rimLight.rimPower;
+	m_shadingConstantData.rimLight.strength = m_renderSettings.rimLight.rimStrength;
+}
+} // namespace Ryudar::ClassicLit

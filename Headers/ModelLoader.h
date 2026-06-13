@@ -17,7 +17,7 @@ namespace Ryudar
 class ModelLoader
 {
 public:
-	void Load(std::string basePath, std::string fileName);
+	void Load(const std::string &basePath, const std::string &fileName);
 
 public:
 	std::vector<MeshData> m_meshes;

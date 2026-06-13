@@ -26,5 +26,5 @@ struct Material
 	float padding1;                                  // 4
 	Vector3 fresnelR0 = Vector3(1.0f, 0.71f, 0.29f); // Gold
 	float padding2;
-}; // 48byte
+}; // 64byte
 } // namespace Ryudar
