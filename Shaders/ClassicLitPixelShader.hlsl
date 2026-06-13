@@ -64,7 +64,7 @@ float3 SchlickFresnel(float3 fresnelR0, float3 normal, float3 toEye)
 float4 main(PixelShaderInput input) : SV_TARGET
 {
     float3 toEye = normalize(eyeWorld - input.posWorld);
-
+    float3 normal = normalize(input.normalWorld);
     float3 color = float3(0.0, 0.0, 0.0);
     
     int i = 0;
@@ -75,19 +75,19 @@ float4 main(PixelShaderInput input) : SV_TARGET
     [unroll] // warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
     for (i = 0; i < NUM_DIR_LIGHTS; ++i)
     {
-        color += ComputeDirectionalLight(lights[i], material, input.normalWorld, toEye, useBlinnPhong, usePhong);
+        color += ComputeDirectionalLight(lights[i], material, normal, toEye, useBlinnPhong, usePhong);
     }
     
     [unroll]
     for (i = NUM_DIR_LIGHTS; i < NUM_DIR_LIGHTS + NUM_POINT_LIGHTS; ++i)
     {
-        color += ComputePointLight(lights[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
+        color += ComputePointLight(lights[i], material, input.posWorld, normal, toEye, useBlinnPhong, usePhong);
     }
     
     [unroll]
     for (i = NUM_DIR_LIGHTS + NUM_POINT_LIGHTS; i < NUM_DIR_LIGHTS + NUM_POINT_LIGHTS + NUM_SPOT_LIGHTS; ++i)
     {
-        color += ComputeSpotLight(lights[i], material, input.posWorld, input.normalWorld, toEye, useBlinnPhong, usePhong);
+        color += ComputeSpotLight(lights[i], material, input.posWorld, normal, toEye, useBlinnPhong, usePhong);
     }
     
     // Image Based Light사용
@@ -96,22 +96,21 @@ float4 main(PixelShaderInput input) : SV_TARGET
         // 환경맵핑 사용.
         if (useEnvironmentReflection)
         {
-            return g_specularCube.Sample(g_sampler, reflect(-toEye, input.normalWorld));
+            return g_specularCube.Sample(g_sampler, reflect(-toEye, normal));
         }
         else
         {
             float4 diffuse = g_diffuseCube.Sample(g_sampler,
-                                            input.normalWorld);
+                                            normal);
             float4 specular = g_specularCube.Sample(g_sampler,
-                            reflect(-toEye, input.normalWorld));
+                            reflect(-toEye, normal));
             
             diffuse.xyz *= material.diffuse;
-            specular *= pow(
-                    (specular.r + specular.g + specular.b) / 3.0f,
-                     material.shininess);
+            float specularBrightness = max((specular.r + specular.g + specular.b) / 3.0f, 0.f);
+            specular *= pow(specularBrightness, material.shininess);
             specular.xyz *= material.specular;
             
-            float3 f = SchlickFresnel(material.fresnelR0, input.normalWorld, toEye);
+            float3 f = SchlickFresnel(material.fresnelR0, normal, toEye);
             specular.xyz *= f;
             
             if (useTexture)
@@ -138,7 +137,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
             // 이때 가중치로 사용하고 싶은 값이 0이므로
             // 원하는 결과와 반대로됨.
             // 그러므로 1에서 빼줌으로써 가중치를 반전시킬수있음.
-            float rim = (1.0f - dot(toEye, input.normalWorld));
+            float rim = saturate(1.0f - dot(toEye, normal));
             // 테두리일수록 더욱 후광을 선명하게,
             // 아닐수록 후광이 더욱 약하게 만들기 위해,
             // rimPower를 제곱시켜줌으로써 rim값을 극단적으로 조절할수있음.

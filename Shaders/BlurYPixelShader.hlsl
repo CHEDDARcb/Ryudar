@@ -25,7 +25,7 @@ float4 main(SamplingPixelShaderInput input) : SV_TARGET
     for (int i = 0; i < 5; i++)
     {
         color += weights[i] * g_texture0.Sample(g_sampler, input.texcoord +
-                                                float2(0.0f, texelHeight) * float(i - 2));
+                                                float2(0.0f, texelHeight) * float(i - 2)).rgb;
     }
     
     return float4(color, 1.0f);
