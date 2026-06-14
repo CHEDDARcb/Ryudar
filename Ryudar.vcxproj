@@ -142,6 +142,7 @@
     <ClCompile Include="Sources\CubeMapping.cpp" />
     <ClCompile Include="Sources\D3D11Utils.cpp" />
     <ClCompile Include="Sources\GeometryGenerator.cpp" />
+    <ClCompile Include="Sources\ImageFilter.cpp" />
     <ClCompile Include="Sources\main.cpp" />
     <ClCompile Include="Sources\ModelLoader.cpp" />
     <ClCompile Include="Sources\Ryudar.cpp" />
@@ -155,7 +156,7 @@
     <ClInclude Include="Headers\CubeMapping.h" />
     <ClInclude Include="Headers\D3D11Utils.h" />
     <ClInclude Include="Headers\GeometryGenerator.h" />
-    <ClInclude Include="Headers\imageFilter.h" />
+    <ClInclude Include="Headers\ImageFilter.h" />
     <ClInclude Include="Headers\Light.h" />
     <ClInclude Include="Headers\Material.h" />
     <ClInclude Include="Headers\Mesh.h" />

@@ -8,7 +8,6 @@ cbuffer SamplingPixelConstantData : register(b0)
     float texelHeight;
     float threshold;
     float strength;
-    float4 options;
 };
 
 struct SamplingPixelShaderInput

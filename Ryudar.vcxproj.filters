@@ -45,6 +45,9 @@
     <ClCompile Include="Sources\Camera.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\ImageFilter.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\AppBase.h">
@@ -89,7 +92,7 @@
     <ClInclude Include="Headers\ClassicLitRenderSettings.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\imageFilter.h">
+    <ClInclude Include="Headers\ImageFilter.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Camera.h">

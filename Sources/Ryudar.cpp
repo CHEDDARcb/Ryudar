@@ -218,7 +218,7 @@ void Ryudar::BuildFilters()
 	// 이후 sampling 필터는 threshold 0으로 통과시킨다.
 	for (int down = 2; down <= m_downsampleCount; down *= 2)
 	{
-		auto downFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
+		auto downFilter = make_shared<ImageFilter>(m_device, m_context, FilterType::Sampling,
 		                                           m_screenWidth / down, m_screenHeight / down);
 
 		if (down == 2)
@@ -242,21 +242,21 @@ void Ryudar::BuildFilters()
 		{
 			// X축 blur 결과를 다음 필터의 입력으로 연결한다.
 			auto &prevResource = m_filters.back()->m_shaderResourceView;
-			m_filters.push_back(make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"BlurX",
-			                                             m_screenWidth / down,
-			                                             m_screenHeight / down));
+			m_filters.push_back(
+			    make_shared<ImageFilter>(m_device, m_context, FilterType::BlurHorizontal,
+			                             m_screenWidth / down, m_screenHeight / down));
 			m_filters.back()->SetShaderResources({prevResource});
 
 			// Y축 blur 결과를 다음 필터의 입력으로 연결한다.
 			auto &prevResource2 = m_filters.back()->m_shaderResourceView;
-			m_filters.push_back(make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"BlurY",
-			                                             m_screenWidth / down,
-			                                             m_screenHeight / down));
+			m_filters.push_back(
+			    make_shared<ImageFilter>(m_device, m_context, FilterType::BlurVertical,
+			                             m_screenWidth / down, m_screenHeight / down));
 			m_filters.back()->SetShaderResources({prevResource2});
 		}
 
 		auto upFilter =
-		    make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Sampling",
+		    make_shared<ImageFilter>(m_device, m_context, FilterType::Sampling,
 		                             m_screenWidth / down * 2, m_screenHeight / down * 2);
 		upFilter->SetShaderResources({m_filters.back()->m_shaderResourceView});
 		upFilter->m_pixelConstData.threshold = 0.0f;
@@ -265,7 +265,7 @@ void Ryudar::BuildFilters()
 	}
 
 	// 원본 이미지와 bloom 이미지를 합성해 최종 결과를 back buffer에 출력한다.
-	auto combineFilter = make_shared<ImageFilter>(m_device, m_context, L"Sampling", L"Combine",
+	auto combineFilter = make_shared<ImageFilter>(m_device, m_context, FilterType::Combine,
 	                                              m_screenWidth, m_screenHeight);
 	combineFilter->SetShaderResources(
 	    {m_postProcessInputSRV, m_filters.back()->m_shaderResourceView});
