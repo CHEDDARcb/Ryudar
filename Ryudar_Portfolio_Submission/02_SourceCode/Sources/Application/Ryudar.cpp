@@ -70,7 +70,7 @@ void Ryudar::Update(float dt)
 	auto &selectedObject = GetSelectedObject();
 	auto &visibleMeshGroup = selectedObject.meshGroup;
 
-	// First-Person Viewが無効の場合はDemo用の固定Camera位置を維持する。
+	// First-Person Viewが無効の場合は初期Camera位置を維持する。
 	if (m_useFirstPersonView)
 	{
 		if (m_keyPressed[87])

@@ -1,5 +1,5 @@
 ﻿#pragma once
-// プロジェクトのデモシーンを実装するAppBase派生クラス。
+// プロジェクトのシーンを実装するAppBase派生クラス。
 // Mesh選択、Light/Material GUI、Cubemap、Bloom Post Processチェーンを管理する。
 
 #include <algorithm>
