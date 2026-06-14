@@ -26,9 +26,8 @@ cbuffer ShadingConstantBuffer : register(b1)
     float rimPadding;
 
     uint useTexture;
-    uint useBlinnPhong;
-    uint usePhong;
-    float shadingPadding;
+    uint shadingModel; // 0: Phong, 1: Blinn-Phong
+    float2 shadingPadding;
 
     uint useIBL;
     uint useEnvironmentReflection;
@@ -75,19 +74,19 @@ float4 main(PixelShaderInput input) : SV_TARGET
     [unroll] // warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
     for (i = 0; i < NUM_DIR_LIGHTS; ++i)
     {
-        color += ComputeDirectionalLight(lights[i], material, normal, toEye, useBlinnPhong, usePhong);
+        color += ComputeDirectionalLight(lights[i], material, normal, toEye, shadingModel);
     }
     
     [unroll]
     for (i = NUM_DIR_LIGHTS; i < NUM_DIR_LIGHTS + NUM_POINT_LIGHTS; ++i)
     {
-        color += ComputePointLight(lights[i], material, input.posWorld, normal, toEye, useBlinnPhong, usePhong);
+        color += ComputePointLight(lights[i], material, input.posWorld, normal, toEye, shadingModel);
     }
     
     [unroll]
     for (i = NUM_DIR_LIGHTS + NUM_POINT_LIGHTS; i < NUM_DIR_LIGHTS + NUM_POINT_LIGHTS + NUM_SPOT_LIGHTS; ++i)
     {
-        color += ComputeSpotLight(lights[i], material, input.posWorld, normal, toEye, useBlinnPhong, usePhong);
+        color += ComputeSpotLight(lights[i], material, input.posWorld, normal, toEye, shadingModel);
     }
     
     // Image Based Light사용

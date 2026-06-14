@@ -4,6 +4,7 @@
 
 #include <directxtk/SimpleMath.h>
 
+#include "ClassicLitTypes.h"
 #include "Light.h"
 #include "Material.h"
 
@@ -49,17 +50,20 @@ struct RimLightConstantData
 };
 static_assert((sizeof(RimLightConstantData) % 16) == 0,
               "Constant Buffer size must be 16-byte aligned");
+static_assert(sizeof(RimLightConstantData) == 32,
+              "RimLightConstantData must match the HLSL cbuffer layout");
 
 // Shading 옵션을 별도의 구조체로 관리한다. ShadingConstantData에서 관리한다.
 struct ShadingOptionsConstantData
 {
-	uint32_t useTexture = false;    // 4
-	uint32_t useBlinnPhong = false; // 4
-	uint32_t usePhong = true;       // 4
-	float padding = 0.f;            // 4
+	uint32_t useTexture = false;                                        // 4
+	uint32_t shadingModel = static_cast<uint32_t>(ShadingModel::Phong); // 4
+	float padding[2] = {};                                              // 8
 };
 static_assert((sizeof(ShadingOptionsConstantData) % 16) == 0,
               "Constant Buffer size must be 16-byte aligned");
+static_assert(sizeof(ShadingOptionsConstantData) == 16,
+              "ShadingOptionsConstantData must match the HLSL cbuffer layout");
 
 // 환경 설정을 별도의 구조체로 관리한다. ShadingConstantData에서 관리한다.
 struct EnvironmentConstantData
@@ -70,6 +74,8 @@ struct EnvironmentConstantData
 };
 static_assert((sizeof(EnvironmentConstantData) % 16) == 0,
               "Constant Buffer size must be 16-byte aligned");
+static_assert(sizeof(EnvironmentConstantData) == 16,
+              "EnvironmentConstantData must match the HLSL cbuffer layout");
 
 // ClassicLit 렌더링에 필요한 모든 픽셀 셰이딩 상수 데이터를 하나의 구조체로 묶는다.
 struct ShadingConstantData
@@ -98,5 +104,7 @@ struct NormalVertexConstantData
 
 static_assert((sizeof(NormalVertexConstantData) % 16) == 0,
               "Constant Buffer size must be 16-byte aligned");
+static_assert(sizeof(NormalVertexConstantData) == 16,
+              "NormalVertexConstantData must match the HLSL cbuffer layout");
 
 } // namespace Ryudar

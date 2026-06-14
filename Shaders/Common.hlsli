@@ -44,6 +44,9 @@ struct Light
     float spotPower;
 };
 
+static const uint SHADING_MODEL_PHONG = 0;
+static const uint SHADING_MODEL_BLINN_PHONG = 1;
+
 float CalcAttenuation(float d, float falloffStart, float falloffEnd)
 {
     // Linear falloff
@@ -51,17 +54,16 @@ float CalcAttenuation(float d, float falloffStart, float falloffEnd)
 }
 
 float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
-                  float3 toEye, Material mat, bool useBlinnPhong, bool usePhong)
+                  float3 toEye, Material mat, uint shadingModel)
 {
-    //bool useBlinnPhong, bool usePhong
-    if (useBlinnPhong)
+    if (shadingModel == SHADING_MODEL_BLINN_PHONG)
     {
         float3 halfway = normalize(toEye + lightVec);
         float hdotn = dot(halfway, normal);
         float3 specular = mat.specular * pow(max(hdotn, 0.0f), mat.shininess);
         return mat.ambient + (mat.diffuse + specular) * lightStrength;
     }
-    else if (usePhong)
+    else if (shadingModel == SHADING_MODEL_PHONG)
     {
         float3 r = -reflect(lightVec, normal);
         float3 specular = mat.specular * pow(max(dot(toEye, r), 0.0f), mat.shininess);
@@ -74,7 +76,7 @@ float3 BlinnPhong(float3 lightStrength, float3 lightVec, float3 normal,
 }
 
 float3 ComputeDirectionalLight(Light L, Material mat, float3 normal,
-                               float3 toEye, bool useBlinnPhong, bool usePhong)
+                               float3 toEye, uint shadingModel)
 {
     float3 lightVec = -L.direction;
     // 원래 ndotl은 diffuse에 영향을 주는 가중치.
@@ -83,11 +85,11 @@ float3 ComputeDirectionalLight(Light L, Material mat, float3 normal,
     float ndotl = max(dot(normal, lightVec), 0.0f);
     float3 lightStrength = L.strength * ndotl;
     
-    return BlinnPhong(lightStrength, lightVec, normal, toEye, mat, useBlinnPhong, usePhong);
+    return BlinnPhong(lightStrength, lightVec, normal, toEye, mat, shadingModel);
 }
 
 float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
-                         float3 toEye, bool useBlinnPhong, bool usePhong)
+                         float3 toEye, uint shadingModel)
 {
     float3 lightVec = L.position - pos;
     
@@ -108,12 +110,12 @@ float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
         float att = CalcAttenuation(d, L.fallOffStart, L.fallOffEnd);
         lightStrength *= att;
 
-        return BlinnPhong(lightStrength, lightVec, normal, toEye, mat, useBlinnPhong, usePhong);
+        return BlinnPhong(lightStrength, lightVec, normal, toEye, mat, shadingModel);
     }
 }
 
 float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
-                        float3 toEye, bool useBlinnPhong, bool usePhong)
+                        float3 toEye, uint shadingModel)
 {
     float3 lightVec = L.position - pos;
     
@@ -135,7 +137,7 @@ float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
         
         float spotFactor = pow(max(dot(-lightVec, L.direction), 0), L.spotPower);
         lightStrength *= spotFactor;
-        return BlinnPhong(lightStrength, lightVec, normal, toEye, mat, useBlinnPhong, usePhong);
+        return BlinnPhong(lightStrength, lightVec, normal, toEye, mat, shadingModel);
 
     }
 }

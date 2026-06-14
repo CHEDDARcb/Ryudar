@@ -5,6 +5,7 @@
 
 #include <directxtk/SimpleMath.h>
 
+#include "ClassicLitTypes.h"
 #include "Material.h"
 
 namespace Ryudar::ClassicLit
@@ -15,8 +16,7 @@ struct ShadingSettings
 {
 	// Selects texture use and the specular model used for direct lighting.
 	bool useTexture = false;
-	bool useBlinnPhong = false;
-	bool usePhong = true;
+	ShadingModel model = ShadingModel::Phong;
 };
 
 struct EnvironmentSettings

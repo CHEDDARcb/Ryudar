@@ -196,8 +196,8 @@ void MeshGroup::ApplyRenderSettings()
 	m_shadingConstantData.material = m_renderSettings.material;
 
 	m_shadingConstantData.shadingOptions.useTexture = m_renderSettings.shading.useTexture;
-	m_shadingConstantData.shadingOptions.useBlinnPhong = m_renderSettings.shading.useBlinnPhong;
-	m_shadingConstantData.shadingOptions.usePhong = m_renderSettings.shading.usePhong;
+	m_shadingConstantData.shadingOptions.shadingModel =
+	    static_cast<uint32_t>(m_renderSettings.shading.model);
 
 	m_shadingConstantData.environment.useIBL = m_renderSettings.environment.useIBL;
 	m_shadingConstantData.environment.useEnvironmentReflection =

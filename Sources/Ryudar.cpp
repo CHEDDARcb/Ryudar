@@ -291,13 +291,12 @@ void Ryudar::DrawMeshSelectorGUI()
 void Ryudar::DrawShadingModeGUI(ClassicLit::MeshGroup &meshGroup)
 {
 	auto &shading = meshGroup.m_renderSettings.shading;
-	const char *items[] = {"Blinn-Phong Shading", "Phong Shading"};
-	int currentItem = shading.useBlinnPhong ? 0 : 1;
+	const char *items[] = {"Phong Shading", "Blinn-Phong Shading"};
+	int currentItem = static_cast<int>(shading.model);
 
 	if (ImGui::Combo("Shading Option", &currentItem, items, IM_ARRAYSIZE(items)))
 	{
-		shading.useBlinnPhong = currentItem == 0;
-		shading.usePhong = currentItem == 1;
+		shading.model = static_cast<ClassicLit::ShadingModel>(currentItem);
 	}
 }
 
