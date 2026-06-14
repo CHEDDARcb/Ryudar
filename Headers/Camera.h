@@ -9,6 +9,12 @@ namespace Ryudar
 using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
 
+enum class ProjectionType
+{
+	Perspective,
+	Orthographic,
+};
+
 class Camera
 {
 public:
@@ -19,30 +25,23 @@ public:
 	// 카메라의 위치 반환
 	Vector3 GetEyePos();
 
+	// 마우스 입력에 따라 카메라의 회전과 이동 방향을 업데이트한다.
+	// mouseNdcX/Y는 화면 중앙이 (0,0), 왼쪽 아래가 (-1,-1), 오른쪽 위가 (1,1)인 정규화된 마우스
+	// 좌표이다.
 	void UpdateMouse(float mouseNdcX, float mouseNdcY);
+
+	// 키보드 입력에 따라 카메라를 앞/뒤, 좌/우로 이동시킨다.
+	// dt는 이전 프레임과의 시간 차이로, 이동 거리를 프레임 속도에 맞춰 조절하는 데 사용한다.
 	void MoveForward(float dt);
 	void MoveRight(float dt);
+
 	// 카메라가 내부적으로 가지고 있는 AspectRatio를 업데이트
 	// projection행렬 계산을 위해 내부적으로 AspectRatio를 가지고 있음
 	void SetAspectRatio(float aspect);
 
-	void ResetCameraSet()
-	{
-		m_position = Vector3(0.0f, 0.4f, 0.0f);
-		m_viewDir = Vector3(0.0f, 0.0f, 1.0f);
-		m_upDir = Vector3(0.0f, 1.0f, 0.0f);
-		m_rightDir = Vector3(1.0f, 0.0f, 0.0f);
-
-		m_pitch = 0.0f;
-		m_yaw = 0.0f;
-	}
+	void ResetCameraSet();
 
 private:
-	// 1인칭 시점은 FPS 게임을 떠올리시면 됩니다.
-	// 가상 세계에 1인칭 시점 게임 캐릭터가 서있는 상황입니다.
-	// 그 캐릭터의 눈의 위치에 카메라가 있습니다.
-	// 그 캐릭터의 정면 방향이 카메라가 보는 방향입니다.
-
 	// m_position : 월드 좌표계에서 카메라의 위치
 	// m_viewDir : 카메라가 보는 방향, 걸어가는 방향
 	// m_upDir : 위쪽 방향, 중력의 반대방향이 기본
@@ -64,11 +63,10 @@ private:
 	float m_speed = 1.0f; // 움직이는 속도
 
 	// 프로젝션 설정
-	// 프로젝션 옵션도 카메라 클래스로 이동
 	float m_projFovAngleY = 70.0f;
 	float m_nearZ = 0.01f;
 	float m_farZ = 100.0f;
 	float m_aspect = 16.0f / 9.0f;
-	bool m_usePerspectiveProjection = true;
+	ProjectionType m_projectionType = ProjectionType::Perspective;
 };
 } // namespace Ryudar

@@ -1,4 +1,5 @@
 ﻿#include "Camera.h"
+#include <cassert>
 #include <iostream>
 namespace Ryudar
 {
@@ -43,11 +44,31 @@ void Camera::MoveRight(float dt)
 
 void Camera::SetAspectRatio(float aspect) { m_aspect = aspect; }
 
+void Camera::ResetCameraSet()
+{
+	m_position = Vector3(0.0f, 0.4f, 0.0f);
+	m_viewDir = Vector3(0.0f, 0.0f, 1.0f);
+	m_upDir = Vector3(0.0f, 1.0f, 0.0f);
+	m_rightDir = Vector3(1.0f, 0.0f, 0.0f);
+
+	m_pitch = 0.0f;
+	m_yaw = 0.0f;
+}
+
 Matrix Camera::GetProjRow()
 {
-	return m_usePerspectiveProjection
-	           ? XMMatrixPerspectiveFovLH(XMConvertToRadians(m_projFovAngleY), m_aspect, m_nearZ,
-	                                      m_farZ)
-	           : XMMatrixOrthographicOffCenterLH(-m_aspect, m_aspect, -1.0f, 1.0f, m_nearZ, m_farZ);
+	switch (m_projectionType)
+	{
+	case ProjectionType::Perspective:
+		return XMMatrixPerspectiveFovLH(XMConvertToRadians(m_projFovAngleY), m_aspect, m_nearZ,
+		                                m_farZ);
+
+	case ProjectionType::Orthographic:
+		return XMMatrixOrthographicOffCenterLH(-m_aspect, m_aspect, -1.0f, 1.0f, m_nearZ, m_farZ);
+	}
+
+	assert(false && "Invalid ProjectionType");
+	return Matrix();
 }
+
 } // namespace Ryudar
