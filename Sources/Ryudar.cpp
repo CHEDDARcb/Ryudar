@@ -47,14 +47,18 @@ bool Ryudar::Initialize()
 	// 구
 	MeshData sphere = GeometryGenerator::MakeSphere(1.3f, 100, 100);
 	sphere.textureFilename = "./Assets/Textures/ojwD8.jpg";
-	m_meshGroupSphere.Initialize(m_device, {sphere});
-	m_meshGroupSphere.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
-	m_meshGroupSphere.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;
+	m_sphere.meshGroup.Initialize(m_device, {sphere});
+	m_sphere.meshGroup.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
+	m_sphere.meshGroup.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;
+	m_sphere.transform.translation = Vector3(0.0f, 0.3f, 3.0f);
+	m_sphere.transform.scaling = Vector3(1.0f);
 
 	// 캐릭터
-	m_meshGroupCharacter.Initialize(m_device, "./Assets/Zelda/", "zeldaPosed001.fbx");
-	m_meshGroupCharacter.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
-	m_meshGroupCharacter.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;
+	m_character.meshGroup.Initialize(m_device, "./Assets/Zelda/", "zeldaPosed001.fbx");
+	m_character.meshGroup.m_diffuseIBLSRV = m_cubeMapping.m_diffuseIBLSRV;
+	m_character.meshGroup.m_specularIBLSRV = m_cubeMapping.m_specularIBLSRV;
+	m_character.transform.translation = Vector3(0.0f, 0.3f, 3.0f);
+	m_character.transform.scaling = Vector3(1.8f);
 
 	BuildFilters();
 
@@ -64,15 +68,8 @@ bool Ryudar::Initialize()
 void Ryudar::Update(float dt)
 {
 	// 렌더링할 물체 선택
-	auto &visibleMeshGroup = m_selectedMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
-
-	// 모델일 경우, 위치, 크기 조정
-	if (m_meshSelectionChanged)
-	{
-		m_modelTranslation = Vector3(0.0f, 0.3f, 3.0f);
-		m_modelScaling = m_selectedMeshIndex == 0 ? Vector3(1.0f) : Vector3(1.8f);
-		m_meshSelectionChanged = false;
-	}
+	auto &selectedObject = GetSelectedObject();
+	auto &visibleMeshGroup = selectedObject.meshGroup;
 
 	// 카메라의 이동
 	if (m_useFirstPersonView)
@@ -96,10 +93,7 @@ void Ryudar::Update(float dt)
 	Vector3 eyeWorld = m_camera.GetEyePos();
 
 	// 모델의 변환 DirectX-Row Major
-	auto modelRow =
-	    Matrix::CreateScale(m_modelScaling) * Matrix::CreateRotationY(m_modelRotation.y) *
-	    Matrix::CreateRotationX(m_modelRotation.x) * Matrix::CreateRotationZ(m_modelRotation.z) *
-	    Matrix::CreateTranslation(m_modelTranslation);
+	Matrix modelRow = selectedObject.transform.GetModelMatrix();
 
 	// 노멀벡터용 InverseTranspose행렬
 	auto invTransposeRow = modelRow;
@@ -168,14 +162,7 @@ void Ryudar::Render()
 	/* 큐브매핑*/
 	m_cubeMapping.Render(m_context);
 	/*오브젝트*/
-	if (m_selectedMeshIndex == 0)
-	{
-		m_meshGroupSphere.Render(m_context);
-	}
-	else
-	{
-		m_meshGroupCharacter.Render(m_context);
-	}
+	GetSelectedObject().meshGroup.Render(m_context);
 
 	// MSAA가 적용된 back buffer의 씬 렌더링 결과를
 	// 후처리 셰이더가 읽을 수 있는 single-sample texture로 resolve한다.
@@ -201,6 +188,20 @@ void Ryudar::OnResize()
 	m_postProcessConstantsDirty = 1;
 }
 
+SceneObject &Ryudar::GetSelectedObject()
+{
+	switch (m_selectedMeshType)
+	{
+	case MeshType::Sphere:
+		return m_sphere;
+
+	case MeshType::Character:
+		return m_character;
+	}
+
+	assert(false && "Invalid MeshType");
+	return m_sphere; // 컴파일러 경고 방지용, 절대 도달하지 않음
+}
 // 블룸필터
 // 첫단계: 전체필셀 돌면서
 // 픽셀의 평균값(RGB값의 평균->밝기)이 일정 값보다 작으면은
@@ -275,16 +276,16 @@ void Ryudar::BuildFilters()
 
 void Ryudar::DrawMeshSelectorGUI()
 {
-	if (ImGui::RadioButton("Sphere", m_selectedMeshIndex == 0))
+	if (ImGui::RadioButton("Sphere", m_selectedMeshType == MeshType::Sphere))
 	{
-		m_selectedMeshIndex = 0;
-		m_meshSelectionChanged = true;
+		m_selectedMeshType = MeshType::Sphere;
 	}
+
 	ImGui::SameLine();
-	if (ImGui::RadioButton("Character", m_selectedMeshIndex == 1))
+
+	if (ImGui::RadioButton("Character", m_selectedMeshType == MeshType::Character))
 	{
-		m_selectedMeshIndex = 1;
-		m_meshSelectionChanged = true;
+		m_selectedMeshType = MeshType::Character;
 	}
 }
 
@@ -327,12 +328,15 @@ void Ryudar::DrawPostProcessingGUI()
 	ImGui::NewLine();
 }
 
-void Ryudar::DrawModelGUI()
+void Ryudar::DrawModelGUI(Transform &transform)
 {
 	ImGui::Text("Model");
-	ImGui::SliderFloat3("m_modelTranslastion", &m_modelTranslation.x, -3.0f, 3.0f);
-	ImGui::SliderFloat3("m_modelRotaion(Rad)", &m_modelRotation.x, -3.13f, 3.14f);
-	ImGui::SliderFloat3("m_modelScaling", &m_modelScaling.x, 0.1f, 2.0f);
+
+	ImGui::SliderFloat3("Translation", &transform.translation.x, -3.0f, 3.0f);
+
+	ImGui::SliderFloat3("Rotation (Rad)", &transform.rotation.x, -3.13f, 3.14f);
+
+	ImGui::SliderFloat3("Scaling", &transform.scaling.x, 0.1f, 2.0f);
 }
 
 void Ryudar::DrawMaterialGUI(ClassicLit::MeshGroup &meshGroup)
@@ -426,10 +430,12 @@ void Ryudar::UpdateGUI()
 
 	DrawMeshSelectorGUI();
 
-	auto &meshGroup = m_selectedMeshIndex == 0 ? m_meshGroupSphere : m_meshGroupCharacter;
+	auto &selectedObject = GetSelectedObject();
+	auto &meshGroup = selectedObject.meshGroup;
+
 	DrawRenderOptionsGUI(meshGroup);
 	DrawPostProcessingGUI();
-	DrawModelGUI();
+	DrawModelGUI(selectedObject.transform);
 	DrawMaterialGUI(meshGroup);
 	DrawLightGUI(meshGroup);
 }

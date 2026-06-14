@@ -12,6 +12,7 @@
 #include "GeometryGenerator.h"
 #include "ImageFilter.h"
 #include "Light.h"
+#include "SceneObject.h"
 
 namespace Ryudar
 {
@@ -20,6 +21,12 @@ using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector2;
 using DirectX::SimpleMath::Vector3;
 using DirectX::SimpleMath::Vector4;
+
+enum class MeshType
+{
+	Sphere,
+	Character,
+};
 
 class Ryudar : public AppBase
 {
@@ -42,6 +49,8 @@ public:
 	virtual void OnResize() override;
 
 protected:
+	// 현재 선택된 메쉬에 대한 참조를 반환한다.
+	SceneObject &GetSelectedObject();
 	// 현재 back buffer 크기에 맞춰 블룸 후처리 필터 체인을 구성한다.
 	void BuildFilters();
 
@@ -58,7 +67,7 @@ protected:
 	void DrawPostProcessingGUI();
 
 	// 선택된 모델의 위치, 회전, 크기를 조절하는 GUI.
-	void DrawModelGUI();
+	void DrawModelGUI(Transform &transform);
 
 	// 선택된 메쉬의 재질 값을 조절하는 GUI.
 	void DrawMaterialGUI(ClassicLit::MeshGroup &meshGroup);
@@ -69,23 +78,18 @@ protected:
 	// 림 라이트 색상과 강도를 조절하는 GUI.
 	void DrawRimLightGUI(ClassicLit::MeshGroup &meshGroup);
 
+protected:
 	// 씬 리소스
-	ClassicLit::MeshGroup m_meshGroupSphere;
-	ClassicLit::MeshGroup m_meshGroupCharacter;
+	SceneObject m_sphere;
+	SceneObject m_character;
 	CubeMapping m_cubeMapping;
-
-	// GUI에서 조절하는 모델 변환값
-	Vector3 m_modelTranslation = Vector3(0.0f, 0.3f, 3.0f);
-	Vector3 m_modelRotation = Vector3(0.0f, 0.0f, 0.0f);
-	Vector3 m_modelScaling = Vector3(1.0f);
 
 	// 조명 GUI 상태
 	int m_selectedLightType = 0;
 	Light m_editableLight;
 
 	// 메쉬 선택 상태
-	int m_selectedMeshIndex = 0; // Sphere, character.
-	bool m_meshSelectionChanged = false;
+	MeshType m_selectedMeshType = MeshType::Sphere;
 
 	// 후처리 필터 체인
 	std::vector<shared_ptr<ImageFilter>> m_filters;

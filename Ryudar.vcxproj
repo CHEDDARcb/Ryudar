@@ -162,6 +162,8 @@
     <ClInclude Include="Headers\MeshData.h" />
     <ClInclude Include="Headers\ModelLoader.h" />
     <ClInclude Include="Headers\Ryudar.h" />
+    <ClInclude Include="Headers\SceneObject.h" />
+    <ClInclude Include="Headers\Transform.h" />
     <ClInclude Include="Headers\Vertex.h" />
   </ItemGroup>
   <ItemGroup>

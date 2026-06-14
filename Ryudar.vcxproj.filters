@@ -95,6 +95,12 @@
     <ClInclude Include="Headers\Camera.h">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\SceneObject.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Transform.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\ClassicLitPixelShader.hlsl">
