@@ -15,14 +15,11 @@
   Ryudar.exe、実行用バッチファイル、必要なDLL、HLSL、Assetを収録しています。
 
 ・02_SourceCode
-  Visual Studio、C++ / HLSLソース、実行用Assetを収録しています。
+  Visual Studioソリューション、C++ / HLSLソース、実行用Assetを収録しています。
   BUILD.mdにはビルド手順、vcpkg.jsonには依存パッケージを記載しています。
 
 ・ThirdPartyLicenses
   使用したオープンソースライブラリのライセンス情報を収録しています。
-
-・README.md
-  本ファイルです。プロジェクト概要、機能、操作方法、設計、実行方法を説明します。
 
 2. プロジェクト概要
 -------------------
@@ -41,12 +38,9 @@ Bloomなどをリアルタイムに変更し、レンダリング結果を比較
 ・Image Based Lighting（Diffuse IBL / Specular IBL）
 ・キューブマップを利用したSkyboxとEnvironment Reflection
 ・Schlick近似によるFresnel反射
-・Rim Light（色、強度、Power、Smoothstepの調整）
-・テクスチャ表示のON / OFF
-・Solid / Wireframe表示の切り替え
-・頂点法線の可視化と表示スケールの調整
+・Rim Light
+・Texture / Wireframe / 頂点法線の表示切り替え
 ・SphereとFBXキャラクターモデルの切り替え
-・モデルの移動、回転、拡大縮小
 ・First-Person Camera
 ・多段Downsample、Separable Blur、Upsample、CombineによるBloom
 ・ウィンドウリサイズ時のRender Target、Depth Buffer、Bloomリソース再生成
@@ -113,7 +107,7 @@ D3D11Utils
 7. 実装上のポイント
 -------------------
 ・Microsoft::WRL::ComPtrを使用し、COMリソースの寿命をRAIIで管理しています。
-・CPUとHLSLのConstant Buffer配置を合わせ、static_assertでサイズを検証しています。
+・CPUとHLSLのConstant Buffer配置を合わせ、static_assertでサイズと16-byte境界を検証しています。
 ・Non-uniform Scaleでも法線を正しく変換するため、Model行列の逆転置行列を使用しています。
 ・DirectXのRow VectorとHLSL側の行列配置を意識し、GPU転送時にTransposeしています。
 ・GUI用のRenderSettingsとGPU転送用Constant Dataを分離しています。
