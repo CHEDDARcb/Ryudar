@@ -1,3 +1,4 @@
+// 스카이박스 정점을 카메라의 뷰 및 투영 공간으로 변환한다.
 #include "Common.hlsli"
 
 cbuffer VertexConstantBuffer : register(b0)

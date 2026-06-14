@@ -10,7 +10,7 @@ cbuffer NormalVertexConstantBuffer : register(b0)
 
 cbuffer NormalVertexConstantBuffer : register(b1)
 {
-    float scale; // 그려지는 선분의 길이 조절
+    float scale; // 노멀 선분의 길이
 };
 
 PixelShaderInput main(VertexShaderInput input)
@@ -18,15 +18,14 @@ PixelShaderInput main(VertexShaderInput input)
     PixelShaderInput output;
     float4 pos = float4(input.posModel, 1.0f);
     
-    // Normal먼저 변환
-    // 노멀벡터의 방향을 알아야 선분의 끝점을 그릴수있음.
+    // 역전치 행렬로 월드 공간의 노멀 방향을 먼저 구한다.
     float4 normal = float4(input.normalModel, 0.0f);
     output.normalWorld = mul(normal, invTranspose).xyz;
     output.normalWorld = normalize(output.normalWorld);
     
     pos = mul(pos, model);
     
-    // 선분의 끝점인지 시작점인지 texcoord에1, 0을 넣어서 구분
+    // texcoord.x의 0과 1로 선분의 시작점과 끝점을 구분한다.
     float t = input.texcoord.x;
     pos.xyz += output.normalWorld * t * scale;
     
@@ -38,7 +37,7 @@ PixelShaderInput main(VertexShaderInput input)
     output.posProj = pos;
     output.texcoord = input.texcoord;
     
-    //시작점과 끝점의 색 구분.
+    // 시작점은 노란색, 끝점은 빨간색으로 표시한다.
     output.color = float3(1.0f, 1.0f, 0.0f) * (1.0f - t) + float3(1.0f, 0.0f, 0.0f) * t;
     
     return output;

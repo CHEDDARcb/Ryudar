@@ -1,26 +1,14 @@
 #ifndef __COMMON_HLSLI__
 #define __COMMON_HLSLI__
 
-// 쉐이더에서 include할 내용들은 .hlsli파일에 작성
-// Properties -> Item Type: Does not participate in build으로 설정
-
-// C++ SimpleMath -> HLSL
-// Matrix -> matrix 또는 float4x4
-// Vector3 -> float3
-// float3 a = normalize(b);
-// float a = dot(v1, v2);
-// Satuarate() -> saturate() 사용
-// float l = length(v);
-// struct A{ float a = 1.0f; }; <- 구조체 안에서 초기화 불가
-// Vector3(0.0f) -> float3(0.0, 0.0, 0.0) // 실수 뒤에 f 불필요
-// Vector4::Transform(v, M) -> mul(v, M)
+// 여러 셰이더가 공유하는 재질, 조명, 정점 입출력 형식을 정의한다.
+// C++ 상수 버퍼 구조체와 필드 순서 및 크기를 동일하게 유지해야 한다.
 
 #define MAX_LIGHTS 3
 #define NUM_DIR_LIGHTS 1
 #define NUM_POINT_LIGHTS 1
 #define NUM_SPOT_LIGHTS 1
 
-// 재질
 struct Material
 {
     float3 ambient;
@@ -33,7 +21,6 @@ struct Material
     float padding2;
 };
 
-// 조명
 struct Light
 {
     float3 strength;
@@ -49,7 +36,7 @@ static const uint SHADING_MODEL_BLINN_PHONG = 1;
 
 float CalcAttenuation(float d, float falloffStart, float falloffEnd)
 {
-    // Linear falloff
+    // 감쇠 시작점부터 끝점까지 조명 세기를 선형으로 줄인다.
     return saturate((falloffEnd - d) / (falloffEnd - falloffStart));
 }
 
@@ -79,9 +66,7 @@ float3 ComputeDirectionalLight(Light L, Material mat, float3 normal,
                                float3 toEye, uint shadingModel)
 {
     float3 lightVec = -L.direction;
-    // 원래 ndotl은 diffuse에 영향을 주는 가중치.
-    // 여기서는 lightStrength에 곱해서, 
-    // BlinnPhong함수에서 diffuse와 specular둘다에 곱해주는 형태.
+    // 입사각 가중치를 광원 세기에 반영해 디퓨즈와 스페큘러에 함께 적용한다.
     float ndotl = max(dot(normal, lightVec), 0.0f);
     float3 lightStrength = L.strength * ndotl;
     
@@ -93,7 +78,7 @@ float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
 {
     float3 lightVec = L.position - pos;
     
-    // 쉐이딩할 지점부터 조명까지의 거리 계산
+    // 조명 범위 밖의 픽셀은 계산을 생략한다.
     float d = length(lightVec);
     
     if (d > L.fallOffEnd)
@@ -119,10 +104,9 @@ float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
 {
     float3 lightVec = L.position - pos;
     
-    // 쉐이딩할 지점부터 조명까지의 거리 계산
     float d = length(lightVec);
     
-    // 너무 멀면 조명이 적용되지 않게함.
+    // 조명 범위 밖의 픽셀은 계산을 생략한다.
     if (d > L.fallOffEnd)
     {
         return float3(0, 0, 0);
@@ -142,28 +126,22 @@ float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
     }
 }
 
-// Semantics
+// 정점 및 픽셀 셰이더가 공유하는 시맨틱 구조체.
 // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-semantics
 struct VertexShaderInput
 {
-    float3 posModel : POSITION; //모델 좌표계의 위치 position
-    float3 normalModel : NORMAL; // 모델 좌표계의 normal    
-    float2 texcoord : TEXCOORD0; // 숫자는 종류가 여러개 일때, 숫자를 붙여 구분함. 하나밖에 없으면 숫자 생략가능.
+    float3 posModel : POSITION;   // 모델 좌표계 위치
+    float3 normalModel : NORMAL;  // 모델 좌표계 노멀
+    float2 texcoord : TEXCOORD0;
 };
 
-
-// SV_(System-value semantics): for rasterizer state.
-// SV_없으면 화면에 렌더링 안됨.
-// PixelShader로 들어가는 데이터는 SV붙여줘야함.
 struct PixelShaderInput
 {
-    //SV_POSITION: Vertex단위 데이터가 아니라, Pixel단위로interpolation된 정보가 들어감.
-    float4 posProj : SV_POSITION; // Screen position
-    // float3 posModel : POSITION0; // Model Position (텍스처좌표 계산-구 매핑 사용)
-    float3 posWorld : POSITION; // World position (조명 계산에 사용)
+    float4 posProj : SV_POSITION; // 래스터라이저가 보간한 화면 위치
+    float3 posWorld : POSITION;   // 조명 계산에 사용하는 월드 위치
     float3 normalWorld : NORMAL;
     float2 texcoord : TEXCOORD;
-    float3 color : COLOR; // Normal lines쉐이더에서 사용
+    float3 color : COLOR;         // 노멀 선 셰이더에서 사용
 };
 
 #endif // __COMMON_HLSLI__

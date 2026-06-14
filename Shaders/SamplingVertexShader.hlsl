@@ -1,3 +1,4 @@
+// 전체 화면 사각형의 위치와 텍스처 좌표를 그대로 전달한다.
 #include "Common.hlsli"
 
 struct SamplingVertexShaderInput

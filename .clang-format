@@ -11,7 +11,7 @@ IndentWidth:     4
 # 기본값: Never
 # 전부: Always 
 # 들여쓰기-탭 & 정렬-공백 : ForIndentation
-UseTab:          ForIndentation
+UseTab: ForIndentation
 
 # 기본값 -2
 AccessModifierOffset: -4

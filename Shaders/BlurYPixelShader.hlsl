@@ -1,3 +1,4 @@
+// 입력 텍스처에 세로 방향 가우시안 블러를 적용한다.
 Texture2D g_texture0 : register(t0);
 SamplerState g_sampler : register(s0);
 

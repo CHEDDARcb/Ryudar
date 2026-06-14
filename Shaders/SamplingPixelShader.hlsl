@@ -1,3 +1,4 @@
+// 밝기 임계값보다 어두운 픽셀을 제거해 블룸 영역을 추출한다.
 Texture2D g_texture0 : register(t0);
 SamplerState g_sampler : register(s0);
 
