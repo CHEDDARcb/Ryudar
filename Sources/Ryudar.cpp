@@ -100,13 +100,14 @@ void Ryudar::Update(float dt)
 	invTransposeRow.Translation(Vector3(0.0f)); // Translation을 0으로 만듬.
 	invTransposeRow = invTransposeRow.Invert().Transpose();
 
+	const auto selectedLightIndex = static_cast<std::size_t>(m_selectedLightType);
 	// MeshGroup의 ConstantBuffers 업데이트
-	for (int i = 0; i < MAX_LIGHTS; i++)
+	for (std::size_t i = 0; i < MaxLights; ++i)
 	{
 		// 다른 조명 끄기
-		if (i != m_selectedLightType)
+		if (i != selectedLightIndex)
 		{
-			visibleMeshGroup.m_lightingConstantData.lights[i].strength *= 0.0f;
+			visibleMeshGroup.m_lightingConstantData.lights[i].strength = Vector3(0.0f);
 		}
 		else
 		{
@@ -373,30 +374,30 @@ void Ryudar::DrawLightGUI(ClassicLit::MeshGroup &meshGroup)
 	ImGui::Checkbox("Use Image Based Light", &environment.useIBL);
 	if (!environment.useIBL)
 	{
-		if (ImGui::RadioButton("Directional Light", m_selectedLightType == 0))
+		if (ImGui::RadioButton("Directional Light", m_selectedLightType == LightType::Directional))
 		{
-			m_selectedLightType = 0;
+			m_selectedLightType = LightType::Directional;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Point Light", m_selectedLightType == 1))
+		if (ImGui::RadioButton("Point Light", m_selectedLightType == LightType::Point))
 		{
-			m_selectedLightType = 1;
+			m_selectedLightType = LightType::Point;
 		}
 		ImGui::SameLine();
-		if (ImGui::RadioButton("Spot Light", m_selectedLightType == 2))
+		if (ImGui::RadioButton("Spot Light", m_selectedLightType == LightType::Spot))
 		{
-			m_selectedLightType = 2;
+			m_selectedLightType = LightType::Spot;
 		}
 
 		// Point Light or Spot Light
-		if (m_selectedLightType == 1 || m_selectedLightType == 2)
+		if (m_selectedLightType == LightType::Point || m_selectedLightType == LightType::Spot)
 		{
 			ImGui::SliderFloat3("Light Position", &m_editableLight.position.x, -5.0f, 5.0f);
 			ImGui::SliderFloat("Light fallOffStart", &m_editableLight.fallOffStart, 0.0f, 5.0f);
 			ImGui::SliderFloat("Light fallOffEnd", &m_editableLight.fallOffEnd, 0.0f, 10.0f);
 
 			// Spot Light only
-			if (m_selectedLightType == 2)
+			if (m_selectedLightType == LightType::Spot)
 			{
 				ImGui::SliderFloat("Light spotPower", &m_editableLight.spotPower, 1.0f, 512.0f);
 			}

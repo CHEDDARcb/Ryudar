@@ -29,9 +29,9 @@ static_assert((sizeof(VertexConstantData) % 16) == 0,
 #pragma region Pixel Constant Data
 struct LightingConstantData
 {
-	Light lights[MAX_LIGHTS]; // 48 * MAX_LIGHTS
-	Vector3 eyeWorld{};       // 12
-	float padding = 0.f;      // 4
+	Light lights[MaxLights]; // 48 * 3 = 144
+	Vector3 eyeWorld{};      // 12
+	float padding = 0.f;     // 4
 };
 static_assert((sizeof(LightingConstantData) % 16) == 0,
               "Constant Buffer size must be 16-byte aligned");

@@ -85,7 +85,7 @@ protected:
 	CubeMapping m_cubeMapping;
 
 	// 조명 GUI 상태
-	int m_selectedLightType = 0;
+	LightType m_selectedLightType = LightType::Directional;
 	Light m_editableLight;
 
 	// 메쉬 선택 상태

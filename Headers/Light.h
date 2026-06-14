@@ -2,12 +2,11 @@
 // Direct Light, Point Light, Spot Light 계산에 공통으로 사용하는 조명 데이터 구조체.
 // HLSL Light 구조체와 constant buffer 레이아웃이 맞도록 구성한다.
 
+#include <cstddef>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <directxtk/SimpleMath.h>
 #include <memory>
-
-#define MAX_LIGHTS 3
 
 namespace Ryudar
 {
@@ -16,6 +15,16 @@ using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector2;
 using DirectX::SimpleMath::Vector3;
 using DirectX::SimpleMath::Vector4;
+
+enum class LightType
+{
+	Directional = 0,
+	Point = 1,
+	Spot = 2,
+	Count
+};
+
+inline constexpr std::size_t MaxLights = static_cast<std::size_t>(LightType::Count);
 
 // 조명
 struct Light
