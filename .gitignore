@@ -43,3 +43,6 @@ Assets/Textures/Cubemaps/HumusTextures/*.dds
 
 # Local ImGui state
 imgui.ini
+
+# Private development notes
+Note/
