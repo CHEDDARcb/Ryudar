@@ -1,7 +1,7 @@
 ﻿#include "Application/Ryudar.h"
 
 #include <DirectXCollision.h>
-#include <directxtk/DDSTextureLoader.h> // 큐브맵 읽을 때 필요
+#include <directxtk/DDSTextureLoader.h> // Cubemap読み込みに使用
 #include <tuple>
 #include <vector>
 
@@ -40,12 +40,12 @@ bool Ryudar::Initialize()
 	if (!AppBase::Initialize())
 		return false;
 
-	// 스카이박스와 IBL에 사용할 환경 맵을 준비한다.
+	// SkyboxとIBLで使用するEnvironment Mapを準備する。
 	m_cubeMapping.Initialize(m_device.Get(),
 	                         L"./Assets/Textures/Cubemaps/Stonewall_diffuseIBL.dds",
 	                         L"./Assets/Textures/Cubemaps/Stonewall_specularIBL.dds");
 
-	// 구와 캐릭터는 렌더 설정과 변환을 각각 독립적으로 유지한다.
+	// SphereとCharacterはレンダリング設定とTransformを個別に保持する。
 	MeshData sphere = GeometryGenerator::MakeSphere(1.3f, 100, 100);
 	sphere.textureFilename = "./Assets/Textures/ojwD8.jpg";
 	m_sphere.meshGroup.Initialize(m_device.Get(), {sphere});
@@ -70,7 +70,7 @@ void Ryudar::Update(float dt)
 	auto &selectedObject = GetSelectedObject();
 	auto &visibleMeshGroup = selectedObject.meshGroup;
 
-	// 1인칭 시점이 꺼지면 데모의 고정 카메라 위치를 유지한다.
+	// First-Person Viewが無効の場合はDemo用の固定Camera位置を維持する。
 	if (m_useFirstPersonView)
 	{
 		if (m_keyPressed[87])
@@ -91,17 +91,17 @@ void Ryudar::Update(float dt)
 	Matrix projRow = m_camera.GetProjRow();
 	Vector3 eyeWorld = m_camera.GetEyePos();
 
-	// DirectX의 행 벡터 기준 모델 행렬을 만든다.
+	// DirectXのRow Vector規則に基づくModel Matrixを生成する。
 	Matrix modelRow = selectedObject.transform.GetModelMatrix();
 
-	// 비균등 크기 변환에서도 노멀 방향을 보존하도록 역전치 행렬을 사용한다.
+	// Non-uniform ScaleでもNormal方向を保つためInverse Transpose Matrixを使用する。
 	auto invTransposeRow = modelRow;
-	invTransposeRow.Translation(Vector3(0.0f)); // 방향 벡터에는 이동을 적용하지 않는다.
+	invTransposeRow.Translation(Vector3(0.0f)); // Direction VectorにはTranslationを適用しない。
 	invTransposeRow = invTransposeRow.Invert().Transpose();
 
 	const auto selectedLightIndex = static_cast<std::size_t>(m_selectedLightType);
 
-	// HLSL 상수 버퍼의 행렬 배치에 맞춰 전치해 전달한다.
+	// HLSL Constant BufferのMatrix配置に合わせてTransposeして渡す。
 	visibleMeshGroup.SetTransformConstants(
 	    modelRow.Transpose(), invTransposeRow.Transpose(), viewRow.Transpose(),
 	    projRow.Transpose());
@@ -110,7 +110,7 @@ void Ryudar::Update(float dt)
 
 	visibleMeshGroup.UpdateConstantBuffers(m_context.Get());
 
-	// 스카이박스는 같은 카메라 뷰와 투영을 공유한다.
+	// Skyboxは同じCamera ViewとProjectionを共有する。
 	m_cubeMapping.UpdateConstantBuffers(m_context.Get(), viewRow.Transpose(), projRow.Transpose());
 
 	if (m_postProcessConstantsDirty)
@@ -147,7 +147,7 @@ void Ryudar::Render()
 	m_cubeMapping.Render(m_context.Get());
 	GetSelectedObject().meshGroup.Render(m_context.Get());
 
-	// MSAA 백 버퍼를 후처리 셰이더가 읽을 수 있는 단일 샘플 텍스처로 리졸브한다.
+	// MSAA Back BufferをPost Process Shaderが読めるSingle-Sample TextureへResolveする。
 	ComPtr<ID3D11Texture2D> backBuffer;
 	ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(backBuffer.GetAddressOf())),
 	              "Get swap-chain back buffer");
@@ -165,7 +165,7 @@ void Ryudar::Render()
 
 void Ryudar::OnResize()
 {
-	// 해상도에 의존하는 필터 출력 텍스처를 다시 만든다.
+	// 解像度依存のFilter出力Textureを再生成する。
 	BuildFilters();
 	m_postProcessConstantsDirty = true;
 }
@@ -182,14 +182,14 @@ SceneObject &Ryudar::GetSelectedObject() noexcept
 	}
 
 	assert(false && "Invalid MeshType");
-	return m_sphere; // 컴파일러 경고 방지용, 절대 도달하지 않음
+	return m_sphere; // Compiler警告回避用。通常は到達しない。
 }
 void Ryudar::BuildFilters()
 {
 	m_filters.clear();
 
-	// 밝은 영역을 추출하면서 단계적으로 다운샘플링한다.
-	// 첫 패스만 GUI 임계값을 사용하고 이후 패스는 모든 픽셀을 통과시킨다.
+	// Bright領域を抽出しながら段階的にDownsampleする。
+	// 最初のPassのみGUI Thresholdを使用し、以降は全Pixelを通過させる。
 	for (int down = 2; down <= m_downsampleCount; down *= 2)
 	{
 		auto downFilter = std::make_unique<ImageFilter>(
@@ -208,19 +208,19 @@ void Ryudar::BuildFilters()
 		m_filters.push_back(std::move(downFilter));
 	}
 
-	// 가장 낮은 해상도부터 블러와 업샘플링을 반복해 블룸 이미지를 만든다.
+	// 最低解像度からBlurとUpsampleを繰り返しBloom画像を生成する。
 	for (int down = m_downsampleCount; down >= 2; down /= 2)
 	{
 		for (int i = 0; i < m_blurRepeatCount; i++)
 		{
-			// 가로 블러 결과를 다음 필터의 입력으로 연결한다.
+			// Horizontal Blur結果を次のFilter入力へ接続する。
 			auto *prevResource = m_filters.back()->GetShaderResourceView();
 			m_filters.push_back(
 			    std::make_unique<ImageFilter>(m_device.Get(), FilterType::BlurHorizontal,
 			                                  m_screenWidth / down, m_screenHeight / down));
 			m_filters.back()->SetShaderResources({prevResource});
 
-			// 세로 블러 결과를 다음 필터의 입력으로 연결한다.
+			// Vertical Blur結果を次のFilter入力へ接続する。
 			auto *prevResource2 = m_filters.back()->GetShaderResourceView();
 			m_filters.push_back(
 			    std::make_unique<ImageFilter>(m_device.Get(), FilterType::BlurVertical,
@@ -237,7 +237,7 @@ void Ryudar::BuildFilters()
 		m_filters.push_back(std::move(upFilter));
 	}
 
-	// 원본 이미지와 블룸 이미지를 합성해 백 버퍼에 출력한다.
+	// 元画像とBloom画像を合成してBack Bufferへ出力する。
 	auto combineFilter = std::make_unique<ImageFilter>(
 	    m_device.Get(), FilterType::Combine, m_screenWidth, m_screenHeight);
 	combineFilter->SetShaderResources(
@@ -370,14 +370,14 @@ void Ryudar::DrawLightGUI(ClassicLit::MeshGroup &meshGroup)
 			m_selectedLightType = LightType::Spot;
 		}
 
-		// 점광원과 스포트라이트가 공유하는 감쇠 범위를 편집한다.
+		// Point LightとSpot Lightで共有するAttenuation範囲を編集する。
 		if (m_selectedLightType == LightType::Point || m_selectedLightType == LightType::Spot)
 		{
 			ImGui::SliderFloat3("Light Position", &m_editableLight.position.x, -5.0f, 5.0f);
 			ImGui::SliderFloat("Light fallOffStart", &m_editableLight.fallOffStart, 0.0f, 5.0f);
 			ImGui::SliderFloat("Light fallOffEnd", &m_editableLight.fallOffEnd, 0.0f, 10.0f);
 
-			// 스포트라이트에서만 원뿔 집중도를 편집한다.
+			// Spot LightのみConeの集中度を編集する。
 			if (m_selectedLightType == LightType::Spot)
 			{
 				ImGui::SliderFloat("Light spotPower", &m_editableLight.spotPower, 1.0f, 512.0f);

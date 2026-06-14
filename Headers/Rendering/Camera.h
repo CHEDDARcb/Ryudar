@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 1인칭 카메라의 위치, 방향, 투영 설정을 관리한다.
-// 입력 변화에 따라 뷰 행렬과 투영 행렬을 계산해 렌더링 코드에 제공한다.
+// First-Person Cameraの位置、向き、Projection設定を管理する。
+// 入力変化に応じてView MatrixとProjection Matrixを計算し、レンダリング処理へ提供する。
 
 #include <directxtk/SimpleMath.h>
 
@@ -18,44 +18,43 @@ enum class ProjectionType
 class Camera
 {
 public:
-	// 현재 카메라 위치와 방향으로 뷰 행렬을 계산한다.
+	// 現在のCamera位置と向きからView Matrixを計算する。
 	Matrix GetViewRow() const noexcept;
-	// 선택된 투영 방식에 맞는 투영 행렬을 계산한다.
+	// 選択されたProjection方式に合うProjection Matrixを計算する。
 	Matrix GetProjRow() const noexcept;
-	// 월드 좌표계의 카메라 위치를 반환한다.
+	// World座標系のCamera位置を返す。
 	Vector3 GetEyePos() const noexcept { return m_position; }
 
-	// 마우스 입력에 따라 카메라의 회전과 이동 방향을 업데이트한다.
-	// mouseNdcX/Y는 화면 중앙이 (0,0), 왼쪽 아래가 (-1,-1), 오른쪽 위가 (1,1)인 정규화된 마우스
-	// 좌표이다.
+	// Mouse入力に応じてCameraの回転と移動方向を更新する。
+	// mouseNdcX/Yは画面中央が(0,0)、左下が(-1,-1)、右上が(1,1)となる正規化座標。
 	void UpdateMouse(float mouseNdcX, float mouseNdcY) noexcept;
 
-	// 키보드 입력에 따라 카메라를 앞/뒤, 좌/우로 이동시킨다.
-	// dt는 이전 프레임과의 시간 차이로, 이동 거리를 프레임 속도에 맞춰 조절하는 데 사용한다.
+	// Keyboard入力に応じてCameraを前後・左右へ移動する。
+	// dtは前フレームとの差分時間で、移動量をFrame Rateから独立させるために使用する。
 	void MoveForward(float dt) noexcept;
 	void MoveRight(float dt) noexcept;
 
-	// 투영 행렬 계산에 사용하는 화면 종횡비를 갱신한다.
+	// Projection Matrix計算に使用する画面のアスペクト比を更新する。
 	void SetAspectRatio(float aspect) noexcept;
 
-	// 카메라 위치와 방향을 초기 시점으로 되돌린다.
+	// Camera位置と向きを初期視点へ戻す。
 	void ResetCameraSet() noexcept;
 
 private:
-	// 카메라 기준 벡터
+	// Camera基準ベクトル
 	Vector3 m_position = Vector3(0.0f, 0.4f, 0.0f);
 	Vector3 m_viewDir = Vector3(0.0f, 0.0f, 1.0f);
 	Vector3 m_upDir = Vector3(0.0f, 1.0f, 0.0f);
 	Vector3 m_rightDir = Vector3(1.0f, 0.0f, 0.0f);
 
-	// 카메라 회전과 이동 설정
+	// Camera回転・移動設定
 	// https://en.wikipedia.org/wiki/Aircraft_principal_axes
-	float m_pitch = 0.0f; // x축
-	float m_yaw = 0.0f;   // y축
+	float m_pitch = 0.0f; // x軸
+	float m_yaw = 0.0f;   // y軸
 
 	float m_speed = 1.0f;
 
-	// 프로젝션 설정
+	// Projection設定
 	float m_projFovAngleY = 70.0f;
 	float m_nearZ = 0.01f;
 	float m_farZ = 100.0f;

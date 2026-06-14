@@ -1,4 +1,4 @@
-// 모델 좌표 방향으로 큐브맵을 샘플링해 배경색을 출력한다.
+// Model座標方向でCubemapをSampleし、背景色を出力する。
 #include "Common.hlsli"
 
 TextureCube g_textureCube0 : register(t0);

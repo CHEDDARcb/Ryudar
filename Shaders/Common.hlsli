@@ -1,8 +1,8 @@
 #ifndef __COMMON_HLSLI__
 #define __COMMON_HLSLI__
 
-// 여러 셰이더가 공유하는 재질, 조명, 정점 입출력 형식을 정의한다.
-// C++ 상수 버퍼 구조체와 필드 순서 및 크기를 동일하게 유지해야 한다.
+// 複数Shaderが共有するMaterial、Light、頂点入出力形式を定義する。
+// C++側Constant Buffer構造体とフィールド順およびサイズを一致させる。
 
 #define MAX_LIGHTS 3
 #define NUM_DIR_LIGHTS 1
@@ -36,7 +36,7 @@ static const uint SHADING_MODEL_BLINN_PHONG = 1;
 
 float CalcAttenuation(float d, float falloffStart, float falloffEnd)
 {
-    // 감쇠 시작점부터 끝점까지 조명 세기를 선형으로 줄인다.
+    // Attenuation開始点から終了点までLight強度を線形に減衰させる。
     return saturate((falloffEnd - d) / (falloffEnd - falloffStart));
 }
 
@@ -66,7 +66,7 @@ float3 ComputeDirectionalLight(Light L, Material mat, float3 normal,
                                float3 toEye, uint shadingModel)
 {
     float3 lightVec = -L.direction;
-    // 입사각 가중치를 광원 세기에 반영해 디퓨즈와 스페큘러에 함께 적용한다.
+    // 入射角WeightをLight強度へ反映し、DiffuseとSpecularへ共通適用する。
     float ndotl = max(dot(normal, lightVec), 0.0f);
     float3 lightStrength = L.strength * ndotl;
     
@@ -78,7 +78,7 @@ float3 ComputePointLight(Light L, Material mat, float3 pos, float3 normal,
 {
     float3 lightVec = L.position - pos;
     
-    // 조명 범위 밖의 픽셀은 계산을 생략한다.
+    // Light範囲外のPixelは計算を省略する。
     float d = length(lightVec);
     
     if (d > L.fallOffEnd)
@@ -106,7 +106,7 @@ float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
     
     float d = length(lightVec);
     
-    // 조명 범위 밖의 픽셀은 계산을 생략한다.
+    // Light範囲外のPixelは計算を省略する。
     if (d > L.fallOffEnd)
     {
         return float3(0, 0, 0);
@@ -126,22 +126,22 @@ float3 ComputeSpotLight(Light L, Material mat, float3 pos, float3 normal,
     }
 }
 
-// 정점 및 픽셀 셰이더가 공유하는 시맨틱 구조체.
+// Vertex ShaderとPixel Shaderが共有するSemantic構造体。
 // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-semantics
 struct VertexShaderInput
 {
-    float3 posModel : POSITION;   // 모델 좌표계 위치
-    float3 normalModel : NORMAL;  // 모델 좌표계 노멀
+    float3 posModel : POSITION;   // Model Space位置
+    float3 normalModel : NORMAL;  // Model Space Normal
     float2 texcoord : TEXCOORD0;
 };
 
 struct PixelShaderInput
 {
-    float4 posProj : SV_POSITION; // 래스터라이저가 보간한 화면 위치
-    float3 posWorld : POSITION;   // 조명 계산에 사용하는 월드 위치
+    float4 posProj : SV_POSITION; // Rasterizerが補間した画面位置
+    float3 posWorld : POSITION;   // Light計算に使用するWorld位置
     float3 normalWorld : NORMAL;
     float2 texcoord : TEXCOORD;
-    float3 color : COLOR;         // 노멀 선 셰이더에서 사용
+    float3 color : COLOR;         // Normal Line Shaderで使用
 };
 
 #endif // __COMMON_HLSLI__

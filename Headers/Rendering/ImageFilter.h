@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 후처리 한 패스를 표현하는 클래스.
-// 입력 SRV를 전체 화면 사각형에 샘플링해 자체 RTV/SRV 또는 백 버퍼로 출력한다.
+// Post Processの1 Passを表すクラス。
+// 入力SRVをFull-Screen QuadでSampleし、自身のRTV/SRVまたはBack Bufferへ出力する。
 
 #include <initializer_list>
 #include <memory>
@@ -21,14 +21,14 @@ enum class FilterType
 	Combine,        // CombinePixelShader.hlsl
 };
 
-// 샘플링, 블러, 합성 픽셀 셰이더가 공유하는 상수 버퍼 데이터.
+// Sampling、Blur、Combine Pixel Shaderが共有するConstant Bufferデータ。
 struct SamplingPixelConstantData
 {
-	// 현재 출력 텍스처에서 한 텍셀의 가로 및 세로 크기.
+	// 現在の出力Textureにおける1 Texelの幅と高さ。
 	float texelWidth = 0.f;
 	float texelHeight = 0.f;
 
-	// 밝은 영역 추출과 블룸 합성에 사용하는 매개변수.
+	// Bright Pass抽出とBloom合成に使用するパラメータ。
 	float threshold = 0.f;
 	float strength = 0.f;
 };
@@ -39,35 +39,35 @@ static_assert(sizeof(SamplingPixelConstantData) == 16,
 class ImageFilter
 {
 public:
-	// 지정한 픽셀 셰이더와 출력 해상도로 후처리 패스 하나를 생성한다.
+	// 指定したPixel Shaderと出力解像度でPost Process Passを生成する。
 	ImageFilter(ID3D11Device *device, FilterType type, int width, int height);
 
-	// 임계값, 강도, 텍셀 크기 등의 픽셀 셰이더 상수를 GPU에 업로드한다.
+	// Threshold、Strength、Texel SizeなどのPixel Shader定数をGPUへUploadする。
 	void UpdateConstantBuffers(ID3D11DeviceContext *context);
 
-	// 설정된 SRV를 읽어 전체 화면 사각형에 샘플링하고, 설정된 RTV에 결과를 쓴다.
+	// 設定されたSRVをFull-Screen QuadでSampleし、結果をRTVへ書き込む。
 	void Render(ID3D11DeviceContext *context);
 
-	// 이 필터의 픽셀 셰이더가 읽을 입력 텍스처 뷰를 설정한다.
+	// このFilterのPixel Shaderが読み込む入力Texture Viewを設定する。
 	void SetShaderResources(
 	    std::initializer_list<ID3D11ShaderResourceView *> resources);
 
-	// 이 필터가 결과를 출력할 렌더 타깃 뷰를 설정한다.
+	// このFilterの出力先Render Target Viewを設定する。
 	void SetRenderTargets(std::initializer_list<ID3D11RenderTargetView *> targets);
 
-	// 다음 필터가 이 필터의 출력을 읽을 때 필요한 셰이더 리소스 뷰를 반환한다.
+	// 次のFilterがこのFilterの出力を読むためのShader Resource Viewを返す。
 	ID3D11ShaderResourceView *GetShaderResourceView() const noexcept;
 
 	void SetThreshold(float threshold) noexcept;
 	void SetStrength(float strength) noexcept;
 
 private:
-	// 전체 화면 사각형, 파이프라인 상태, 출력 텍스처, 상수 버퍼를 만든다.
+	// Full-Screen Quad、Pipeline State、出力Texture、Constant Bufferを生成する。
 	void Initialize(ID3D11Device *device, FilterType type, int width, int height);
 
 	static std::wstring GetPixelShaderFilename(FilterType type);
 
-	// 전체 화면 패스용 메쉬와 파이프라인 상태.
+	// Full-Screen Pass用のMeshとPipeline State。
 	Mesh m_mesh;
 
 	ComPtr<ID3D11VertexShader> m_vertexShader;
@@ -81,7 +81,7 @@ private:
 	D3D11_VIEWPORT m_viewport;
 	SamplingPixelConstantData m_pixelConstData;
 
-	// D3D11 바인딩 호출을 위해 보관하는 비소유 원시 포인터.
+	// D3D11 Bind呼び出し用に保持する非所有Raw Pointer。
 	std::vector<ID3D11ShaderResourceView *> m_shaderResources;
 	std::vector<ID3D11RenderTargetView *> m_renderTargets;
 };

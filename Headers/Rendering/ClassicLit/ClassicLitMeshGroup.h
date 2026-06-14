@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 여러 Mesh를 하나의 렌더링 단위로 묶어 셰이더, 상수 버퍼, 텍스처를 관리한다.
-// 일반 메쉬 렌더링과 노멀 벡터 시각화 기능을 함께 관리한다.
+// 複数のMeshを一つのレンダリング単位にまとめ、Shader、Constant Buffer、Textureを管理する。
+// 通常MeshのレンダリングとNormal Vector可視化を同時に管理する。
 
 #include "Rendering/ClassicLit/ClassicLitConstantData.h"
 #include "Rendering/ClassicLit/ClassicLitRenderSettings.h"
@@ -14,17 +14,17 @@ namespace Ryudar::ClassicLit
 class MeshGroup
 {
 public:
-	// 모델 파일을 읽어 MeshData로 변환한 뒤 GPU 리소스를 생성한다.
+	// ModelファイルをMeshDataへ変換し、GPUリソースを生成する。
 	void Initialize(ID3D11Device *device, const std::string &basePath,
 	                const std::string &filename);
 
-	// 이미 만들어진 MeshData 목록으로 정점/인덱스 버퍼와 셰이더 리소스를 생성한다.
+	// 既存のMeshData一覧からVertex/Index BufferとShaderリソースを生成する。
 	void Initialize(ID3D11Device *device, const std::vector<MeshData> &meshes);
 
-	// CPU에서 수정한 셰이더 상수 데이터를 GPU 상수 버퍼에 업로드한다.
+	// CPU側で変更したShader定数をGPU Constant BufferへUploadする。
 	void UpdateConstantBuffers(ID3D11DeviceContext *context);
 
-	// 기본 메쉬를 그린 뒤, 옵션이 켜져 있으면 노멀 벡터를 선으로 추가 렌더링한다.
+	// 通常Meshを描画し、オプション有効時はNormal VectorをLineとして追加描画する。
 	void Render(ID3D11DeviceContext *context);
 
 	void SetEnvironmentMaps(ID3D11ShaderResourceView *diffuse,
@@ -44,7 +44,7 @@ public:
 	void SetNormalScale(float scale) noexcept;
 
 private:
-	// CPU 렌더 설정을 GPU 상수 버퍼 형식으로 변환한다.
+	// CPU側のレンダリング設定をGPU Constant Buffer形式へ変換する。
 	void ApplyRenderSettings() noexcept;
 
 	VertexConstantData m_vertexConstantData;
@@ -59,30 +59,30 @@ private:
 	bool m_drawNormalsDirtyFlag = true;
 	bool m_drawNormals = false;
 
-	// 같은 셰이더와 상수 버퍼를 공유해 그릴 메시 목록.
+	// 同じShaderとConstant Bufferを共有して描画するMesh一覧。
 	std::vector<Mesh> m_meshes;
 
-	// 삼각형 메시 렌더링에 사용하는 기본 셰이더와 입력 레이아웃.
+	// Triangle Meshレンダリング用の基本ShaderとInput Layout。
 	ComPtr<ID3D11VertexShader> m_vertexShader;
 	ComPtr<ID3D11PixelShader> m_pixelShader;
 	ComPtr<ID3D11InputLayout> m_inputLayout;
 
-	// 일반 텍스처와 IBL 큐브맵 샘플링에 사용하는 샘플러 상태.
+	// 通常TextureとIBL CubemapのSamplingに使用するSampler State。
 	ComPtr<ID3D11SamplerState> m_samplerState;
 
-	// 모든 메시가 공유하는 기본 셰이더 상수 버퍼.
+	// 全Meshが共有する基本Shader Constant Buffer。
 	ComPtr<ID3D11Buffer> m_vertexConstantBuffer;
 	ComPtr<ID3D11Buffer> m_lightingConstantBuffer;
 	ComPtr<ID3D11Buffer> m_shadingConstantBuffer;
 
-	// 노멀 벡터를 선으로 그릴 때 사용하는 셰이더.
+	// Normal VectorをLine描画するためのShader。
 	ComPtr<ID3D11VertexShader> m_normalVertexShader;
 	ComPtr<ID3D11PixelShader> m_normalPixelShader;
 
-	// 각 정점에서 노멀 방향으로 뻗는 선분을 모아둔 디버그 메시.
+	// 各頂点からNormal方向へ伸びるLineをまとめたDebug Mesh。
 	Mesh m_normalLines;
 
-	// 노멀 벡터 시각화 전용 상수 버퍼.
+	// Normal Vector可視化専用Constant Buffer。
 	ComPtr<ID3D11Buffer> m_normalVertexConstantBuffer;
 	ComPtr<ID3D11Buffer> m_normalPixelConstantBuffer;
 };

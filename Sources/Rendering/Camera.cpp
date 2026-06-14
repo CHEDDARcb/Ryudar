@@ -15,12 +15,12 @@ Matrix Camera::GetViewRow() const noexcept
 
 void Camera::UpdateMouse(float mouseNdcX, float mouseNdcY) noexcept
 {
-	// 정규화된 화면 좌표를 상하 180도, 좌우 360도 회전으로 변환한다.
+	// 正規化画面座標を上下180度、左右360度の回転へ変換する。
 	// https://en.wikipedia.org/wiki/Aircraft_principal_axes
 	m_pitch = mouseNdcY * DirectX::XM_PIDIV2;
 	m_yaw = mouseNdcX * DirectX::XM_2PI;
 
-	// 회전된 전방 벡터를 기준으로 이동에 사용할 오른쪽 벡터도 다시 계산한다.
+	// 回転後のForward Vectorを基準に、移動用のRight Vectorも再計算する。
 	m_viewDir = Vector3::Transform(Vector3(0.0f, 0.0f, 1.0f), Matrix::CreateRotationX(-m_pitch) *
 	                                                              Matrix::CreateRotationY(m_yaw));
 	m_rightDir = m_upDir.Cross(m_viewDir);

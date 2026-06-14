@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 프로젝트의 실제 데모 씬을 구현하는 AppBase 파생 클래스.
-// 메쉬 선택, 조명/재질 GUI, 큐브맵, 블룸 후처리 체인을 관리한다.
+// プロジェクトのデモシーンを実装するAppBase派生クラス。
+// Mesh選択、Light/Material GUI、Cubemap、Bloom Post Processチェーンを管理する。
 
 #include <algorithm>
 #include <iostream>
@@ -33,69 +33,69 @@ class Ryudar : public AppBase
 public:
 	Ryudar();
 
-	// 씬에 필요한 메쉬, 큐브맵, 후처리 필터를 초기화한다.
+	// シーンに必要なMesh、Cubemap、Post Process Filterを初期化する。
 	virtual bool Initialize() override;
 
-	// ImGui 창을 구성하고 현재 선택된 메쉬의 편집 UI를 그린다.
+	// ImGuiウィンドウを構築し、現在選択中のMesh編集UIを描画する。
 	virtual void UpdateGUI() override;
 
-	// 입력과 GUI 상태를 반영해 카메라, 조명, 모델, 상수 버퍼를 갱신한다.
+	// 入力とGUI状態を反映し、Camera、Light、Model、Constant Bufferを更新する。
 	virtual void Update(float dt) override;
 
-	// 큐브맵, 선택된 메쉬, 후처리 필터 체인을 순서대로 렌더링한다.
+	// Cubemap、選択中のMesh、Post Process Filterチェーンの順にレンダリングする。
 	virtual void Render() override;
 
-	// 창 크기 변경 시 화면 크기에 의존하는 후처리 필터를 다시 만든다.
+	// ウィンドウサイズ変更時に画面サイズ依存のPost Process Filterを再生成する。
 	virtual void OnResize() override;
 
 protected:
-	// 현재 선택된 메쉬에 대한 참조를 반환한다.
+	// 現在選択中のSceneObjectへの参照を返す。
 	SceneObject &GetSelectedObject() noexcept;
-	// 현재 백 버퍼 크기에 맞춰 블룸 후처리 필터 체인을 구성한다.
+	// 現在のBack Bufferサイズに合わせてBloom Filterチェーンを構築する。
 	void BuildFilters();
 
-	// 렌더링할 메쉬를 선택하는 GUI.
+	// レンダリング対象のMeshを選択するGUI。
 	void DrawMeshSelectorGUI();
 
-	// Phong/Blinn-Phong 등 셰이딩 방식을 선택하는 GUI.
+	// Phong/Blinn-PhongなどのShading Modelを選択するGUI。
 	void DrawShadingModeGUI(ClassicLit::MeshGroup &meshGroup);
 
-	// 텍스처, 와이어프레임, 노멀 시각화 같은 렌더링 옵션 GUI.
+	// Texture、Wireframe、Normal可視化などのレンダリングオプションGUI。
 	void DrawRenderOptionsGUI(ClassicLit::MeshGroup &meshGroup);
 
-	// 블룸 사용 여부와 임계값 및 강도를 조절하는 후처리 GUI.
+	// Bloomの有効化、Threshold、Strengthを調整するPost Process GUI。
 	void DrawPostProcessingGUI();
 
-	// 선택된 모델의 위치, 회전, 크기를 조절하는 GUI.
+	// 選択中Modelの位置、回転、Scaleを調整するGUI。
 	void DrawModelGUI(Transform &transform);
 
-	// 선택된 메쉬의 재질 값을 조절하는 GUI.
+	// 選択中MeshのMaterial値を調整するGUI。
 	void DrawMaterialGUI(ClassicLit::MeshGroup &meshGroup);
 
-	// 기본 조명과 IBL/환경 반사 옵션을 조절하는 GUI.
+	// Direct LightとIBL/Environment Reflectionオプションを調整するGUI。
 	void DrawLightGUI(ClassicLit::MeshGroup &meshGroup);
 
-	// 림 라이트 색상과 강도를 조절하는 GUI.
+	// Rim Lightの色と強度を調整するGUI。
 	void DrawRimLightGUI(ClassicLit::MeshGroup &meshGroup);
 
 protected:
-	// 씬 리소스
+	// シーンリソース
 	SceneObject m_sphere;
 	SceneObject m_character;
 	CubeMapping m_cubeMapping;
 
-	// 조명 GUI 상태
+	// Light GUI状態
 	LightType m_selectedLightType = LightType::Directional;
 	Light m_editableLight;
 
-	// 메쉬 선택 상태
+	// Mesh選択状態
 	MeshType m_selectedMeshType = MeshType::Sphere;
 
-	// 후처리 필터 체인
+	// Post Process Filterチェーン
 	std::vector<std::unique_ptr<ImageFilter>> m_filters;
 
-	// 블룸 설정
-	bool m_postProcessConstantsDirty = true; // 시작 시 상수 버퍼를 한 번 갱신한다.
+	// Bloom設定
+	bool m_postProcessConstantsDirty = true; // 起動時にConstant Bufferを一度更新する。
 	int m_downsampleCount = 16;
 	int m_blurRepeatCount = 5;
 	float m_bloomThreshold = 1.0f;

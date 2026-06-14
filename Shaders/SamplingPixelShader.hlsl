@@ -1,4 +1,4 @@
-// 밝기 임계값보다 어두운 픽셀을 제거해 블룸 영역을 추출한다.
+// 輝度Threshold未満のPixelを除去し、Bloom領域を抽出する。
 Texture2D g_texture0 : register(t0);
 SamplerState g_sampler : register(s0);
 

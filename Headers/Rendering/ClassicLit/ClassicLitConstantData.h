@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 기본 메시 렌더링과 노멀 디버그 렌더링에 사용하는 상수 버퍼 데이터 정의.
-// C++ 구조체와 HLSL 상수 버퍼의 레이아웃이 맞도록 16바이트 정렬을 확인한다.
+// 通常MeshとNormal Debug描画で使用するConstant Bufferデータを定義する。
+// C++構造体とHLSL Constant BufferのLayoutが一致するよう16Byte Alignmentを検証する。
 
 #include <directxtk/SimpleMath.h>
 
@@ -38,7 +38,7 @@ static_assert((sizeof(LightingConstantData) % 16) == 0,
 static_assert(sizeof(LightingConstantData) == 160,
               "LightingConstantData must match the HLSL cbuffer layout");
 
-// 림 라이트에 사용하는 GPU 상수 데이터.
+// Rim Light用のGPU定数データ。
 struct RimLightConstantData
 {
 	Vector3 rimColor = Vector3(1.0f); // 12
@@ -53,7 +53,7 @@ static_assert((sizeof(RimLightConstantData) % 16) == 0,
 static_assert(sizeof(RimLightConstantData) == 32,
               "RimLightConstantData must match the HLSL cbuffer layout");
 
-// 텍스처와 셰이딩 모델 선택에 사용하는 GPU 상수 데이터.
+// TextureとShading Modelの選択に使用するGPU定数データ。
 struct ShadingOptionsConstantData
 {
 	uint32_t useTexture = false;                                        // 4
@@ -65,7 +65,7 @@ static_assert((sizeof(ShadingOptionsConstantData) % 16) == 0,
 static_assert(sizeof(ShadingOptionsConstantData) == 16,
               "ShadingOptionsConstantData must match the HLSL cbuffer layout");
 
-// 환경 설정을 별도의 구조체로 관리한다. ShadingConstantData에서 관리한다.
+// Environment設定を分離して管理し、ShadingConstantDataへ格納する。
 struct EnvironmentConstantData
 {
 	uint32_t useIBL = false;                   // 4
@@ -77,7 +77,7 @@ static_assert((sizeof(EnvironmentConstantData) % 16) == 0,
 static_assert(sizeof(EnvironmentConstantData) == 16,
               "EnvironmentConstantData must match the HLSL cbuffer layout");
 
-// ClassicLit 렌더링에 필요한 모든 픽셀 셰이딩 상수 데이터를 하나의 구조체로 묶는다.
+// Classic Litレンダリングに必要なPixel Shading定数を一つの構造体にまとめる。
 struct ShadingConstantData
 {
 	Material material;                         // 64

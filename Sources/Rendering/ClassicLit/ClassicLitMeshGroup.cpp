@@ -17,7 +17,7 @@ void MeshGroup::Initialize(ID3D11Device *device, const std::string &basePath,
 void MeshGroup::Initialize(ID3D11Device *device, const std::vector<MeshData> &meshes)
 {
 
-	// 기본 재질 텍스처와 IBL 큐브맵에 공통으로 사용할 샘플러다.
+	// 基本Material TextureとIBL Cubemapで共有するSampler。
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -30,7 +30,7 @@ void MeshGroup::Initialize(ID3D11Device *device, const std::vector<MeshData> &me
 	ThrowIfFailed(device->CreateSamplerState(&sampDesc, m_samplerState.GetAddressOf()),
 	              "Create ClassicLit sampler state");
 
-	// 모든 메시가 공유할 셰이더 상수 버퍼를 생성한다.
+	// 全Meshが共有するShader Constant Bufferを生成する。
 	m_vertexConstantData.modelWorld = Matrix();
 	m_vertexConstantData.view = Matrix();
 	m_vertexConstantData.projection = Matrix();
@@ -38,7 +38,7 @@ void MeshGroup::Initialize(ID3D11Device *device, const std::vector<MeshData> &me
 	D3D11Utils::CreateConstantBuffer(device, m_lightingConstantData, m_lightingConstantBuffer);
 	D3D11Utils::CreateConstantBuffer(device, m_shadingConstantData, m_shadingConstantBuffer);
 
-	// 일반 메시 렌더링 파이프라인을 구성한다.
+	// 通常Mesh用のRendering Pipelineを構築する。
 	vector<D3D11_INPUT_ELEMENT_DESC> classicLitInputElements = {
 	    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	    {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 4 * 3, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -51,7 +51,7 @@ void MeshGroup::Initialize(ID3D11Device *device, const std::vector<MeshData> &me
 
 	D3D11Utils::CreatePixelShader(device, L"ClassicLitPixelShader.hlsl", m_pixelShader);
 
-	// CPU 메시 데이터를 각각의 GPU 버퍼로 변환한다.
+	// CPU側Meshデータを個別のGPU Bufferへ変換する。
 	std::size_t totalVertexCount = 0;
 	m_meshes.reserve(m_meshes.size() + meshes.size());
 	for (const auto &meshData : meshes)
@@ -77,13 +77,13 @@ void MeshGroup::Initialize(ID3D11Device *device, const std::vector<MeshData> &me
 		m_meshes.push_back(std::move(newMesh));
 	}
 
-	// 각 정점마다 시작점과 끝점을 만들어 노멀 시각화용 선분을 구성한다.
+	// 各頂点に開始点と終了点を作り、Normal可視化用のLineを構成する。
 	std::vector<Vertex> normalVertices;
 	std::vector<uint32_t> normalIndices;
 	normalVertices.reserve(totalVertexCount * 2);
 	normalIndices.reserve(totalVertexCount * 2);
 
-	// 여러 메시의 노멀 선분을 하나의 디버그 메시로 합친다.
+	// 複数MeshのNormal Lineを一つのDebug Meshへまとめる。
 	size_t offset = 0;
 	for (const auto &meshData : meshes)
 	{
@@ -92,10 +92,10 @@ void MeshGroup::Initialize(ID3D11Device *device, const std::vector<MeshData> &me
 
 			auto v = meshData.vertices[i];
 
-			v.texcoord.x = 0.0f; // 시작점 표시
+			v.texcoord.x = 0.0f; // 開始点
 			normalVertices.push_back(v);
 
-			v.texcoord.x = 1.0f; // 끝점 표시
+			v.texcoord.x = 1.0f; // 終了点
 			normalVertices.push_back(v);
 
 			normalIndices.push_back(uint32_t(2 * (i + offset)));
@@ -197,7 +197,7 @@ void MeshGroup::UpdateConstantBuffers(ID3D11DeviceContext *context)
 	D3D11Utils::UpdateBuffer(context, m_lightingConstantData, m_lightingConstantBuffer.Get());
 	D3D11Utils::UpdateBuffer(context, m_shadingConstantData, m_shadingConstantBuffer.Get());
 
-	// 크기가 변경된 경우에만 노멀 전용 상수 버퍼를 갱신한다.
+	// Scale変更時のみNormal描画用Constant Bufferを更新する。
 	if (m_drawNormals && m_drawNormalsDirtyFlag)
 	{
 		D3D11Utils::UpdateBuffer(context, m_normalVertexConstantData,
@@ -208,7 +208,7 @@ void MeshGroup::UpdateConstantBuffers(ID3D11DeviceContext *context)
 
 void MeshGroup::Render(ID3D11DeviceContext *context)
 {
-	// 일반 메시 렌더링에 사용할 셰이더와 샘플러를 바인딩한다.
+	// 通常Mesh描画用のShaderとSamplerをBindする。
 	context->VSSetShader(m_vertexShader.Get(), 0, 0);
 	context->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 	context->PSSetShader(m_pixelShader.Get(), 0, 0);
@@ -225,7 +225,7 @@ void MeshGroup::Render(ID3D11DeviceContext *context)
 
 		context->VSSetConstantBuffers(0, 1, mesh.vertexConstantBuffer.GetAddressOf());
 
-		// 재질 텍스처와 IBL 큐브맵을 한 번에 바인딩한다.
+		// Material TextureとIBL CubemapをまとめてBindする。
 		ID3D11ShaderResourceView *resViews[3] = {mesh.textureResourceView.Get(),
 		                                         m_diffuseIBLSRV.Get(), m_specularIBLSRV.Get()};
 		context->PSSetShaderResources(0, 3, resViews);
@@ -237,7 +237,7 @@ void MeshGroup::Render(ID3D11DeviceContext *context)
 		context->DrawIndexed(mesh.m_indexCount, 0, 0);
 	}
 
-	// 노멀 표시가 켜진 경우 같은 모델 변환으로 선분 메시를 추가 렌더링한다.
+	// Normal表示有効時は同じModel TransformでLine Meshを追加描画する。
 	if (m_drawNormals)
 	{
 		context->IASetInputLayout(m_inputLayout.Get());

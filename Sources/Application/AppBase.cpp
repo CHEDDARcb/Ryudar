@@ -1,4 +1,4 @@
-﻿// 헤더 포함 순서 참고:
+﻿// Header include順序の参考:
 // https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes
 
 #include "Application/AppBase.h"
@@ -9,8 +9,8 @@
 
 #include "Graphics/D3D11Utils.h"
 
-// imgui_impl_win32.cpp에 정의된 메시지 처리 함수에 대한 전방 선언.
-// vcpkg로 ImGui를 사용할 때 IDE 경고가 보일 수 있다.
+// imgui_impl_win32.cppで定義されるメッセージ処理関数のForward Declaration。
+// vcpkg版ImGuiではIDE上に警告が表示される場合がある。
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam,
                                                              LPARAM lParam);
 
@@ -19,10 +19,10 @@ namespace Ryudar
 
 using namespace std;
 
-// Win32 콜백 함수에서 현재 AppBase 인스턴스로 메시지를 전달하기 위한 포인터.
+// Win32 Callbackから現在のAppBase Instanceへメッセージを転送するためのPointer。
 AppBase *g_appBase = nullptr;
 
-// RegisterClassEx에 등록되는 실제 Win32 메시지 콜백 함수.
+// RegisterClassExへ登録するWin32メッセージCallback。
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (g_appBase)
@@ -46,7 +46,7 @@ AppBase::AppBase()
 
 AppBase::~AppBase()
 {
-	// DestroyWindow는 WndProc를 동기적으로 호출하므로 AppBase와 ImGui가 살아 있을 때 처리한다.
+	// DestroyWindowはWndProcを同期呼び出しするため、AppBaseとImGuiの生存中に実行する。
 	if (m_mainWindow)
 	{
 		DestroyWindow(m_mainWindow);
@@ -68,9 +68,9 @@ AppBase::~AppBase()
 
 	g_appBase = nullptr;
 
-	// UnregisterClass(wc.lpszClassName, wc.hInstance); 생략
+	// UnregisterClass(wc.lpszClassName, wc.hInstance); は省略
 
-	// ComPtr가 참조 카운트를 관리하므로 Direct3D 리소스는 자동으로 해제된다.
+	// ComPtrが参照カウントを管理するため、Direct3Dリソースは自動解放される。
 	// https:learn.microsoft.com/en-us/cpp/cppcx/wrl/comptr-class?view=msvc-170
 }
 
@@ -81,7 +81,7 @@ float AppBase::GetAspectRatio() const noexcept
 
 int AppBase::Run()
 {
-	// 메인 메시지 루프.
+	// Main Message Loop。
 	MSG msg = {0};
 	while (WM_QUIT != msg.message)
 	{
@@ -104,7 +104,7 @@ int AppBase::Run()
 			UpdateGUI();
 
 			m_guiWidth = 0;
-			// GUI 폭만큼 렌더링 영역을 줄이고 싶을 때 사용.
+			// GUI幅の分だけレンダリング領域を縮小する場合に使用する。
 			// ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
 			// m_guiWidth = int(ImGui::GetWindowWidth());
 
@@ -117,7 +117,7 @@ int AppBase::Run()
 
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-			// ImGui 렌더링 후 백 버퍼와 프런트 버퍼를 교체한다.
+			// ImGui描画後にBack BufferとFront Bufferを交換する。
 			ThrowIfFailed(m_swapChain->Present(1, 0), "Present swap chain");
 		}
 	}
@@ -136,7 +136,7 @@ bool AppBase::Initialize()
 	if (!InitGUI())
 		return false;
 
-	// 콘솔 창이 렌더링 창을 가리지 않도록 렌더링 창을 앞으로 가져온다.
+	// Console Windowが描画Windowを隠さないよう前面へ移動する。
 	SetForegroundWindow(m_mainWindow);
 
 	return true;
@@ -145,13 +145,13 @@ bool AppBase::Initialize()
 void AppBase::OnMouseMove(WPARAM btnState, int mouseX, int mouseY)
 {
 
-	// 마우스 좌표를 NDC 좌표계로 변환한다.
-	// 화면 좌측 상단은 (0, 0), 우측 하단은 (width - 1, height - 1)이다.
-	// NDC 좌표계는 좌측 하단이 (-1, -1), 우측 상단이 (1, 1)이다.
+	// Mouse座標をNDCへ変換する。
+	// 画面座標は左上が(0, 0)、右下が(width - 1, height - 1)。
+	// NDCは左下が(-1, -1)、右上が(1, 1)。
 	float x = mouseX * 2.0f / m_screenWidth - 1.0f;
 	float y = -mouseY * 2.0f / m_screenHeight + 1.0f;
 
-	// 커서가 화면 밖으로 나갔을 때도 값이 유효 범위에 머물도록 제한한다.
+	// Cursorが画面外へ出ても値が有効範囲内に収まるようClampする。
 	x = std::clamp(x, -1.0f, 1.0f);
 	y = std::clamp(y, -1.0f, 1.0f);
 
@@ -161,8 +161,8 @@ void AppBase::OnMouseMove(WPARAM btnState, int mouseX, int mouseY)
 	}
 }
 
-// hwnd: 메시지를 받은 윈도우.
-// msg, wParam, lParam: Win32 메시지와 추가 데이터.
+// hwnd: メッセージを受信したWindow。
+// msg, wParam, lParam: Win32メッセージと追加データ。
 LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
@@ -185,7 +185,7 @@ LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 				m_guiWidth = 0;
 
-				// ResizeBuffers 전에 백 버퍼와 관련된 바인딩을 해제한다.
+				// ResizeBuffersの前にBack Buffer関連のBindingを解除する。
 				m_context->OMSetRenderTargets(0, nullptr, nullptr);
 
 				ID3D11ShaderResourceView *nullSRV[16] = {};
@@ -235,12 +235,12 @@ LRESULT AppBase::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		if (wParam == 27)
 		{
-			// ESC 키를 누르면 프로그램을 종료한다.
+			// ESCキーでアプリケーションを終了する。
 			DestroyWindow(hwnd);
 		}
 		break;
 	case WM_KEYUP:
-		// 키보드 눌림 상태를 해제한다.
+		// Keyboardの押下状態を解除する。
 		m_keyPressed[wParam] = false;
 		break;
 	case WM_DESTROY:
@@ -266,22 +266,22 @@ bool AppBase::InitMainWindow()
 	                 L"Ryudar",
 	                 NULL};
 
-	// RegisterClassEx로 윈도우 클래스를 등록한다.
+	// RegisterClassExでWindow Classを登録する。
 	if (!RegisterClassEx(&wc))
 	{
 		cout << "RegisterClassEx() failed." << endl;
 		return false;
 	}
 
-	// 원하는 클라이언트 영역 크기를 기준으로 실제 윈도우 크기를 계산한다.
+	// 希望するClient領域サイズから実際のWindowサイズを計算する。
 	RECT wr = {0, 0, m_screenWidth, m_screenHeight};
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, false);
 
 	m_mainWindow = CreateWindow(wc.lpszClassName, L"Ryudar Engine", WS_OVERLAPPEDWINDOW,
-	                            100,                // 윈도우 좌측 상단 x 좌표
-	                            100,                // 윈도우 좌측 상단 y 좌표
-	                            wr.right - wr.left, // 윈도우 전체 너비
-	                            wr.bottom - wr.top, // 윈도우 전체 높이
+	                            100,                // Window左上のx座標
+	                            100,                // Window左上のy座標
+	                            wr.right - wr.left, // Window全体の幅
+	                            wr.bottom - wr.top, // Window全体の高さ
 	                            NULL, NULL, wc.hInstance, NULL);
 
 	if (!m_mainWindow)
@@ -298,7 +298,7 @@ bool AppBase::InitMainWindow()
 
 bool AppBase::InitDirect3D()
 {
-	// 하드웨어 드라이버를 사용할 수 없는 환경에서는 WARP로 테스트할 수 있다.
+	// Hardware Driverを使用できない環境ではWARPでテストできる。
 	const D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE_HARDWARE;
 	// const D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE_WARP;
 
@@ -307,17 +307,17 @@ bool AppBase::InitDirect3D()
 	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-	// 지원할 기능 수준을 높은 버전부터 요청한다.
+	// 対応するFeature Levelを高いVersionから順に要求する。
 	const D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_9_3};
 
 	D3D_FEATURE_LEVEL featureLevel;
 
-	// D3D11 장치와 컨텍스트 생성
-	ThrowIfFailed(D3D11CreateDevice(nullptr,           // 기본 어댑터 사용
-	                                driverType,        // 하드웨어 / WARP
-	                                0,                 // 소프트웨어 래스터라이저 모듈 핸들
-	                                createDeviceFlags, // 디버그 계층 등의 생성 옵션
-	                                featureLevels,     // 요청할 기능 수준 목록
+	// D3D11 DeviceとContextを生成する。
+	ThrowIfFailed(D3D11CreateDevice(nullptr,           // Default Adapterを使用
+	                                driverType,        // Hardware / WARP
+	                                0,                 // Software Rasterizer Module Handle
+	                                createDeviceFlags, // Debug Layerなどの生成Option
+	                                featureLevels,     // 要求するFeature Level一覧
 	                                ARRAYSIZE(featureLevels), D3D11_SDK_VERSION,
 	                                m_device.GetAddressOf(), &featureLevel,
 	                                m_context.GetAddressOf()),
@@ -329,7 +329,7 @@ bool AppBase::InitDirect3D()
 		return false;
 	}
 
-	// 4배 MSAA 지원 여부 확인
+	// 4x MSAAの対応可否を確認する。
 	numQualityLevels = 0;
 	ThrowIfFailed(
 	    m_device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &numQualityLevels),
@@ -340,7 +340,7 @@ bool AppBase::InitDirect3D()
 		cout << "4x MSAA not supported. Fallback to no MSAA." << endl;
 	}
 
-	// D3D 장치에서 DXGI 장치, 어댑터, 팩터리 순서로 상위 객체를 얻는다.
+	// D3D DeviceからDXGI Device、Adapter、Factoryの順に上位Objectを取得する。
 	ComPtr<IDXGIDevice> dxgiDevice;
 	ComPtr<IDXGIAdapter> dxgiAdapter;
 	ComPtr<IDXGIFactory> dxgiFactory;
@@ -354,7 +354,7 @@ bool AppBase::InitDirect3D()
 	                                     reinterpret_cast<void **>(dxgiFactory.GetAddressOf())),
 	              "Get DXGI factory");
 
-	// 스왑 체인 생성
+	// Swap Chainを生成する。
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
 
@@ -362,13 +362,13 @@ bool AppBase::InitDirect3D()
 	sd.BufferDesc.Height = m_screenHeight;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-	// 창 모드에서는 영향이 작지만 기본 새로 고침 빈도를 명시한다.
+	// Window Modeでは影響が小さいが、基本Refresh Rateを明示する。
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
 
 	// sd.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	// 백 버퍼 두 개로 더블 버퍼링한다.
+	// Back Buffer二つでDouble Bufferingを行う。
 	sd.BufferCount = 2;
 
 	sd.OutputWindow = m_mainWindow;
@@ -391,16 +391,16 @@ bool AppBase::InitDirect3D()
 	ThrowIfFailed(dxgiFactory->CreateSwapChain(m_device.Get(), &sd, m_swapChain.GetAddressOf()),
 	              "Create swap chain");
 
-	// 필요하면 Alt+Enter 기본 전체 화면 전환을 비활성화할 수 있다.
+	// 必要に応じてAlt+Enterによる標準Full Screen切り替えを無効化できる。
 	// dxgiFactory->MakeWindowAssociation(m_mainWindow, DXGI_MWA_NO_ALT_ENTER);
 
-	// 렌더 타깃 뷰 생성
+	// Render Target Viewを生成する。
 	CreateRenderTargetView();
 
-	// 뷰포트 설정
+	// Viewportを設定する。
 	SetViewport();
 
-	// 래스터라이저 상태 생성
+	// Rasterizer Stateを生成する。
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(rastDesc));
 
@@ -417,11 +417,11 @@ bool AppBase::InitDirect3D()
 	ThrowIfFailed(m_device->CreateRasterizerState(&rastDesc, m_wireRasterizerState.GetAddressOf()),
 	              "Create wireframe rasterizer state");
 
-	// 깊이 버퍼와 DSV 생성
+	// Depth BufferとDSVを生成する。
 	D3D11Utils::CreateDepthBuffer(m_device.Get(), m_screenWidth, m_screenHeight, numQualityLevels,
 	                              m_depthStencilView);
 
-	// 깊이/스텐실 상태 생성
+	// Depth/Stencil Stateを生成する。
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
@@ -429,7 +429,7 @@ bool AppBase::InitDirect3D()
 	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
-	// 현재 스텐실은 사용하지 않는다.
+	// 現在Stencilは使用しない。
 	depthStencilDesc.StencilEnable = false;
 
 	ThrowIfFailed(
@@ -490,7 +490,7 @@ void AppBase::SetViewport()
 		m_screenViewport.MaxDepth = 1.0f;
 	}
 
-	// 후처리 패스가 뷰포트를 바꿀 수 있으므로 메인 렌더링 전에 다시 바인딩한다.
+	// Post Process PassがViewportを変更するため、Main Render前に再Bindする。
 	m_context->RSSetViewports(1, &m_screenViewport);
 }
 

@@ -1,6 +1,6 @@
 ﻿#include "Graphics/D3D11Utils.h"
 
-#include <directxtk/DDSTextureLoader.h> // 큐브맵 읽을 때 필요
+#include <directxtk/DDSTextureLoader.h> // Cubemap読み込みに使用
 #include <dxgi.h>
 #include <dxgi1_4.h>
 #include <filesystem>
@@ -94,7 +94,7 @@ void D3D11Utils::CreateVertexShaderAndInputLayout(
 	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	// main을 진입점으로 컴파일하고 HLSL include를 허용한다.
+	// mainをEntry PointとしてCompileし、HLSL includeを許可する。
 	const wstring shaderPath = ResolveShaderPath(filename);
 	HRESULT hr = D3DCompileFromFile(shaderPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 	                                "main", "vs_5_0", compileFlags, 0, shaderBlob.GetAddressOf(),
@@ -125,7 +125,7 @@ void D3D11Utils::CreatePixelShader(ID3D11Device *device, const wstring &filename
 	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	// main을 진입점으로 컴파일하고 HLSL include를 허용한다.
+	// mainをEntry PointとしてCompileし、HLSL includeを許可する。
 	const wstring shaderPath = ResolveShaderPath(filename);
 	HRESULT hr = D3DCompileFromFile(shaderPath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 	                                "main", "ps_5_0", compileFlags, 0,
@@ -149,7 +149,7 @@ void D3D11Utils::CreateIndexBuffer(ID3D11Device *device,
 	}
 
 	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE; // 생성 이후 GPU에서 읽기만 한다.
+	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE; // 生成後はGPUからの読み取りのみ。
 	bufferDesc.ByteWidth = UINT(sizeof(uint32_t) * indices.size());
 	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
@@ -180,7 +180,7 @@ void D3D11Utils::CreateTexture(ID3D11Device *device, const std::string &filename
 		throw std::runtime_error("Failed to load texture: " + filename);
 	}
 
-	// 로드한 RGBA 데이터를 변경 불가능한 2D 텍스처로 생성한다.
+	// 読み込んだRGBAデータからImmutableな2D Textureを生成する。
 	D3D11_TEXTURE2D_DESC txtDesc = {};
 	txtDesc.Width = width;
 	txtDesc.Height = height;
@@ -210,7 +210,7 @@ void D3D11Utils::CreateCubemapTexture(ID3D11Device *device, const wchar_t *filen
 	// https://github.com/microsoft/DirectXTK/wiki/DDSTextureLoader
 	auto hr = CreateDDSTextureFromFileEx(
 	    device, filename, 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0,
-	    D3D11_RESOURCE_MISC_TEXTURECUBE, // 큐브맵 리소스로 생성한다.
+	    D3D11_RESOURCE_MISC_TEXTURECUBE, // Cubemapリソースとして生成する。
 	    DDS_LOADER_FLAGS(false), (ID3D11Resource **)texture.GetAddressOf(),
 	    textureResourceView.GetAddressOf(), nullptr);
 

@@ -1,6 +1,6 @@
 ﻿#pragma once
-// GPU 버퍼를 만들기 전에 CPU 메모리에 보관하는 메시 데이터 구조체.
-// GeometryGenerator와 ModelLoader가 만든 정점/인덱스/텍스처 파일 정보를 담는다.
+// GPU Buffer生成前にCPUメモリ上で保持するMeshデータ構造体。
+// GeometryGeneratorとModelLoaderが生成した頂点、Index、Textureパスを保持する。
 
 #include <directxtk/SimpleMath.h>
 #include <string>
@@ -15,13 +15,13 @@ using std::vector;
 
 struct MeshData
 {
-	// GPU 정점 버퍼를 만들기 전에 보관하는 정점 목록.
+	// GPU Vertex Buffer生成前に保持する頂点一覧。
 	std::vector<Vertex> vertices;
 
-	// 정점을 삼각형 또는 선분으로 조립할 때 사용하는 인덱스 목록.
+	// 頂点をTriangleまたはLineへ組み立てるためのIndex一覧。
 	std::vector<uint32_t> indices;
 
-	// 이 메시가 사용할 디퓨즈 텍스처 경로. 비어 있으면 텍스처를 만들지 않는다.
+	// このMeshが使用するDiffuse Textureパス。空の場合はTextureを生成しない。
 	std::string textureFilename;
 };
 

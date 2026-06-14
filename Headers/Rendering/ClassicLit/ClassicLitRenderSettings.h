@@ -1,6 +1,6 @@
 ﻿#pragma once
-// Classic Lit 렌더링 경로에서 사용하는 CPU 측 설정을 모아둔다.
-// GUI에서 수정한 뒤 GPU 상수 데이터로 변환하며, 메모리 레이아웃은 별도 구조체가 담당한다.
+// Classic Litレンダリングで使用するCPU側設定をまとめる。
+// GUIで編集した後にGPU定数へ変換し、Memory Layoutは別の構造体で管理する。
 
 #include <directxtk/SimpleMath.h>
 
@@ -13,21 +13,21 @@ using DirectX::SimpleMath::Vector3;
 
 struct ShadingSettings
 {
-	// 텍스처 사용 여부와 직접광의 반사 모델을 선택한다.
+	// Texture使用有無とDirect Lightの反射Modelを選択する。
 	bool useTexture = false;
 	ShadingModel model = ShadingModel::Phong;
 };
 
 struct EnvironmentSettings
 {
-	// 이미지 기반 조명과 환경 반사 사용 여부를 제어한다.
+	// Image Based LightingとEnvironment Reflectionの使用有無を制御する。
 	bool useIBL = false;
 	bool useEnvironmentReflection = false;
 };
 
 struct RimLightSettings
 {
-	// 시선과 표면 노멀의 각도를 이용해 객체 가장자리를 강조한다.
+	// 視線とSurface Normalの角度を利用してObjectの輪郭を強調する。
 	Vector3 rimColor = Vector3(1.0f);
 	float rimPower = 2.0f;
 	float rimStrength = 0.0f;
@@ -38,7 +38,7 @@ struct RimLightSettings
 
 struct RenderSettings
 {
-	// 하나의 Classic Lit 객체가 독립적으로 소유하는 렌더링 설정이다.
+	// 一つのClassic Lit Objectが独立して所有するレンダリング設定。
 	Material material;
 	ShadingSettings shading;
 	EnvironmentSettings environment;

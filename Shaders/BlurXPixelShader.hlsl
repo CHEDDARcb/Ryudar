@@ -1,4 +1,4 @@
-// 입력 텍스처에 가로 방향 가우시안 블러를 적용한다.
+// 入力Textureへ水平方向のGaussian Blurを適用する。
 Texture2D g_texture0 : register(t0);
 SamplerState g_sampler : register(s0);
 
@@ -20,7 +20,7 @@ struct SamplingPixelShaderInput
 
 float4 main(SamplingPixelShaderInput input) : SV_TARGET
 {
-    // 가로 방향으로 5탭 가우시안 블러를 적용한다.
+    // 水平方向へ5-Tap Gaussian Blurを適用する。
     float3 color = float3(0.0f, 0.0f, 0.0f);
     
     int i;

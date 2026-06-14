@@ -34,8 +34,8 @@ cbuffer ShadingConstantBuffer : register(b1)
     float2 environmentPadding;
 };
 
-// Real-Time Rendering 4판의 Schlick 근사식을 사용한다.
-// fresnelR0는 표면을 정면에서 볼 때의 재질 고유 반사율이다.
+// 「Real-Time Rendering 第4版」のSchlick近似を使用する。
+// fresnelR0はSurfaceを正面から見た場合のMaterial固有反射率。
 float3 SchlickFresnel(float3 fresnelR0, float3 normal, float3 toEye)
 {
     // http://psgraphics.blogspot.com/2020/03/fresnel-equations-schlick-approximation.html
@@ -43,7 +43,7 @@ float3 SchlickFresnel(float3 fresnelR0, float3 normal, float3 toEye)
     float normalDotView = saturate(dot(normal, toEye));
     float f0 = 1.0f - normalDotView;
 
-    // 시선이 표면에 평행해질수록 반사율이 1에 가까워진다.
+    // 視線がSurfaceと平行に近づくほど反射率は1へ近づく。
     return fresnelR0 + (1.0f - fresnelR0) * pow(f0, 5.0);
 }
 
@@ -58,7 +58,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
     // https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-for
     // https://forum.unity.com/threads/what-are-unroll-and-loop-when-to-use-them.1283096/
     
-    [unroll] // 고정된 소수의 광원을 반복하므로 루프를 펼친다.
+    [unroll] // 固定された少数のLightを処理するためLoopを展開する。
     for (i = 0; i < NUM_DIR_LIGHTS; ++i)
     {
         color += ComputeDirectionalLight(lights[i], material, normal, toEye, shadingModel);
@@ -76,7 +76,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
         color += ComputeSpotLight(lights[i], material, input.posWorld, normal, toEye, shadingModel);
     }
     
-    // IBL을 사용하면 직접광 대신 큐브맵에서 디퓨즈와 스페큘러를 얻는다.
+    // IBL使用時はDirect Lightの代わりにCubemapからDiffuseとSpecularを取得する。
     if (useIBL)
     {
         if (useEnvironmentReflection)
@@ -106,13 +106,13 @@ float4 main(PixelShaderInput input) : SV_TARGET
             return diffuse + specular;
         }
     }
-    else // 직접광 사용
+    else // Direct Lightを使用
     {
         if (useRimLight)
         {
-            // 시선과 노멀이 수직에 가까운 가장자리일수록 림 값을 크게 만든다.
+            // 視線とNormalが垂直に近い輪郭ほどRim値を大きくする。
             float rim = saturate(1.0f - dot(toEye, normal));
-            // 지수로 림 라이트가 퍼지는 범위를 조절한다.
+            // 指数でRim Lightの広がりを調整する。
             if (useSmoothstep)
             {
                 rim = smoothstep(0.0f, 1.0f, rim);

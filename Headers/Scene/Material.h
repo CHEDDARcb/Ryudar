@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 기본 조명과 IBL 셰이딩에 사용하는 재질 데이터 구조체.
-// HLSL 재질 구조체와 레이아웃이 맞도록 float3 뒤에 패딩 필드를 둔다.
+// Direct LightとIBL Shadingで使用するMaterialデータ構造体。
+// HLSL側のMaterial構造体とLayoutを合わせるため、float3の後にPaddingを配置する。
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -15,7 +15,7 @@ namespace Ryudar
 using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
 
-// 재질
+// Material
 struct Material
 {
 	Vector3 ambient = Vector3(0.0f);                 // 12
@@ -24,7 +24,7 @@ struct Material
 	float padding0 = 0.0f;                           // 4
 	Vector3 specular = Vector3(0.5f);                // 12
 	float padding1 = 0.0f;                           // 4
-	Vector3 fresnelR0 = Vector3(1.0f, 0.71f, 0.29f); // 금의 기본 반사율
+	Vector3 fresnelR0 = Vector3(1.0f, 0.71f, 0.29f); // 金の基本反射率
 	float padding2 = 0.0f;
 }; // 64byte
 } // namespace Ryudar

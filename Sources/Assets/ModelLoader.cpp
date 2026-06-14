@@ -24,7 +24,7 @@ std::vector<MeshData> ModelLoader::Load(const std::string &basePath,
 	}
 	else
 	{
-		// 루트 노드에는 부모 변환이 없으므로 단위 행렬에서 순회를 시작한다.
+		// Root Nodeには親Transformがないため、Identity Matrixから走査を開始する。
 		Matrix parentTransform;
 		ProcessNode(pScene->mRootNode, pScene, parentTransform);
 	}
@@ -34,7 +34,7 @@ std::vector<MeshData> ModelLoader::Load(const std::string &basePath,
 
 void ModelLoader::ProcessNode(aiNode *node, const aiScene *scene, Matrix parentTransform)
 {
-	// Assimp의 노드 변환을 DirectX 행렬로 옮기고 부모 변환을 누적한다.
+	// AssimpのNode TransformをDirectX Matrixへ変換し、親Transformを累積する。
 	Matrix nodeTransform;
 	ai_real *temp = &node->mTransformation.a1;
 	float *matrixElements = &nodeTransform._11;
@@ -73,7 +73,7 @@ MeshData ModelLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 	std::vector<Vertex> &vertices = newMesh.vertices;
 	std::vector<uint32_t> &indices = newMesh.indices;
 
-	// Assimp 정점 속성을 프로젝트의 공통 Vertex 형식으로 변환한다.
+	// Assimpの頂点属性をプロジェクト共通のVertex形式へ変換する。
 	for (UINT i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
@@ -103,7 +103,7 @@ MeshData ModelLoader::ProcessMesh(aiMesh *mesh, const aiScene *scene)
 			indices.push_back(face.mIndices[j]);
 	}
 
-	// 첫 번째 디퓨즈 텍스처 파일을 메시의 재질 텍스처로 사용한다.
+	// 最初のDiffuse TextureをMeshのMaterial Textureとして使用する。
 	// http://assimp.sourceforge.net/lib_html/materials.html
 	if (mesh->mMaterialIndex >= 0)
 	{

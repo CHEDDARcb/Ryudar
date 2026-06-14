@@ -38,7 +38,7 @@ void ImageFilter::Initialize(ID3D11Device *device, FilterType type, int width, i
 
 	D3D11Utils::CreatePixelShader(device, GetPixelShaderFilename(type), m_pixelShader);
 
-	// 화면 가장자리 샘플이 반대편으로 순환하지 않도록 좌표를 고정한다.
+	// 画面端のSampleが反対側へWrapしないようTexture座標をClampする。
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -52,7 +52,7 @@ void ImageFilter::Initialize(ID3D11Device *device, FilterType type, int width, i
 	ThrowIfFailed(device->CreateSamplerState(&sampDesc, m_samplerState.GetAddressOf()),
 	              "Create image filter sampler state");
 
-	// 후처리 사각형은 화면 전체에 그리므로 컬링하지 않는다.
+	// Post Process Quadは画面全体へ描画するためCullingしない。
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(D3D11_RASTERIZER_DESC));
 	rastDesc.FillMode = D3D11_FILL_SOLID;
@@ -63,7 +63,7 @@ void ImageFilter::Initialize(ID3D11Device *device, FilterType type, int width, i
 	ThrowIfFailed(device->CreateRasterizerState(&rastDesc, m_rasterizerState.GetAddressOf()),
 	              "Create image filter rasterizer state");
 
-	// 이 필터의 출력 텍스처 크기에 맞춰 뷰포트를 고정한다.
+	// このFilterの出力Textureサイズに合わせてViewportを固定する。
 	ZeroMemory(&m_viewport, sizeof(D3D11_VIEWPORT));
 	m_viewport.TopLeftX = 0;
 	m_viewport.TopLeftY = 0;
@@ -91,7 +91,7 @@ void ImageFilter::Initialize(ID3D11Device *device, FilterType type, int width, i
 	viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	viewDesc.Texture2D.MipSlice = 0;
 
-	// 같은 텍스처를 현재 패스의 RTV와 다음 패스의 SRV로 사용한다.
+	// 同じTextureを現在PassのRTVと次PassのSRVとして使用する。
 	ThrowIfFailed(device->CreateTexture2D(&txtDesc, nullptr, texture.GetAddressOf()),
 	              "Create image filter texture");
 	ThrowIfFailed(device->CreateRenderTargetView(texture.Get(), &viewDesc,
@@ -101,13 +101,13 @@ void ImageFilter::Initialize(ID3D11Device *device, FilterType type, int width, i
 	    device->CreateShaderResourceView(texture.Get(), nullptr, m_shaderResourceView.GetAddressOf()),
 	    "Create image filter shader resource view");
 
-	// 블러 셰이더가 주변 픽셀을 찾을 때 사용할 한 텍셀의 크기다.
+	// Blur Shaderが周辺Pixelを参照するための1 Texelサイズ。
 	m_pixelConstData.texelWidth = 1.0f / width;
 	m_pixelConstData.texelHeight = 1.0f / height;
 
 	D3D11Utils::CreateConstantBuffer(device, m_pixelConstData, m_mesh.pixelConstantBuffer);
 
-	// 합성 패스만 BuildFilters()에서 출력 대상을 백 버퍼로 교체한다.
+	// Combine PassのみBuildFilters()で出力先をBack Bufferへ変更する。
 	SetRenderTargets({m_renderTargetView.Get()});
 }
 

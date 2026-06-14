@@ -1,6 +1,6 @@
 ﻿#pragma once
-// GPU 렌더링에 필요한 정점/인덱스 버퍼, 상수 버퍼, 텍스처 뷰를 묶는 구조체.
-// 실제 렌더링 소유자는 ClassicLit::MeshGroup이나 ImageFilter가 담당한다.
+// GPUレンダリングに必要なVertex/Index Buffer、Constant Buffer、Texture Viewをまとめる。
+// 実際の所有者はClassicLit::MeshGroupまたはImageFilterとなる。
 
 #include <d3d11.h>
 #include <windows.h>
@@ -12,16 +12,16 @@ using Microsoft::WRL::ComPtr;
 
 struct Mesh
 {
-	// 지오메트리 버퍼
+	// Geometry Buffer
 	ComPtr<ID3D11Buffer> vertexBuffer;
 	ComPtr<ID3D11Buffer> indexBuffer;
 	UINT m_indexCount = 0;
 
-	// 소유한 메시 그룹이나 필터가 공유하는 셰이더 상수 버퍼.
+	// 所有元のMeshGroupまたはFilterが共有するShader Constant Buffer。
 	ComPtr<ID3D11Buffer> vertexConstantBuffer;
 	ComPtr<ID3D11Buffer> pixelConstantBuffer;
 
-	// 선택적으로 사용하는 재질 텍스처.
+	// 必要に応じて使用するMaterial Texture。
 	ComPtr<ID3D11Texture2D> texture;
 	ComPtr<ID3D11ShaderResourceView> textureResourceView;
 };

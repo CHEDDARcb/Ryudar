@@ -20,7 +20,7 @@ MeshData GeometryGenerator::MakeSquare(const float scale)
 	    {Vector3(-1.0f, -1.0f, 0.0f) * scale, normal, Vector2(0.0f, 1.0f)},
 	};
 	meshData.indices = {
-	    0, 1, 2, 0, 2, 3, // 앞면
+	    0, 1, 2, 0, 2, 3, // 前面
 	};
 
 	return meshData;
@@ -40,32 +40,32 @@ MeshData GeometryGenerator::MakeBox(const float scale)
 		meshData.vertices.push_back({p3 * scale, normal, Vector2(0.0f, 1.0f)});
 	};
 
-	// 윗면
+	// 上面
 	AddFace(Vector3(-1.0f, 1.0f, -1.0f), Vector3(-1.0f, 1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f),
 	        Vector3(1.0f, 1.0f, -1.0f), Vector3(0.0f, 1.0f, 0.0f));
-	// 아랫면
+	// 下面
 	AddFace(Vector3(-1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, -1.0f, 1.0f),
 	        Vector3(-1.0f, -1.0f, 1.0f), Vector3(0.0f, -1.0f, 0.0f));
-	// 앞면
+	// 前面
 	AddFace(Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
 	        Vector3(1.0f, -1.0f, -1.0f), Vector3(0.0f, 0.0f, -1.0f));
-	// 뒷면
+	// 背面
 	AddFace(Vector3(-1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, 1.0f), Vector3(1.0f, 1.0f, 1.0f),
 	        Vector3(-1.0f, 1.0f, 1.0f), Vector3(0.0f, 0.0f, 1.0f));
-	// 왼쪽
+	// 左面
 	AddFace(Vector3(-1.0f, -1.0f, 1.0f), Vector3(-1.0f, 1.0f, 1.0f), Vector3(-1.0f, 1.0f, -1.0f),
 	        Vector3(-1.0f, -1.0f, -1.0f), Vector3(-1.0f, 0.0f, 0.0f));
-	// 오른쪽
+	// 右面
 	AddFace(Vector3(1.0f, -1.0f, 1.0f), Vector3(1.0f, -1.0f, -1.0f), Vector3(1.0f, 1.0f, -1.0f),
 	        Vector3(1.0f, 1.0f, 1.0f), Vector3(1.0f, 0.0f, 0.0f));
 
 	meshData.indices = {
-	    0,  1,  2,  0,  2,  3,  // 윗면
-	    4,  5,  6,  4,  6,  7,  // 아랫면
-	    8,  9,  10, 8,  10, 11, // 앞면
-	    12, 13, 14, 12, 14, 15, // 뒷면
-	    16, 17, 18, 16, 18, 19, // 왼쪽
-	    20, 21, 22, 20, 22, 23  // 오른쪽
+	    0,  1,  2,  0,  2,  3,  // 上面
+	    4,  5,  6,  4,  6,  7,  // 下面
+	    8,  9,  10, 8,  10, 11, // 前面
+	    12, 13, 14, 12, 14, 15, // 背面
+	    16, 17, 18, 16, 18, 19, // 左面
+	    20, 21, 22, 20, 22, 23  // 右面
 	};
 
 	return meshData;
@@ -74,7 +74,7 @@ MeshData GeometryGenerator::MakeBox(const float scale)
 MeshData GeometryGenerator::MakeGrid(const float width, const float height, const int numSlices,
                                      const int numStacks)
 {
-	// x-y 평면을 행과 열로 나누고 각 칸을 두 개의 삼각형으로 구성한다.
+	// x-y平面を行と列に分割し、各Cellを二つのTriangleで構成する。
 
 	const float dx = width / numSlices;
 	const float dy = height / numStacks;
@@ -89,16 +89,16 @@ MeshData GeometryGenerator::MakeGrid(const float width, const float height, cons
 	Vector3 leftBottom = Vector3(-0.5f * width, -0.5f * height, 0.0f);
 	for (int j = 0; j <= numStacks; j++)
 	{
-		// x-y평면에서 시작점을 y방향을 이동
+		// x-y平面上の開始点をy方向へ移動する。
 		Vector3 stackStartPoint =
 		    Vector3::Transform(leftBottom, Matrix::CreateTranslation(0.0f, dy * j, 0.0f));
 		for (int i = 0; i <= numSlices; i++)
 		{
 			Vertex v;
-			// x-y평면에서 시작점을 x 방향을 이동
+			// 各行の開始点をx方向へ移動する。
 			v.position =
 			    Vector3::Transform(stackStartPoint, Matrix::CreateTranslation(dx * i, 0.0f, 0.0f));
-			v.normal = Vector3(0.0f, 0.0f, -1.0f); // 시점을 향하는 방향
+			v.normal = Vector3(0.0f, 0.0f, -1.0f); // 視点方向を向くNormal
 			v.texcoord = Vector2(1.0f / numSlices * i, 1.0f - (1.0f / numStacks) * j);
 
 			vertices.push_back(v);
@@ -125,7 +125,7 @@ MeshData GeometryGenerator::MakeGrid(const float width, const float height, cons
 MeshData GeometryGenerator::MakeCylinder(const float bottomRadius, const float topRadius,
                                          float height, int sliceCount)
 {
-	// 텍스처 좌표의 이음매를 닫기 위해 시작 정점을 끝에 한 번 더 만든다.
+	// Texture座標のSeamを閉じるため、開始頂点を末尾にもう一度生成する。
 
 	const float dTheta = -XM_2PI / float(sliceCount);
 
@@ -134,14 +134,14 @@ MeshData GeometryGenerator::MakeCylinder(const float bottomRadius, const float t
 	meshData.indices.reserve(sliceCount * 6);
 
 	vector<Vertex> &vertices = meshData.vertices;
-	// 아래쪽과 위쪽 정점 고리를 각각 만든다.
+	// 下側と上側の頂点Ringをそれぞれ生成する。
 	for (int i = 0; i <= sliceCount; i++)
 	{
 		Vertex v;
 
 		v.position = Vector3::Transform(Vector3(bottomRadius, -0.5f * height, 0.0f),
 		                                Matrix::CreateRotationY(dTheta * float(i)));
-		// 원의 중심에서 정점으로 향하는 방향을 옆면 노멀로 사용한다.
+		// 円の中心から頂点へ向かう方向を側面Normalとして使用する。
 		v.normal = v.position - Vector3(0.0f, -0.5f * height, 0.0f);
 		v.normal.Normalize();
 		v.texcoord = Vector2(0.0f + 1.0f / sliceCount * float(i), 1.0f);
@@ -178,9 +178,9 @@ MeshData GeometryGenerator::MakeCylinder(const float bottomRadius, const float t
 
 MeshData GeometryGenerator::MakeSphere(const float radius, const int numSlices, const int numStacks)
 {
-	// 위도와 경도 방향으로 정점을 생성한다.
+	// 緯度・経度方向に頂点を生成する。
 	// http://www.songho.ca/opengl/gl_sphere.html
-	// 텍스처 좌표의 이음매를 닫기 위해 각 스택의 시작 정점을 끝에 한 번 더 만든다.
+	// Texture座標のSeamを閉じるため、各Stackの開始頂点を末尾にもう一度生成する。
 
 	const float dTheta = -XM_2PI / float(numSlices);
 	const float dPhi = -XM_PI / float(numStacks);
@@ -192,17 +192,17 @@ MeshData GeometryGenerator::MakeSphere(const float radius, const int numSlices, 
 	vector<Vertex> &vertices = meshData.vertices;
 	for (int j = 0; j <= numStacks; j++)
 	{
-		// 스택에 쌓일 수록 시작점을 x-y 평면에서 회전 시켜서 위로 올리는 구조
+		// Stackごとに開始点をx-y平面で回転させ、緯度方向へ移動する。
 		Vector3 stackStartPoint =
 		    Vector3::Transform(Vector3(0.0f, -radius, 0.0f), Matrix::CreateRotationZ(dPhi * j));
 		for (int i = 0; i <= numSlices; i++)
 		{
 			Vertex v;
 
-			// 시작점을 x-z 평면에서 회전시키면서 원을 만드는 구조
+			// 開始点をx-z平面で回転させ、経度方向の円を生成する。
 			v.position =
 			    Vector3::Transform(stackStartPoint, Matrix::CreateRotationY(dTheta * float(i)));
-			v.normal = v.position; // 원점이 구의 중심(0, 0, 0).
+			v.normal = v.position; // Sphereの中心は原点(0, 0, 0)。
 			v.normal.Normalize();
 			v.texcoord = Vector2(float(i) / numSlices, 1.0f - float(j) / numStacks);
 
@@ -232,7 +232,7 @@ MeshData GeometryGenerator::MakeSphere(const float radius, const int numSlices, 
 
 MeshData GeometryGenerator::MakeIcosahedron()
 {
-	// 정이십면체의 정점과 삼각형 인덱스를 직접 구성한다.
+	// 正二十面体の頂点とTriangle Indexを直接構成する。
 	// https://mathworld.wolfram.com/Isohedron.html
 
 	const float X = 0.525731f;
@@ -265,7 +265,7 @@ MeshData GeometryGenerator::MakeIcosahedron()
 MeshData GeometryGenerator::MakeTetrahedron()
 {
 
-	// 정사면체를 원점 중심으로 이동해 생성한다.
+	// 正四面体を原点中心へ移動して生成する。
 	// https://mathworld.wolfram.com/RegularTetrahedron.html
 
 	const float a = 1.0f;
@@ -296,7 +296,7 @@ MeshData GeometryGenerator::MakeTetrahedron()
 
 		Vertex v;
 		v.position = points[i];
-		v.normal = v.position; // 중심이 원점
+		v.normal = v.position; // 中心は原点
 		v.normal.Normalize();
 
 		meshData.vertices.push_back(v);
@@ -315,7 +315,7 @@ MeshData GeometryGenerator::SubdivideToSphere(const float radius, const MeshData
 		v.normal.Normalize();
 		v.position = v.normal * radius;
 
-		// 구면 좌표를 UV로 변환하므로 경도 이음매에서 보정이 필요할 수 있다.
+		// 球面座標をUVへ変換するため、経度Seamで補正が必要になる場合がある。
 		// https://stackoverflow.com/questions/283406/what-is-the-difference-between-atan-and-atan2-in-c
 		const float theta = atan2f(v.position.z, v.position.x);
 		const float phi = acosf(v.position.y / radius);
@@ -325,7 +325,7 @@ MeshData GeometryGenerator::SubdivideToSphere(const float radius, const MeshData
 
 	auto UpdateFaceNormal = [](Vertex &v0, Vertex &v1, Vertex &v2)
 	{
-		// 삼각형 세 정점에 동일한 면 노멀을 적용한다.
+		// Triangleの三頂点へ同じFace Normalを適用する。
 		auto faceNormal = (v1.position - v0.position).Cross(v2.position - v0.position);
 		faceNormal.Normalize();
 		v0.normal = faceNormal;
@@ -333,7 +333,7 @@ MeshData GeometryGenerator::SubdivideToSphere(const float radius, const MeshData
 		v2.normal = faceNormal;
 	};
 
-	// 버텍스가 중복되는 구조로 구현
+	// 頂点を共有せず、Triangleごとに複製する構造。
 	MeshData newMesh;
 	uint16_t count = 0;
 	for (size_t i = 0; i < meshData.indices.size(); i += 3)
@@ -351,24 +351,24 @@ MeshData GeometryGenerator::SubdivideToSphere(const float radius, const MeshData
 		ProjectVertex(v2);
 
 		Vertex v3;
-		// 위치와 텍스처 좌표 결정
+		// 位置とTexture座標を計算する。
 		v3.position = (v0.position + v2.position) * 0.5f;
 		v3.texcoord = (v0.texcoord + v2.texcoord) * 0.5f;
 		ProjectVertex(v3);
 
 		Vertex v4;
-		// 위치와 텍스처 좌표 결정
+		// 位置とTexture座標を計算する。
 		v4.position = (v0.position + v1.position) * 0.5f;
 		v4.texcoord = (v0.texcoord + v1.texcoord) * 0.5f;
 		ProjectVertex(v4);
 
 		Vertex v5;
-		// 위치와 텍스처 좌표 결정
+		// 位置とTexture座標を計算する。
 		v5.position = (v1.position + v2.position) * 0.5f;
 		v5.texcoord = (v1.texcoord + v2.texcoord) * 0.5f;
 		ProjectVertex(v5);
 
-		// 세분화한 네 개의 삼각형을 새 메시로 추가한다.
+		// 細分化した四つのTriangleを新しいMeshへ追加する。
 		newMesh.vertices.push_back(v4);
 		newMesh.vertices.push_back(v1);
 		newMesh.vertices.push_back(v5);
@@ -404,7 +404,7 @@ vector<MeshData> GeometryGenerator::ReadFromFile(const std::string &basePath,
 	ModelLoader modelLoader;
 	vector<MeshData> meshes = modelLoader.Load(basePath, filename);
 
-	// 모델 전체가 원점 기준 단위 크기에 들어오도록 정점 위치를 정규화한다.
+	// Model全体が原点基準の単位サイズに収まるよう頂点位置を正規化する。
 	Vector3 minBounds(1000, 1000, 1000);
 	Vector3 maxBounds(-1000, -1000, -1000);
 	for (auto &mesh : meshes)

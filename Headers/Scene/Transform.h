@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-// 씬 객체의 이동, 회전, 크기를 저장하고 모델 행렬로 변환한다.
-// 회전값은 라디안 단위이며 Y, X, Z 순서로 적용한다.
+// Scene Objectの移動、回転、Scaleを保持し、Model Matrixへ変換する。
+// 回転値はRadian単位で、Y、X、Zの順に適用する。
 
 #include <directxtk/SimpleMath.h>
 

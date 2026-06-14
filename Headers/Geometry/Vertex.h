@@ -1,6 +1,6 @@
 ﻿#pragma once
-// 렌더링 파이프라인에서 사용하는 기본 정점 형식.
-// 모델 위치, 노멀, 텍스처 좌표를 CPU/GPU 양쪽에서 동일한 순서로 사용한다.
+// Rendering Pipelineで使用する基本頂点形式。
+// Model位置、Normal、Texture座標をCPU/GPU双方で同じ順序に保つ。
 
 #include <directxtk/SimpleMath.h>
 #include <vector>
