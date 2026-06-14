@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{48F7F438-31C7-4D7F-9B8E-0C4B34C48E10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Application">
+      <UniqueIdentifier>{D332FDEE-8D3D-4FD2-B791-248EDBD6DDE3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Graphics">
+      <UniqueIdentifier>{1FE36C3E-556D-4663-BFCD-EDE92A2B3160}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Rendering">
+      <UniqueIdentifier>{0163A792-F99A-4B27-A643-6F6CB121EF9C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Rendering\ClassicLit">
+      <UniqueIdentifier>{290999D4-4D18-4FBE-9FDB-B6E1670281B3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Geometry">
+      <UniqueIdentifier>{463BD089-E646-45E9-AFB9-27C7A75C5909}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Assets">
+      <UniqueIdentifier>{E420BD2E-1583-42F1-A735-4222CD2C300C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Application">
+      <UniqueIdentifier>{015C57D8-1E95-4B01-8CED-BB612A3D685D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Graphics">
+      <UniqueIdentifier>{8747DFCA-15BD-4C2B-8B18-D4874F4C4FFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Rendering">
+      <UniqueIdentifier>{C9DA065F-F2CC-4DE5-98D9-462536A8A832}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Rendering\ClassicLit">
+      <UniqueIdentifier>{4464EE0C-A70B-4FE7-8879-99C929061FAC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Geometry">
+      <UniqueIdentifier>{CB3DA262-15E9-447C-B805-E5BCBE5C4787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Assets">
+      <UniqueIdentifier>{87BB03B1-70C1-46D3-B56B-EBD2BFB04CB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers\Scene">
+      <UniqueIdentifier>{59D9C5BF-0A6C-449D-B8AC-92CA404DE060}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\Application\AppBase.cpp">
+      <Filter>Sources\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Application\Ryudar.cpp">
+      <Filter>Sources\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Application\main.cpp">
+      <Filter>Sources\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Geometry\GeometryGenerator.cpp">
+      <Filter>Sources\Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Assets\ModelLoader.cpp">
+      <Filter>Sources\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Graphics\D3D11Utils.cpp">
+      <Filter>Sources\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Rendering\ClassicLit\ClassicLitMeshGroup.cpp">
+      <Filter>Sources\Rendering\ClassicLit</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Rendering\CubeMapping.cpp">
+      <Filter>Sources\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Rendering\Camera.cpp">
+      <Filter>Sources\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Rendering\ImageFilter.cpp">
+      <Filter>Sources\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Graphics\D3D11Exception.cpp">
+      <Filter>Sources\Graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Headers\Application\AppBase.h">
+      <Filter>Headers\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Application\Ryudar.h">
+      <Filter>Headers\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Geometry\GeometryGenerator.h">
+      <Filter>Headers\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Geometry\Mesh.h">
+      <Filter>Headers\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\Material.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Geometry\Vertex.h">
+      <Filter>Headers\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Geometry\MeshData.h">
+      <Filter>Headers\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Assets\ModelLoader.h">
+      <Filter>Headers\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Rendering\CubeMapping.h">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Graphics\D3D11Utils.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Rendering\ClassicLit\ClassicLitConstantData.h">
+      <Filter>Headers\Rendering\ClassicLit</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\Light.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Rendering\ClassicLit\ClassicLitMeshGroup.h">
+      <Filter>Headers\Rendering\ClassicLit</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Rendering\ClassicLit\ClassicLitRenderSettings.h">
+      <Filter>Headers\Rendering\ClassicLit</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Rendering\ImageFilter.h">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Rendering\Camera.h">
+      <Filter>Headers\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\SceneObject.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\Transform.h">
+      <Filter>Headers\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Graphics\D3D11Exception.h">
+      <Filter>Headers\Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\ClassicLitPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ClassicLitVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\NormalVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMappingPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CubeMappingVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BlurXPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\BlurYPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\CombinePixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SamplingPixelShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SamplingVertexShader.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
+    <None Include="Shaders\Common.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="stanford_dragon.stl">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\crate2_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\Textures\wall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Assets\Textures\ojwD8.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
