@@ -1,72 +1,78 @@
-# Ryudar
+# Ryudar 2.0
 
-DirectX 11とC++17で実装した、リアルタイム3Dレンダリングのポートフォリオプロジェクトです。
+Ryudar 2.0 は、既存の Ryudar 1.0 をベースに、よりゲームエンジンらしい構造へリファクタリングするための開発ブランチです。
 
-既存のゲームエンジンには依存せず、Win32ウィンドウ、Direct3D 11の初期化、
-GPUリソース管理、HLSLシェーダー、ライティング、モデル読み込み、
-ポストプロセスまでを実装しています。
+Ryudar 1.0 では、DirectX 11 を用いたリアルタイム 3D レンダリング、Lighting、Material、Cubemap、IBL、Bloom、ImGui による操作 UI などを 1 つのレンダリングアプリケーションとして実装しました。
 
-## 主な機能
+Ryudar 2.0 では、その実装を維持しながら、アプリケーション固有の処理とエンジン基盤を分離し、今後の拡張に耐えられる構造へ整理していきます。
 
-- Phong / Blinn-Phongシェーディング
-- Directional / Point / Spot Light
-- Image Based LightingとEnvironment Reflection
-- Cubemapを利用したSkybox
-- Fresnel反射とRim Light
-- FBXモデル読み込み
-- Texture / Wireframe / Normal可視化
-- First-Person Camera
-- 多段DownsampleとSeparable BlurによるBloom
-- ImGuiによるリアルタイムパラメーター編集
-- ウィンドウリサイズ時のGPUリソース再生成
+## 目的
 
-## 実行方法
+Ryudar 2.0 の目的は、Ryudar 1.0 の機能を単なるデモアプリケーションとしてではなく、再利用可能なゲームエンジン風アーキテクチャへ移行することです。
 
-ビルド環境を用意せずに実行できるRelease版を同梱しています。
+主な方針は以下です。
 
-1. [`Ryudar_Portfolio_Submission`](./Ryudar_Portfolio_Submission)を開きます。
-2. `Run_Ryudar.bat`を実行します。
+- Application と Engine の責務を分離する
+- Scene、Object、Component、Renderer の関係を整理する
+- Rendering pipeline をより明確な単位へ分割する
+- Material、Mesh、Texture、Shader などの resource 管理を整理する
+- Post Process を独立した pipeline として扱いやすくする
+- GUI 操作と engine runtime state の境界を明確にする
+- 将来的な scene 拡張、複数 object 管理、renderer 差し替えに備える
 
-Visual Studio、vcpkg、追加ライブラリのインストールは不要です。
-必要なDLL、Shader、Asset、Visual C++ Runtimeは実行版に同梱しています。
+## ベースライン
 
-## 操作
+Ryudar 1.0 の基準点は Git tag として保存しています。
 
-- `W` / `S`: 前進 / 後退（First-Person Camera有効時）
-- `A` / `D`: 左移動 / 右移動（First-Person Camera有効時）
-- マウス移動: カメラ方向変更（First-Person Camera有効時）
-- `ESC`: 終了
-- `Scene Control`: モデル、ライト、マテリアル、Bloomなどの設定
+```text
+ryudar-v1.0
+```
 
-## プロジェクト構成
+Ryudar 1.0 の状態を確認したい場合は、以下で参照できます。
 
-- `Sources`: C++実装
-- `Headers`: ヘッダーとデータ構造
-- `Shaders`: HLSLシェーダー
-- `Assets`: Texture、Cubemap、FBXモデル
-- `Ryudar_Portfolio_Submission`: 実行版、提出用ソース、ライセンス
+```bash
+git switch --detach ryudar-v1.0
+```
 
-詳細な機能、設計、レンダリングフローについては、
-提出用の[README](./Ryudar_Portfolio_Submission/README.md)をご確認ください。
+再び Ryudar 2.0 の開発ブランチへ戻る場合は以下を使用します。
 
-## 使用技術
+```bash
+git switch ryudar-2.0-engine-refactor
+```
 
-- C++17
-- Win32 API
-- DirectX 11 / DXGI
-- HLSL Shader Model 5.0
-- DirectXTK / DirectXMath
-- Dear ImGui
-- Assimp
-- stb_image
-- vcpkg
+## 開発ブランチ
 
-## ソースコードの確認
+Ryudar 2.0 のリファクタリング作業は、以下のブランチで進めます。
 
-主な実装:
+```text
+ryudar-2.0-engine-refactor
+```
 
-- [`Sources/Application/Ryudar.cpp`](./Sources/Application/Ryudar.cpp): シーンと描画フロー
-- [`Sources/Application/AppBase.cpp`](./Sources/Application/AppBase.cpp): Win32 / D3D11基盤
-- [`Sources/Rendering/ClassicLit`](./Sources/Rendering/ClassicLit): Mesh描画とShading
-- [`Sources/Rendering/ImageFilter.cpp`](./Sources/Rendering/ImageFilter.cpp): Bloom Pass
-- [`Shaders/ClassicLitPixelShader.hlsl`](./Shaders/ClassicLitPixelShader.hlsl): Light、IBL、Fresnel
+このブランチは `main` から分岐しています。
+
+## リファクタリング予定
+
+現時点で想定している主な変更は以下です。
+
+- `AppBase` の役割を engine runtime と application layer に分ける
+- `Ryudar` に集中している scene 初期化、GUI、render flow を分割する
+- `SceneObject` をより拡張しやすい scene entity として整理する
+- `ClassicLit::MeshGroup` の責務を renderer、mesh resource、material state に分ける
+- `CubeMapping` を environment / skybox resource として扱いやすくする
+- `ImageFilter` と Bloom 構築処理を post-process pipeline として整理する
+- `D3D11Utils` の低レベル API helper と engine-level resource creation を分ける
+- ドキュメントを Ryudar 2.0 の構造に合わせて更新する
+
+## 現在の状態
+
+この README は Ryudar 2.0 リファクタリング開始時点の案内です。
+
+今後、実装の分割が進むにつれて、以下の内容を更新していきます。
+
+- 新しいフォルダー構成
+- Engine / Application の境界
+- Scene 管理方式
+- Rendering pipeline
+- Resource 管理方式
+- Build / Run 手順
+
