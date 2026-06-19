@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980">
+  <defs>
+    <style>
+      .title{font:700 30px Segoe UI,Arial,sans-serif;fill:#111827}
+      .class{rx:10;ry:10;fill:#fff;stroke:#1f2937;stroke-width:2}
+      .abstract{fill:#eff6ff}
+      .data{fill:#fefce8}
+      .render{fill:#ecfdf5}
+      .util{fill:#f5f3ff}
+      .name{font:700 17px Segoe UI,Arial,sans-serif;fill:#111827}
+      .member{font:13px Consolas,Menlo,monospace;fill:#111827}
+      .label{font:13px Segoe UI,Arial,sans-serif;fill:#374151}
+      .arrow{stroke:#374151;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .inherit{stroke:#111827;stroke-width:2;fill:none;marker-end:url(#tri)}
+      .dash{stroke-dasharray:7 5}
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#374151"/>
+    </marker>
+    <marker id="tri" viewBox="0 0 12 10" refX="10" refY="5" markerWidth="10" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" stroke="#111827" stroke-width="1.5"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="980" fill="#f8fafc"/>
+  <text x="45" y="55" class="title">Ryudar Main Class / Data Relationships</text>
+
+  <rect x="80" y="105" width="290" height="210" class="class abstract"/>
+  <text x="105" y="135" class="name">AppBase</text>
+  <text x="105" y="165" class="member">+ Initialize()</text>
+  <text x="105" y="188" class="member">+ Run()</text>
+  <text x="105" y="211" class="member">+ UpdateGUI() = 0</text>
+  <text x="105" y="234" class="member">+ Update(dt) = 0</text>
+  <text x="105" y="257" class="member">+ Render() = 0</text>
+  <text x="105" y="285" class="member"># Camera m_camera</text>
+
+  <rect x="475" y="105" width="330" height="250" class="class abstract"/>
+  <text x="500" y="135" class="name">Ryudar : AppBase</text>
+  <text x="500" y="165" class="member">- SceneObject m_sphere</text>
+  <text x="500" y="188" class="member">- SceneObject m_character</text>
+  <text x="500" y="211" class="member">- CubeMapping m_cubeMapping</text>
+  <text x="500" y="234" class="member">- vector&lt;unique_ptr&lt;ImageFilter&gt;&gt;</text>
+  <text x="500" y="257" class="member">- Light m_editableLight</text>
+  <text x="500" y="285" class="member">+ BuildFilters()</text>
+  <text x="500" y="308" class="member">+ GetSelectedObject()</text>
+  <text x="500" y="331" class="member">+ Draw*GUI()</text>
+
+  <rect x="910" y="105" width="250" height="155" class="class data"/>
+  <text x="935" y="135" class="name">Camera</text>
+  <text x="935" y="165" class="member">+ GetViewRow()</text>
+  <text x="935" y="188" class="member">+ GetProjRow()</text>
+  <text x="935" y="211" class="member">+ UpdateMouse()</text>
+  <text x="935" y="234" class="member">+ MoveForward/Right()</text>
+
+  <rect x="80" y="425" width="300" height="135" class="class data"/>
+  <text x="105" y="455" class="name">SceneObject</text>
+  <text x="105" y="485" class="member">ClassicLit::MeshGroup meshGroup</text>
+  <text x="105" y="508" class="member">Transform transform</text>
+
+  <rect x="475" y="425" width="345" height="255" class="class render"/>
+  <text x="500" y="455" class="name">ClassicLit::MeshGroup</text>
+  <text x="500" y="485" class="member">- vector&lt;Mesh&gt; m_meshes</text>
+  <text x="500" y="508" class="member">- RenderSettings m_renderSettings</text>
+  <text x="500" y="531" class="member">- Vertex/Lighting/Shading CB</text>
+  <text x="500" y="554" class="member">- Normal debug mesh/shaders</text>
+  <text x="500" y="582" class="member">+ Initialize(file | MeshData)</text>
+  <text x="500" y="605" class="member">+ SetTransformConstants()</text>
+  <text x="500" y="628" class="member">+ SetActiveLight()</text>
+  <text x="500" y="651" class="member">+ UpdateConstantBuffers()</text>
+
+  <rect x="900" y="425" width="290" height="185" class="class render"/>
+  <text x="925" y="455" class="name">CubeMapping</text>
+  <text x="925" y="485" class="member">+ m_diffuseIBLSRV</text>
+  <text x="925" y="508" class="member">+ m_specularIBLSRV</text>
+  <text x="925" y="536" class="member">- Mesh m_cubeMesh</text>
+  <text x="925" y="559" class="member">+ Initialize()</text>
+  <text x="925" y="582" class="member">+ UpdateConstantBuffers()</text>
+
+  <rect x="1220" y="425" width="230" height="185" class="class render"/>
+  <text x="1245" y="455" class="name">ImageFilter</text>
+  <text x="1245" y="485" class="member">- Mesh m_mesh</text>
+  <text x="1245" y="508" class="member">- SRV/RTV</text>
+  <text x="1245" y="531" class="member">- viewport</text>
+  <text x="1245" y="559" class="member">+ SetShaderResources()</text>
+  <text x="1245" y="582" class="member">+ Render()</text>
+
+  <rect x="80" y="740" width="255" height="145" class="class data"/>
+  <text x="105" y="770" class="name">Transform</text>
+  <text x="105" y="800" class="member">translation</text>
+  <text x="105" y="823" class="member">rotation</text>
+  <text x="105" y="846" class="member">scaling</text>
+  <text x="105" y="869" class="member">+ GetModelMatrix()</text>
+
+  <rect x="395" y="740" width="255" height="145" class="class data"/>
+  <text x="420" y="770" class="name">Mesh / MeshData / Vertex</text>
+  <text x="420" y="800" class="member">Vertex: pos normal uv</text>
+  <text x="420" y="823" class="member">MeshData: CPU arrays</text>
+  <text x="420" y="846" class="member">Mesh: GPU buffers/views</text>
+
+  <rect x="710" y="740" width="270" height="145" class="class data"/>
+  <text x="735" y="770" class="name">Material / Light</text>
+  <text x="735" y="800" class="member">Material: ambient/diffuse</text>
+  <text x="735" y="823" class="member">specular/fresnel/shininess</text>
+  <text x="735" y="846" class="member">Light: directional/point/spot</text>
+
+  <rect x="1040" y="740" width="260" height="145" class="class util"/>
+  <text x="1065" y="770" class="name">D3D11Utils</text>
+  <text x="1065" y="800" class="member">CreateVertexBuffer()</text>
+  <text x="1065" y="823" class="member">CreateConstantBuffer()</text>
+  <text x="1065" y="846" class="member">CreateTexture/Cubemap()</text>
+
+  <rect x="1185" y="105" width="260" height="155" class="class util"/>
+  <text x="1210" y="135" class="name">GeometryGenerator</text>
+  <text x="1210" y="165" class="member">MakeSphere/Box/Grid...</text>
+  <text x="1210" y="188" class="member">ReadFromFile()</text>
+  <text x="1210" y="211" class="member">uses ModelLoader</text>
+
+  <path d="M475 220 L370 220" class="inherit"/>
+  <text x="392" y="205" class="label">inherits</text>
+  <path d="M805 185 L910 185" class="arrow"/>
+  <text x="835" y="170" class="label">uses</text>
+  <path d="M640 355 L250 425" class="arrow"/>
+  <text x="340" y="385" class="label">owns 2 objects</text>
+  <path d="M380 488 L475 510" class="arrow"/>
+  <path d="M230 560 L210 740" class="arrow"/>
+  <path d="M640 355 L1035 425" class="arrow"/>
+  <path d="M735 355 L1335 425" class="arrow"/>
+  <text x="1125" y="390" class="label">owns bloom filter chain</text>
+  <path d="M820 512 L900 512" class="arrow"/>
+  <text x="826" y="496" class="label">IBL SRVs</text>
+  <path d="M650 680 L525 740" class="arrow"/>
+  <path d="M705 680 L845 740" class="arrow"/>
+  <path d="M1190 535 L1220 535" class="arrow"/>
+  <path d="M1320 260 L720 425" class="arrow dash"/>
+  <text x="1030" y="330" class="label">procedural/file mesh data</text>
+  <path d="M980 812 L1040 812" class="arrow"/>
+  <path d="M650 812 L710 812" class="arrow"/>
+</svg>

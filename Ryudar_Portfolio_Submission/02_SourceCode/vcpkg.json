@@ -1,0 +1,16 @@
+{
+  "name": "ryudar",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "assimp",
+    "directxtk",
+    {
+      "name": "imgui",
+      "features": [
+        "dx11-binding",
+        "win32-binding"
+      ]
+    },
+    "stb"
+  ]
+}
