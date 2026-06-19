@@ -1,0 +1,9 @@
+# portfolio-submission branch allowlist
+# Track only the branch README, the submission package, and this ignore file.
+
+*
+
+!.gitignore
+!README.md
+!Ryudar_Portfolio_Submission/
+!Ryudar_Portfolio_Submission/**
