@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <style>
+      .title{font:700 30px Segoe UI,Arial,sans-serif;fill:#111827}
+      .swim{rx:12;ry:12;fill:#fff;stroke:#cbd5e1;stroke-width:2}
+      .head{font:700 18px Segoe UI,Arial,sans-serif;fill:#111827}
+      .box{rx:10;ry:10;fill:#eff6ff;stroke:#1d4ed8;stroke-width:1.8}
+      .gpu{fill:#ecfdf5;stroke:#047857}
+      .post{fill:#fef3c7;stroke:#b45309}
+      .present{fill:#f5f3ff;stroke:#6d28d9}
+      .txt{font:14px Segoe UI,Arial,sans-serif;fill:#111827}
+      .code{font:13px Consolas,Menlo,monospace;fill:#111827}
+      .arrow{stroke:#334155;stroke-width:2;fill:none;marker-end:url(#arrow)}
+      .dash{stroke-dasharray:7 5}
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect width="1500" height="900" fill="#f8fafc"/>
+  <text x="45" y="55" class="title">Per-Frame Runtime Flow</text>
+
+  <rect x="55" y="95" width="310" height="735" class="swim"/>
+  <text x="80" y="130" class="head">AppBase::Run</text>
+  <rect x="85" y="165" width="250" height="65" class="box"/>
+  <text x="105" y="192" class="txt">Win32 message pump</text>
+  <text x="105" y="214" class="code">PeekMessage / Dispatch</text>
+  <rect x="85" y="275" width="250" height="65" class="box"/>
+  <text x="105" y="302" class="txt">Start ImGui frame</text>
+  <text x="105" y="324" class="code">NewFrame / Begin</text>
+  <rect x="85" y="385" width="250" height="65" class="box"/>
+  <text x="105" y="412" class="txt">Call virtual hooks</text>
+  <text x="105" y="434" class="code">UpdateGUI -> Update -> Render</text>
+  <rect x="85" y="725" width="250" height="65" class="present"/>
+  <text x="105" y="752" class="txt">Draw ImGui and Present</text>
+  <text x="105" y="774" class="code">RenderDrawData / Present</text>
+
+  <rect x="430" y="95" width="350" height="735" class="swim"/>
+  <text x="455" y="130" class="head">Ryudar::Update</text>
+  <rect x="465" y="165" width="280" height="70" class="box"/>
+  <text x="485" y="192" class="txt">Select object</text>
+  <text x="485" y="214" class="code">Sphere or Character</text>
+  <rect x="465" y="270" width="280" height="82" class="box"/>
+  <text x="485" y="297" class="txt">Update camera from input</text>
+  <text x="485" y="319" class="code">WASD + mouse if FPV</text>
+  <rect x="465" y="390" width="280" height="90" class="box"/>
+  <text x="485" y="417" class="txt">Build transform constants</text>
+  <text x="485" y="439" class="code">model, invTranspose</text>
+  <text x="485" y="461" class="code">view, projection, eye</text>
+  <rect x="465" y="520" width="280" height="82" class="box"/>
+  <text x="485" y="547" class="txt">Upload constant buffers</text>
+  <text x="485" y="569" class="code">MeshGroup + CubeMapping</text>
+  <rect x="465" y="640" width="280" height="82" class="post"/>
+  <text x="485" y="667" class="txt">Update bloom constants</text>
+  <text x="485" y="689" class="code">threshold / strength</text>
+
+  <rect x="845" y="95" width="580" height="735" class="swim"/>
+  <text x="870" y="130" class="head">Ryudar::Render and GPU Pipeline</text>
+  <rect x="890" y="165" width="485" height="70" class="gpu"/>
+  <text x="910" y="192" class="txt">Bind viewport, clear RTV and DSV</text>
+  <text x="910" y="214" class="code">OMSetRenderTargets / Clear*</text>
+  <rect x="890" y="270" width="485" height="70" class="gpu"/>
+  <text x="910" y="297" class="txt">Draw skybox</text>
+  <text x="910" y="319" class="code">CubeMapping::Render</text>
+  <rect x="890" y="375" width="485" height="82" class="gpu"/>
+  <text x="910" y="402" class="txt">Draw selected mesh group</text>
+  <text x="910" y="424" class="code">ClassicLitVertex/PixelShader</text>
+  <text x="910" y="446" class="code">optional Normal debug lines</text>
+  <rect x="890" y="500" width="485" height="70" class="post"/>
+  <text x="910" y="527" class="txt">Resolve MSAA back buffer for sampling</text>
+  <text x="910" y="549" class="code">ResolveSubresource -> m_postProcessInputSRV</text>
+  <rect x="890" y="610" width="485" height="92" class="post"/>
+  <text x="910" y="637" class="txt">Optional bloom chain</text>
+  <text x="910" y="659" class="code">downsample -> blur X/Y -> upsample</text>
+  <text x="910" y="681" class="code">combine original + bloom into back buffer</text>
+  <rect x="890" y="735" width="485" height="55" class="present"/>
+  <text x="910" y="769" class="txt">Swap chain presents final frame</text>
+
+  <path d="M210 230 L210 275" class="arrow"/>
+  <path d="M210 340 L210 385" class="arrow"/>
+  <path d="M335 418 L465 200" class="arrow"/>
+  <path d="M605 235 L605 270" class="arrow"/>
+  <path d="M605 352 L605 390" class="arrow"/>
+  <path d="M605 480 L605 520" class="arrow"/>
+  <path d="M605 602 L605 640" class="arrow"/>
+  <path d="M745 560 L890 200" class="arrow"/>
+  <path d="M1132 235 L1132 270" class="arrow"/>
+  <path d="M1132 340 L1132 375" class="arrow"/>
+  <path d="M1132 457 L1132 500" class="arrow"/>
+  <path d="M1132 570 L1132 610" class="arrow"/>
+  <path d="M1132 702 L1132 735" class="arrow"/>
+  <path d="M890 762 L335 758" class="arrow dash"/>
+  <text x="520" y="752" class="txt">then AppBase renders ImGui over the scene</text>
+</svg>
