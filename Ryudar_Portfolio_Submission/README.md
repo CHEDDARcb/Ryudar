@@ -7,6 +7,7 @@
 ソースコード一式を収録しています。
 
 ・Run_Ryudar.bat
+
   提出フォルダー直下の実行用ファイルです。
   詳細な実行方法は「9. 実行方法」をご確認ください。
 
@@ -38,6 +39,7 @@ Bloomなどをリアルタイムに変更し、レンダリング結果を比較
 3. 主な機能
 ------------
 ・Phong / Blinn-Phongシェーディングの切り替え
+
 ・Directional Light / Point Light / Spot Light
 ・Diffuse、Specular、Shininessなどのマテリアル調整
 ・Image Based Lighting（Diffuse IBL / Specular IBL）
