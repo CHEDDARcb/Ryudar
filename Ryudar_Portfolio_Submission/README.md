@@ -1,162 +1,158 @@
-﻿Ryudar - DirectX 11 リアルタイムレンダリングアプリケーション
-================================================
+# Ryudar
 
-1. 提出物の構成
----------------
-この提出フォルダーには、すぐに確認できる実行版と、実装内容を確認するための
-ソースコード一式を収録しています。
+DirectX 11 と C++17 で実装したリアルタイム 3D レンダリングアプリケーションです。  
+Win32 ウィンドウ生成、Direct3D 11 初期化、GPU リソース管理、HLSL シェーダー、ライティング、ポストプロセスまでを、既存ゲームエンジンに依存せず実装しています。
 
-・Run_Ryudar.bat
-  提出フォルダー直下の実行用ファイルです。
-  詳細な実行方法は「9. 実行方法」をご確認ください。
+ImGui の `Scene Control` パネルから、描画方式、ライト、マテリアル、モデル Transform、Bloom などをリアルタイムに変更できます。
 
-・01_Executable
-  Release x64でビルドした実行版です。
-  Ryudar.exe、実行用バッチファイル、必要なDLL、HLSL、Assetを収録しています。
+## 1. 提出物の構成
 
-・02_SourceCode
-  Visual Studioソリューション、C++ / HLSLソース、実行用Assetを収録しています。
-  BUILD.mdにはビルド手順、vcpkg.jsonには依存パッケージを記載しています。
+この提出フォルダーには、すぐに確認できる実行版と、実装内容を確認するためのソースコード一式を収録しています。
 
-・Docs
-  プロジェクト全体の構造説明を収録しています。
-  ArchitectureOverview.mdでは、フォルダー構成、主要クラスの役割、初期化フロー、
-  1フレームの描画フローを確認できます。
+| パス | 内容 |
+| --- | --- |
+| [`Run_Ryudar.bat`](./Run_Ryudar.bat) | 提出フォルダー直下の実行用バッチファイルです。 |
+| [`01_Executable`](./01_Executable) | Release x64 でビルドした実行版です。`Ryudar.exe`、必要な DLL、HLSL、Asset を収録しています。 |
+| [`02_SourceCode`](./02_SourceCode) | Visual Studio ソリューション、C++ / HLSL ソース、実行用 Asset を収録しています。 |
+| [`Docs`](./Docs) | プロジェクト全体の構造説明を収録しています。 |
+| [`ThirdPartyLicenses`](./ThirdPartyLicenses) | 使用したオープンソースライブラリのライセンス情報を収録しています。 |
 
-・ThirdPartyLicenses
-  使用したオープンソースライブラリのライセンス情報を収録しています。
+プロジェクト全体の設計を確認する場合は、先に [`Docs/ArchitectureOverview.md`](./Docs/ArchitectureOverview.md) を読むと、フォルダー構成、主要クラスの役割、初期化フロー、1 フレームの描画フローを把握できます。
 
-2. プロジェクト概要
--------------------
-Ryudarは、C++とDirectX 11を使用して実装したリアルタイム3Dレンダリングアプリケーションです。
-既存のゲームエンジンには依存せず、Win32ウィンドウの生成、Direct3D 11の初期化、
-GPUリソース管理、シェーダー、ライティング、ポストプロセスまでを実装しています。
+## 2. プロジェクト概要
 
-ImGuiの操作パネルから描画方式やライト、マテリアル、モデルのTransform、
-Bloomなどをリアルタイムに変更し、レンダリング結果を比較できます。
+Ryudar は、C++ と DirectX 11 を使用して実装したリアルタイム 3D レンダリングアプリケーションです。
 
-3. 主な機能
-------------
-・Phong / Blinn-Phongシェーディングの切り替え
-・Directional Light / Point Light / Spot Light
-・Diffuse、Specular、Shininessなどのマテリアル調整
-・Image Based Lighting（Diffuse IBL / Specular IBL）
-・キューブマップを利用したSkyboxとEnvironment Reflection
-・Schlick近似によるFresnel反射
-・Rim Light
-・Texture / Wireframe / 頂点法線の表示切り替え
-・SphereとFBXキャラクターモデルの切り替え
-・First-Person Camera
-・多段Downsample、Separable Blur、Upsample、CombineによるBloom
-・ウィンドウリサイズ時のRender Target、Depth Buffer、Bloomリソース再生成
+主な特徴は以下です。
 
-4. 操作方法
-------------
-右側の「Scene Control」ウィンドウから各レンダリング設定を変更できます。
+- Win32 / Direct3D 11 によるアプリケーション基盤
+- HLSL によるライティングとポストプロセス
+- ImGui によるリアルタイムパラメーター編集
+- FBX モデルと Procedural Mesh の描画
+- Cubemap、IBL、Bloom を含むレンダリングデモ
 
-・Use FPV: First-Person CameraのON / OFF
-・W / S: 前進 / 後退（Use FPVがONの場合）
-・A / D: 左移動 / 右移動（Use FPVがONの場合）
-・マウス移動: カメラ方向の変更（Use FPVがONの場合）
-・ESC: アプリケーション終了
+## 3. 主な機能
 
-主なGUI項目:
-・Sphere / Character: 表示モデルの選択
-・Shading Option: Phong / Blinn-Phongの選択
-・Use Texture / Use Wireframe / Draw Normals: 描画デバッグ設定
-・Use PostProc: Bloomの有効化、ThresholdとStrengthの調整
-・Model: Translation、Rotation、Scalingの調整
-・Material: Fresnel R0、Diffuse、Specular、Shininessの調整
-・Light: Direct Light、IBL、Environment Reflection、Rim Lightの設定
+- Phong / Blinn-Phong シェーディングの切り替え
+- Directional Light / Point Light / Spot Light
+- Diffuse、Specular、Shininess などのマテリアル調整
+- Image Based Lighting（Diffuse IBL / Specular IBL）
+- Cubemap を利用した Skybox と Environment Reflection
+- Schlick 近似による Fresnel 反射
+- Rim Light
+- Texture / Wireframe / 頂点法線の表示切り替え
+- Sphere と FBX キャラクターモデルの切り替え
+- First-Person Camera
+- 多段 Downsample、Separable Blur、Upsample、Combine による Bloom
+- ウィンドウリサイズ時の Render Target、Depth Buffer、Bloom リソース再生成
 
-5. レンダリングフロー
----------------------
-1. CPU側で入力とImGuiの設定値を更新します。
-2. Model / View / Projection、逆転置行列、ライト、マテリアルをConstant Bufferへ転送します。
-3. Skyboxを描画します。
-4. 選択中の3DモデルをClassic Litパイプラインで描画します。
-5. MSAA Back Bufferをポストプロセス用のSingle-Sample TextureへResolveします。
-6. 明るい領域を抽出し、段階的にDownsampleします。
-7. Horizontal / Vertical BlurとUpsampleを繰り返してBloom画像を生成します。
-8. 元画像とBloom画像を合成し、ImGuiを描画してPresentします。
+## 4. 操作方法
 
-6. ソフトウェア構成
--------------------
-AppBase
-  Win32メッセージループ、D3D11 Device / Context / Swap Chain、
-  Render Target、Depth Buffer、ImGui、入力、リサイズ処理を管理します。
+右側の `Scene Control` ウィンドウから各レンダリング設定を変更できます。
 
-Ryudar
-  シーン全体を管理するAppBaseの派生クラスです。
-  モデル選択、GUI、ライト、マテリアル、IBL、Bloomパスを統合します。
+### 基本操作
 
-ClassicLit::MeshGroup
-  複数MeshのVertex / Index Buffer、Texture、Shader、Constant Bufferを管理します。
-  通常描画と頂点法線のデバッグ描画を同じレンダリング単位で扱います。
+| 操作 | 内容 |
+| --- | --- |
+| `Use FPV` | First-Person Camera の ON / OFF |
+| `W` / `S` | 前進 / 後退。`Use FPV` が ON の場合のみ有効です。 |
+| `A` / `D` | 左移動 / 右移動。`Use FPV` が ON の場合のみ有効です。 |
+| マウス移動 | カメラ方向の変更。`Use FPV` が ON の場合のみ有効です。 |
+| `ESC` | アプリケーション終了 |
 
-CubeMapping
-  Skybox描画と、各Meshが共有するDiffuse / Specular IBL Cubemapを管理します。
+### 主な GUI 項目
 
-ImageFilter
-  Full-Screen Quadを用いた1回分のポストプロセスPassを表します。
-  Sampling、Horizontal Blur、Vertical Blur、Combineを共通インターフェースで接続します。
+| 項目 | 内容 |
+| --- | --- |
+| `Sphere / Character` | 表示モデルの選択 |
+| `Shading Option` | Phong / Blinn-Phong の選択 |
+| `Use Texture` / `Use Wireframe` / `Draw Normals` | 描画デバッグ設定 |
+| `Use PostProc` | Bloom の有効化、Threshold と Strength の調整 |
+| `Model` | Translation、Rotation、Scaling の調整 |
+| `Material` | Fresnel R0、Diffuse、Specular、Shininess の調整 |
+| `Light` | Direct Light、IBL、Environment Reflection、Rim Light の設定 |
 
-ModelLoader
-  AssimpでFBXを読み込み、Node Transformを累積しながら独自のMeshDataへ変換します。
-  Position、Normal、UV、Index、Diffuse Textureのパスを抽出します。
+## 5. レンダリングフロー
 
-D3D11Utils
-  Buffer、Texture、Shader、Input Layout、Depth Bufferなどの生成処理を共通化しています。
-  HRESULT失敗時はD3D11Exceptionを通して処理内容とエラー情報を通知します。
+1. CPU 側で入力と ImGui の設定値を更新します。
+2. Model / View / Projection、逆転置行列、ライト、マテリアルを Constant Buffer へ転送します。
+3. Skybox を描画します。
+4. 選択中の 3D モデルを Classic Lit パイプラインで描画します。
+5. MSAA Back Buffer をポストプロセス用の Single-Sample Texture へ Resolve します。
+6. 明るい領域を抽出し、段階的に Downsample します。
+7. Horizontal / Vertical Blur と Upsample を繰り返して Bloom 画像を生成します。
+8. 元画像と Bloom 画像を合成し、ImGui を描画して Present します。
 
-7. 実装上のポイント
--------------------
-・Microsoft::WRL::ComPtrを使用し、COMリソースの寿命をRAIIで管理しています。
-・CPUとHLSLのConstant Buffer配置を合わせ、static_assertでサイズと16-byte境界を検証しています。
-・Non-uniform Scaleでも法線を正しく変換するため、Model行列の逆転置行列を使用しています。
-・DirectXのRow VectorとHLSL側の行列配置を意識し、GPU転送時にTransposeしています。
-・GUI用のRenderSettingsとGPU転送用Constant Dataを分離しています。
-・SphereとCharacterが個別のTransform、Material、描画設定を所有します。
-・Bloomは固定処理ではなく、ImageFilterを連結するPass構成として実装しています。
-・リサイズ前にRTV / SRVのBindingを解除し、Swap Chain関連リソースを再生成します。
+## 6. ソフトウェア構成
 
-8. 使用技術・ライブラリ
------------------------
-・C++17
-・Win32 API
-・DirectX 11 / DXGI / HLSL Shader Model 5.0
-・DirectXTK / DirectXMath
-・Dear ImGui
-・Assimp
-・stb_image
-・vcpkg
+| クラス / モジュール | 役割 |
+| --- | --- |
+| `AppBase` | Win32 メッセージループ、D3D11 Device / Context / Swap Chain、Render Target、Depth Buffer、ImGui、入力、リサイズ処理を管理します。 |
+| `Ryudar` | シーン全体を管理する `AppBase` の派生クラスです。モデル選択、GUI、ライト、マテリアル、IBL、Bloom パスを統合します。 |
+| `ClassicLit::MeshGroup` | 複数 Mesh の Vertex / Index Buffer、Texture、Shader、Constant Buffer を管理します。通常描画と頂点法線のデバッグ描画を同じレンダリング単位で扱います。 |
+| `CubeMapping` | Skybox 描画と、各 Mesh が共有する Diffuse / Specular IBL Cubemap を管理します。 |
+| `ImageFilter` | Full-Screen Quad を用いた 1 回分のポストプロセス Pass を表します。Sampling、Horizontal Blur、Vertical Blur、Combine を共通インターフェースで接続します。 |
+| `ModelLoader` | Assimp で FBX を読み込み、Node Transform を累積しながら独自の `MeshData` へ変換します。Position、Normal、UV、Index、Diffuse Texture のパスを抽出します。 |
+| `D3D11Utils` | Buffer、Texture、Shader、Input Layout、Depth Buffer などの生成処理を共通化しています。HRESULT 失敗時は `D3D11Exception` を通して処理内容とエラー情報を通知します。 |
 
-外部ライブラリのライセンスはThirdPartyLicensesフォルダーに収録しています。
+## 7. 実装上のポイント
 
-9. 実行方法
-------------
-1. 提出フォルダー直下のRun_Ryudar.batを実行します。
-2. 01_ExecutableフォルダーのRyudar.exeを直接実行することもできます。
+- `Microsoft::WRL::ComPtr` を使用し、COM リソースの寿命を RAII で管理しています。
+- CPU と HLSL の Constant Buffer 配置を合わせ、`static_assert` でサイズと 16-byte 境界を検証しています。
+- Non-uniform Scale でも法線を正しく変換するため、Model 行列の逆転置行列を使用しています。
+- DirectX の Row Vector と HLSL 側の行列配置を意識し、GPU 転送時に Transpose しています。
+- GUI 用の `RenderSettings` と GPU 転送用 Constant Data を分離しています。
+- Sphere と Character が個別の Transform、Material、描画設定を所有します。
+- Bloom は固定処理ではなく、`ImageFilter` を連結する Pass 構成として実装しています。
+- リサイズ前に RTV / SRV の Binding を解除し、Swap Chain 関連リソースを再生成します。
 
-動作環境:
-・Windows 10 / 11 64-bit
-・DirectX 11 Feature Level 11.0対応GPU
+## 8. 使用技術・ライブラリ
 
-Visual Studio、vcpkg、追加ライブラリのインストールは不要です。
-実行に必要なVisual C++ RuntimeとDLLは同梱しています。
-AssetとShaderは相対パスで読み込むため、01_Executable内の構成を維持してください。
+| 分類 | 内容 |
+| --- | --- |
+| Language | C++17 |
+| Platform | Win32 API |
+| Graphics | DirectX 11 / DXGI / HLSL Shader Model 5.0 |
+| Math / Texture | DirectXTK / DirectXMath |
+| GUI | Dear ImGui |
+| Model Loading | Assimp |
+| Image Loading | stb_image |
+| Package | vcpkg |
 
-10. ソースコードの確認・ビルド
-------------------------------
-プロジェクト全体の構造は、Docs/ArchitectureOverview.mdにまとめています。
+外部ライブラリのライセンスは [`ThirdPartyLicenses`](./ThirdPartyLicenses) フォルダーに収録しています。
+
+## 9. 実行方法
+
+### 手順
+
+1. 提出フォルダー直下の [`Run_Ryudar.bat`](./Run_Ryudar.bat) を実行します。
+2. または、[`01_Executable/Ryudar.exe`](./01_Executable/Ryudar.exe) を直接実行します。
+
+### 動作環境
+
+- Windows 10 / 11 64-bit
+- DirectX 11 Feature Level 11.0 対応 GPU
+
+Visual Studio、vcpkg、追加ライブラリのインストールは不要です。  
+実行に必要な Visual C++ Runtime と DLL は同梱しています。
+
+Asset と Shader は相対パスで読み込むため、`01_Executable` 内の構成を維持してください。
+
+## 10. ソースコードの確認・ビルド
+
+プロジェクト全体の構造は [`Docs/ArchitectureOverview.md`](./Docs/ArchitectureOverview.md) にまとめています。  
 コードを確認する前に読むことで、主要クラスの関係とレンダリングフローを把握できます。
 
-詳細なビルド条件と依存パッケージは、同フォルダーのBUILD.mdおよびvcpkg.jsonに記載しています。
+詳細なビルド条件と依存パッケージは、[`02_SourceCode/BUILD.md`](./02_SourceCode/BUILD.md) および [`02_SourceCode/vcpkg.json`](./02_SourceCode/vcpkg.json) に記載しています。
 
-推奨確認箇所:
-・Sources/Application/Ryudar.cpp: シーン、GUI、描画フロー、Bloom Pass構築
-・Sources/Application/AppBase.cpp: Win32 / D3D11初期化、メインループ、リサイズ
-・Sources/Rendering/ClassicLit: Mesh描画とレンダリング設定
-・Sources/Rendering/ImageFilter.cpp: ポストプロセスの Pass
-・Shaders/ClassicLitPixelShader.hlsl: Direct Light、IBL、Fresnel、Rim Light
-・Shaders/BlurXPixelShader.hlsl / BlurYPixelShader.hlsl: Separable Blur
+### 推奨確認箇所
+
+| パス | 内容 |
+| --- | --- |
+| [`02_SourceCode/Sources/Application/Ryudar.cpp`](./02_SourceCode/Sources/Application/Ryudar.cpp) | シーン、GUI、描画フロー、Bloom Pass 構築 |
+| [`02_SourceCode/Sources/Application/AppBase.cpp`](./02_SourceCode/Sources/Application/AppBase.cpp) | Win32 / D3D11 初期化、メインループ、リサイズ |
+| [`02_SourceCode/Sources/Rendering/ClassicLit`](./02_SourceCode/Sources/Rendering/ClassicLit) | Mesh 描画とレンダリング設定 |
+| [`02_SourceCode/Sources/Rendering/ImageFilter.cpp`](./02_SourceCode/Sources/Rendering/ImageFilter.cpp) | ポストプロセス Pass |
+| [`02_SourceCode/Shaders/ClassicLitPixelShader.hlsl`](./02_SourceCode/Shaders/ClassicLitPixelShader.hlsl) | Direct Light、IBL、Fresnel、Rim Light |
+| [`02_SourceCode/Shaders/BlurXPixelShader.hlsl`](./02_SourceCode/Shaders/BlurXPixelShader.hlsl) / [`BlurYPixelShader.hlsl`](./02_SourceCode/Shaders/BlurYPixelShader.hlsl) | Separable Blur |
+
