@@ -1,0 +1,66 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Ryudar: Build Debug",
+			"type": "process",
+			"command": "${env:ProgramFiles}\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
+			"args": [
+				"${workspaceFolder}\\Ryudar.sln",
+				"/t:Build",
+				"/p:Configuration=Debug",
+				"/p:Platform=x64",
+				"/m"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Ryudar: Build Release",
+			"type": "process",
+			"command": "${env:ProgramFiles}\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
+			"args": [
+				"${workspaceFolder}\\Ryudar.sln",
+				"/t:Build",
+				"/p:Configuration=Release",
+				"/p:Platform=x64",
+				"/m"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "Ryudar: Build and Run",
+			"type": "shell",
+			"command": "$msbuild = '${env:ProgramFiles}\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe'; & $msbuild '${workspaceFolder}\\Ryudar.sln' /t:Build /p:Configuration=${input:buildConfiguration} /p:Platform=x64 /m; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; & '${workspaceFolder}\\x64\\${input:buildConfiguration}\\Ryudar.exe'",
+			"options": {
+				"cwd": "${workspaceFolder}",
+				"shell": {
+					"executable": "powershell.exe",
+					"args": [
+						"-NoLogo",
+						"-NoProfile",
+						"-ExecutionPolicy",
+						"Bypass",
+						"-Command"
+					]
+				}
+			},
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+			"id": "buildConfiguration",
+			"type": "pickString",
+			"description": "실행할 빌드 구성을 선택하세요.",
+			"options": [
+				"Debug",
+				"Release"
+			],
+			"default": "Debug"
+		}
+	]
+}
