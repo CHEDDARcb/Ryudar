@@ -1,0 +1,29 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Ryudar Debug",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}\\x64\\Debug\\Ryudar.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": true,
+			"preLaunchTask": "Ryudar: Build Debug"
+		},
+		{
+			"name": "Ryudar Release",
+			"type": "cppvsdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}\\x64\\Release\\Ryudar.exe",
+			"args": [],
+			"stopAtEntry": false,
+			"cwd": "${workspaceFolder}",
+			"environment": [],
+			"externalConsole": true,
+			"preLaunchTask": "Ryudar: Build Release"
+		}
+	]
+}
