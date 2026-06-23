@@ -6,18 +6,58 @@ Ryudar 1.0 では、DirectX 11 を用いたリアルタイム 3D レンダリン
 
 Ryudar 2.0 では、その実装を維持しながら、アプリケーション固有の処理とエンジン基盤を分離し、今後の拡張に耐えられる構造へ整理していきます。
 
-## デモ GIF
+## 機能別デモ GIF
 
-> ここにプロジェクトの動作が分かる GIF を配置します。
->
-> 推奨配置: `Docs/Images/ryudar_demo.gif`
->
-> README への埋め込み例:
->
-> `![Ryudar demo](./Docs/Images/ryudar_demo.gif)`
+各 GIF は `Docs/Images/` に配置すると、README から参照しやすくなります。
+実際の GIF を追加した後、以下の埋め込み例を画像表示用の Markdown として使用します。
 
-この GIF では、ライティング切り替え、IBL、Skybox、Bloom、ImGui による
-リアルタイムパラメータ調整が一目で分かる流れを見せると効果的です。
+### Shading / Light
+
+> 推奨 GIF: `Docs/Images/feature_shading_light.gif`
+>
+> `![Shading and light demo](./Docs/Images/feature_shading_light.gif)`
+
+Phong / Blinn-Phong、Directional / Point / Spot Light の切り替えが分かる短い GIF を配置します。
+
+### IBL / Skybox
+
+> 推奨 GIF: `Docs/Images/feature_ibl_skybox.gif`
+>
+> `![IBL and skybox demo](./Docs/Images/feature_ibl_skybox.gif)`
+
+Environment Reflection、Diffuse IBL、Specular IBL、Skybox の見た目の変化を見せます。
+
+### Model / Material
+
+> 推奨 GIF: `Docs/Images/feature_model_material.gif`
+>
+> `![Model and material demo](./Docs/Images/feature_model_material.gif)`
+
+Sphere と Character の切り替え、Texture、Material、Transform 操作を見せます。
+
+### Normal / Wireframe
+
+> 推奨 GIF: `Docs/Images/feature_debug_view.gif`
+>
+> `![Normal and wireframe demo](./Docs/Images/feature_debug_view.gif)`
+
+Normal 可視化、Wireframe 表示、デバッグ用描画の切り替えを見せます。
+
+### Bloom / Post Process
+
+> 推奨 GIF: `Docs/Images/feature_bloom_postprocess.gif`
+>
+> `![Bloom post process demo](./Docs/Images/feature_bloom_postprocess.gif)`
+
+Threshold、Strength、Blur の調整で Bloom の変化が分かる GIF を配置します。
+
+### Camera / Window Resize
+
+> 推奨 GIF: `Docs/Images/feature_camera_resize.gif`
+>
+> `![Camera and resize demo](./Docs/Images/feature_camera_resize.gif)`
+
+First-Person Camera の移動と、ウィンドウリサイズ時の描画更新を見せます。
 
 ## 目的
 
