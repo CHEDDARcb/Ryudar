@@ -6,64 +6,73 @@ Ryudar 1.0 では、DirectX 11 を用いたリアルタイム 3D レンダリン
 
 Ryudar 2.0 では、その実装を維持しながら、アプリケーション固有の処理とエンジン基盤を分離し、今後の拡張に耐えられる構造へ整理していきます。
 
+## デモ動画
+
+全体の動作確認用動画は以下から確認できます。
+
+[YouTube: Ryudar demo](https://youtu.be/rWNu4yBpQ5Q)
+
 ## 機能別デモ GIF
 
-各 GIF は `Docs/gifs/` に配置すると、README から参照しやすくなります。
-実際の GIF を追加した後、以下の埋め込み例を画像表示用の Markdown として使用します。
+### Shading Model
 
-### Shading / Light
+![Shading model demo](https://github.com/user-attachments/assets/223ae696-c540-4e4b-9bd2-235eb8daddcb)
 
-> 推奨 GIF: `Docs/gifs/feature_shading_light.gif`
->
-> `![Shading and light demo](./Docs/gifs/feature_shading_light.gif)`
+Phong と Blinn-Phong を切り替え、specular highlight の計算モデルを比較できます。
 
-Phong / Blinn-Phong、Directional / Point / Spot Light の切り替えが分かる短い GIF を配置します。
+### Texture Toggle
 
-### IBL / Skybox
+![Texture toggle demo](https://github.com/user-attachments/assets/ebbdcdae-36cb-4e5d-a9fe-ea4def72e0ec)
 
-> 推奨 GIF: `Docs/gifs/feature_ibl_skybox.gif`
->
-> `![IBL and skybox demo](./Docs/gifs/feature_ibl_skybox.gif)`
+Texture sampling の有効 / 無効を切り替え、material color と texture 適用結果を確認できます。
 
-Environment Reflection、Diffuse IBL、Specular IBL、Skybox の見た目の変化を見せます。
+### Debug View
 
-### Model / Material
+![Debug view demo](https://github.com/user-attachments/assets/950a5a5b-f78d-4261-8ad7-84060b6fadbc)
 
-> 推奨 GIF: `Docs/gifs/feature_model_material.gif`
->
-> `![Model and material demo](./Docs/gifs/feature_model_material.gif)`
+Normal 可視化と wireframe 表示で、mesh の向きや形状を確認できます。
 
-Sphere と Character の切り替え、Texture、Material、Transform 操作を見せます。
+### Object Transform / Selection
 
-### Object Selection
+![Object transform demo](https://github.com/user-attachments/assets/d5e9f9c8-4d56-4997-b5c7-7304fe75fc56)
 
-![Object selection demo](https://github.com/user-attachments/assets/d5e9f9c8-4d56-4997-b5c7-7304fe75fc56)
+選択中の object に対して Translation、Rotation、Scale を個別に適用できます。
 
-GUI で選択した object だけに Transform 操作が反映される様子を見せます。
+### Material Parameters
 
-### Normal / Wireframe
+![Material parameters demo](https://github.com/user-attachments/assets/56540391-4165-434e-9925-185d2e546b2f)
 
-> 推奨 GIF: `Docs/gifs/feature_debug_view.gif`
->
-> `![Normal and wireframe demo](./Docs/gifs/feature_debug_view.gif)`
+Diffuse、Specular、Shininess を調整し、材質の反射特性を変更できます。
 
-Normal 可視化、Wireframe 表示、デバッグ用描画の切り替えを見せます。
+### Light Type
 
-### Bloom / Post Process
+![Light type demo](https://github.com/user-attachments/assets/59c4e298-c683-4bb8-9911-ffc5ecfac839)
 
-> 推奨 GIF: `Docs/gifs/feature_bloom_postprocess.gif`
->
-> `![Bloom post process demo](./Docs/gifs/feature_bloom_postprocess.gif)`
+Directional、Point、Spot Light を切り替え、light type ごとの照明結果を確認できます。
 
-Threshold、Strength、Blur の調整で Bloom の変化が分かる GIF を配置します。
+### Rim Light
 
-### Camera / Window Resize
+![Rim light demo](https://github.com/user-attachments/assets/4167d10f-6d2a-4c01-a10d-843619a4561c)
 
-> 推奨 GIF: `Docs/gifs/feature_camera_resize.gif`
->
-> `![Camera and resize demo](./Docs/gifs/feature_camera_resize.gif)`
+Rim Light により、object の輪郭付近を強調できます。
 
-First-Person Camera の移動と、ウィンドウリサイズ時の描画更新を見せます。
+### Image Based Lighting
+
+![Image based lighting demo](https://github.com/user-attachments/assets/4e0cba32-80c3-4a88-87a0-32b6177cc9e1)
+
+IBL により、environment map を使った diffuse / specular lighting を適用できます。
+
+### Post Processing
+
+![Post processing demo](https://github.com/user-attachments/assets/5071617f-efec-4452-848c-ccf892af26b7)
+
+Bloom の threshold、strength、blur を調整し、画面全体の発光表現を制御できます。
+
+### First-Person Camera
+
+![First-person camera demo](https://github.com/user-attachments/assets/347152c2-b8c0-46d4-a8db-ac5c6c442e2c)
+
+WASD と mouse 操作で、scene 内を First-Person Camera として移動できます。
 
 ## 目的
 
