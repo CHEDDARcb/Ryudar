@@ -250,4 +250,10 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="RyudarCopyVcpkgRuntimeDlls" AfterTargets="Build" Condition="'$(Platform)'=='x64' and '$(VcpkgEnabled)'=='true' and '$(VcpkgUseStatic)'!='true'">
+    <ItemGroup>
+      <RyudarVcpkgRuntimeDlls Include="$(_ZVcpkgCurrentInstalledDir)$(_ZVcpkgConfigSubdir)bin\*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RyudarVcpkgRuntimeDlls)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(RyudarVcpkgRuntimeDlls)'!=''" />
+  </Target>
 </Project>

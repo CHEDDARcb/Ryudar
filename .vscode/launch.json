@@ -10,7 +10,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
-			"externalConsole": true,
+			"console": "externalTerminal",
 			"preLaunchTask": "Ryudar: Build Debug"
 		},
 		{
@@ -22,7 +22,7 @@
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}",
 			"environment": [],
-			"externalConsole": true,
+			"console": "externalTerminal",
 			"preLaunchTask": "Ryudar: Build Release"
 		}
 	]
