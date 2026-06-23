@@ -8,54 +8,60 @@ Ryudar 2.0 では、その実装を維持しながら、アプリケーション
 
 ## 機能別デモ GIF
 
-各 GIF は `Docs/Images/` に配置すると、README から参照しやすくなります。
+各 GIF は `Docs/gifs/` に配置すると、README から参照しやすくなります。
 実際の GIF を追加した後、以下の埋め込み例を画像表示用の Markdown として使用します。
 
 ### Shading / Light
 
-> 推奨 GIF: `Docs/Images/feature_shading_light.gif`
+> 推奨 GIF: `Docs/gifs/feature_shading_light.gif`
 >
-> `![Shading and light demo](./Docs/Images/feature_shading_light.gif)`
+> `![Shading and light demo](./Docs/gifs/feature_shading_light.gif)`
 
 Phong / Blinn-Phong、Directional / Point / Spot Light の切り替えが分かる短い GIF を配置します。
 
 ### IBL / Skybox
 
-> 推奨 GIF: `Docs/Images/feature_ibl_skybox.gif`
+> 推奨 GIF: `Docs/gifs/feature_ibl_skybox.gif`
 >
-> `![IBL and skybox demo](./Docs/Images/feature_ibl_skybox.gif)`
+> `![IBL and skybox demo](./Docs/gifs/feature_ibl_skybox.gif)`
 
 Environment Reflection、Diffuse IBL、Specular IBL、Skybox の見た目の変化を見せます。
 
 ### Model / Material
 
-> 推奨 GIF: `Docs/Images/feature_model_material.gif`
+> 推奨 GIF: `Docs/gifs/feature_model_material.gif`
 >
-> `![Model and material demo](./Docs/Images/feature_model_material.gif)`
+> `![Model and material demo](./Docs/gifs/feature_model_material.gif)`
 
 Sphere と Character の切り替え、Texture、Material、Transform 操作を見せます。
 
+### Object Selection
+
+![Object selection demo](./Docs/gifs/SelectObject.gif)
+
+GUI で選択した object だけに Transform 操作が反映される様子を見せます。
+
 ### Normal / Wireframe
 
-> 推奨 GIF: `Docs/Images/feature_debug_view.gif`
+> 推奨 GIF: `Docs/gifs/feature_debug_view.gif`
 >
-> `![Normal and wireframe demo](./Docs/Images/feature_debug_view.gif)`
+> `![Normal and wireframe demo](./Docs/gifs/feature_debug_view.gif)`
 
 Normal 可視化、Wireframe 表示、デバッグ用描画の切り替えを見せます。
 
 ### Bloom / Post Process
 
-> 推奨 GIF: `Docs/Images/feature_bloom_postprocess.gif`
+> 推奨 GIF: `Docs/gifs/feature_bloom_postprocess.gif`
 >
-> `![Bloom post process demo](./Docs/Images/feature_bloom_postprocess.gif)`
+> `![Bloom post process demo](./Docs/gifs/feature_bloom_postprocess.gif)`
 
 Threshold、Strength、Blur の調整で Bloom の変化が分かる GIF を配置します。
 
 ### Camera / Window Resize
 
-> 推奨 GIF: `Docs/Images/feature_camera_resize.gif`
+> 推奨 GIF: `Docs/gifs/feature_camera_resize.gif`
 >
-> `![Camera and resize demo](./Docs/Images/feature_camera_resize.gif)`
+> `![Camera and resize demo](./Docs/gifs/feature_camera_resize.gif)`
 
 First-Person Camera の移動と、ウィンドウリサイズ時の描画更新を見せます。
 
