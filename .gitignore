@@ -38,6 +38,9 @@ Ryudar/Release/
 *.exe
 *.dll
 
+# README demo captures
+Docs/gifs/*.gif
+
 # Very large optional cubemap sources
 Assets/Textures/Cubemaps/skybox.dds
 Assets/Textures/Cubemaps/Skybox/cubemap_bgra.dds
