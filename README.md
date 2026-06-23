@@ -10,7 +10,7 @@ Ryudar 2.0 では、その実装を維持しながら、アプリケーション
 
 全体の動作確認用動画は以下から確認できます。
 
-[YouTube: Ryudar demo](https://youtu.be/rWNu4yBpQ5Q)
+[![Ryudar demo video](https://img.youtube.com/vi/rWNu4yBpQ5Q/maxresdefault.jpg)](https://youtu.be/rWNu4yBpQ5Q)
 
 ## 機能別デモ GIF
 
