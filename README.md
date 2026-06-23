@@ -6,6 +6,19 @@ DirectX 11とC++17で実装した、3Dレンダラープロジェクトです。
 GPUリソース管理、HLSLシェーダー、ライティング、モデル読み込み、
 ポストプロセスまでを実装しています。
 
+## デモ GIF
+
+> ここにプロジェクトの動作が分かる GIF を配置します。
+>
+> 推奨配置: `Docs/Images/ryudar_demo.gif`
+>
+> README への埋め込み例:
+>
+> `![Ryudar demo](./Docs/Images/ryudar_demo.gif)`
+
+この GIF では、ライティング切り替え、IBL、Skybox、Bloom、ImGui による
+リアルタイムパラメータ調整が一目で分かる流れを見せると効果的です。
+
 ## 主な機能
 
 - Phong / Blinn-Phongシェーディング
