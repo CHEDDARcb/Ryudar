@@ -1,4 +1,5 @@
 以下のGithubリンクで見ると更に読みやすくなります。
+
 Github : https://github.com/CHEDDARcb/Ryudar/tree/main/Ryudar_Portfolio_Submission
 
 # Ryudar
@@ -30,6 +31,9 @@ Ryudar は、C++ と DirectX 11 を使用して実装したリアルタイム 3D
 - ImGui によるリアルタイムパラメーター編集
 - FBX モデルと Procedural Mesh の描画
 - Cubemap、IBL、Bloom を含むレンダリング
+
+### 動画
+[![Ryudar video](https://img.youtube.com/vi/rWNu4yBpQ5Q/maxresdefault.jpg)](https://youtu.be/rWNu4yBpQ5Q)
 
 ## 3. 主な機能
 
