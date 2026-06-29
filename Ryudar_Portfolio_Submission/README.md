@@ -1,6 +1,6 @@
 # Ryudar
 
-DirectX 11 と C++17 で実装したリアルタイム 3D レンダリングアプリケーションです。  
+DirectX 11 と C++17 で実装したリアルタイム 3D レンダラーです。  
 Direct3D 11 初期化、GPU リソース管理、HLSL シェーダー、ライティング、ポストプロセスまでを実装しています。
 
 ImGui の `Scene Control` パネルから、描画方式、ライト、マテリアル、モデル Transform、Bloom などをリアルタイムに変更できます。
@@ -19,11 +19,10 @@ ImGui の `Scene Control` パネルから、描画方式、ライト、マテリ
 
 ## 2. プロジェクト概要
 
-Ryudar は、C++ と DirectX 11 を使用して実装したリアルタイム 3D レンダリングアプリケーションです。
+Ryudar は、C++ と DirectX 11 を使用して実装したリアルタイム 3D レンダラーです。
 
 主な特徴は以下です。
 
-- Win32 / Direct3D 11 によるアプリケーション基盤
 - HLSL によるライティングとポストプロセス
 - ImGui によるリアルタイムパラメーター編集
 - FBX モデルと Procedural Mesh の描画
@@ -31,18 +30,65 @@ Ryudar は、C++ と DirectX 11 を使用して実装したリアルタイム 3D
 
 ## 3. 主な機能
 
-- Phong / Blinn-Phong シェーディングの切り替え
-- Directional Light / Point Light / Spot Light
-- Diffuse、Specular、Shininess などのマテリアル調整
-- Image Based Lighting（Diffuse IBL / Specular IBL）
-- Cubemap を利用した Skybox と Environment Reflection
-- Schlick 近似による Fresnel 反射
-- Rim Light
-- Texture / Wireframe / 頂点法線の表示切り替え
-- Sphere と FBX キャラクターモデルの切り替え
-- First-Person Camera
-- 多段 Downsample、Separable Blur、Upsample、Combine による Bloom
-- ウィンドウリサイズ時の Render Target、Depth Buffer、Bloom リソース再生成
+### Shading Model
+
+![Shading model demo](Docs/gifs/SelectShader.gif)
+
+Phong と Blinn-Phong を切り替え、specular highlight の計算モデルを比較できます。
+
+### Texture Toggle
+
+![Texture toggle demo](Docs/gifs/UseTexture.gif)
+
+Texture sampling の有効 / 無効を切り替え、material color と texture 適用結果を確認できます。
+
+### Debug View
+
+![Debug view demo](Docs/gifs/NormalNWire.gif)
+
+Normal 可視化と wireframe 表示で、mesh の向きや形状を確認できます。
+
+### Object Transform / Selection
+
+![Object transform demo](Docs/gifs/SelectObject.gif)
+
+選択中の object に対して Translation、Rotation、Scale を個別に適用できます。
+
+### Material Parameters
+
+![Material parameters demo](Docs/gifs/Material.gif)
+
+Diffuse、Specular、Shininess を調整し、材質の反射特性を変更できます。
+
+### Light Type
+
+![Light type demo](Docs/gifs/Lights.gif)
+
+Directional、Point、Spot Light を切り替え、light type ごとの照明結果を確認できます。
+
+### Rim Light
+
+![Rim light demo](Docs/gifs/RimLight.gif)
+
+Rim Light により、object の輪郭付近を強調できます。
+
+### Image Based Lighting
+
+![Image based lighting demo](Docs/gifs/IBL.gif)
+
+IBL により、environment map を使った diffuse / specular lighting を適用できます。
+
+### Post Processing
+
+![Post processing demo](Docs/gifs/PostProc.gif)
+
+Bloom の threshold、strength、blur を調整し、画面全体の発光表現を制御できます。
+
+### First-Person Camera
+
+![First-person camera demo](Docs/gifs/FPV.gif)
+
+WASD と mouse 操作で、scene 内を First-Person Camera として移動できます。
 
 ## 4. 操作方法
 
@@ -72,7 +118,6 @@ Ryudar は、C++ と DirectX 11 を使用して実装したリアルタイム 3D
 
 ## 5. 実装上のポイント
 
-- `Microsoft::WRL::ComPtr` を使用し、COM リソースの寿命を RAII で管理しています。
 - CPU と HLSL の Constant Buffer 配置を合わせ、`static_assert` でサイズと 16-byte 境界を検証しています。
 - Non-uniform Scale でも法線を正しく変換するため、Model 行列の逆転置行列を使用しています。
 - DirectX の Row Vector と HLSL 側の行列配置を意識し、GPU 転送時に Transpose しています。
