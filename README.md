@@ -6,13 +6,13 @@ Ryudar 1.0 では、DirectX 11 を用いたリアルタイム 3D レンダリン
 
 Ryudar 2.0 では、その実装を維持しながら、アプリケーション固有の処理とエンジン基盤を分離し、今後の拡張に耐えられる構造へ整理していきます。
 
-## デモ動画
+## 動画
 
 全体の動作確認用動画は以下から確認できます。
 
 [![Ryudar demo video](https://img.youtube.com/vi/rWNu4yBpQ5Q/maxresdefault.jpg)](https://youtu.be/rWNu4yBpQ5Q)
 
-## 機能別デモ GIF
+## 主な機能
 
 ### Shading Model
 
